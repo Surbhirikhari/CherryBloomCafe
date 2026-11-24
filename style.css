@@ -86,20 +86,27 @@ main {
   transition: opacity 0.8s ease, transform 1.3s ease-in;
 }
 .scene-outside {
-  object-fit: contain;             /* show the whole painting, never cropped */
-  transform-origin: 47% 75%;       /* where the shop door is */
+  transform-origin: 54% 74%;       /* game.js sets this to the exact door spot */
+  will-change: transform;          /* helps the zoom run smoothly */
 }
-/* a big blurry copy of the painting fills the space at the sides */
-.scene-outside-blur { filter: blur(28px) saturate(1.1); transform: scale(1.15); }
+
+/* people walking along the street (drawn in street.js) */
+.walker { animation: walk-right 50s linear infinite; }
+.walker-left { animation-name: walk-left; }
+@keyframes walk-right { from { transform: translateX(-200px); } to { transform: translateX(1800px); } }
+@keyframes walk-left  { from { transform: translateX(1800px); } to { transform: translateX(-200px); } }
+.bob { animation: bob 0.55s ease-in-out infinite alternate; }
+@keyframes bob { to { transform: translateY(-2px); } }
+.leg { transform-box: fill-box; transform-origin: 50% 0; animation: step 0.55s ease-in-out infinite alternate; }
+.leg-b { animation-direction: alternate-reverse; }
+@keyframes step { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
 .scene-inside  { object-position: 50% 55%; opacity: 0; }
 
 /* walking in: zoom towards the door and fade to white */
 .scene.entering .scene-outside { transform: scale(2.6); opacity: 0; }
-.scene.entering .scene-outside-blur { opacity: 0; }
 
 /* inside: show the cafe painting, softened a little so the game is easy to read */
-.scene.inside .scene-outside,
-.scene.inside .scene-outside-blur { opacity: 0; }
+.scene.inside .scene-outside { opacity: 0; }
 .scene.inside .scene-inside  { opacity: 1; }
 .scene::after {
   content: "";
@@ -460,6 +467,7 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .scene.entering .scene-outside { transform: none; }
   .petals { display: none; }
+  .walker, .bob, .leg { animation: none; }
   .mochi-tail, .mochi-body, .z, .bounce, .petal,
   .bloom-body, .bloom-hair-L, .bloom-hair-R, .bloom-eye, .bloom-ribbon-L, .bloom-ribbon-R { animation: none; }
 }

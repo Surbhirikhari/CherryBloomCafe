@@ -128,6 +128,12 @@ const MOCHI_CLICK_LINES = [
 // 2. 1.3 seconds later (setTimeout) we swap to the inside painting and the kitchen.
 openButton.addEventListener("click", function () {
   openButton.disabled = true;               // no double clicks while walking in
+
+  // zoom towards the cafe door: find where it is on screen right now
+  const door = document.getElementById("cafe-door").getBoundingClientRect();
+  document.getElementById("street").style.transformOrigin =
+    (door.left + door.width / 2) + "px " + (door.top + door.height / 2) + "px";
+
   titleScreen.classList.add("leaving");
   scene.classList.add("entering");
 
