@@ -8,10 +8,10 @@
 const INK = "#412c2c";   // Bloom's marker ink, used for every outline
 
 // ---------- The menu ----------
-// "station" says where it's made: the Matcha Station (matcha.js),
-// or the Bakery Station (bakery.js) using the recipe named in "dessert".
+// Everything is made at the Bakery Station (bakery.js),
+// using the recipe named in "dessert" (desserts.js or drinks.js).
 const MENU = [
-  { name: "Strawberry Matcha Latte", price: 15, station: "matcha" },
+  { name: "Strawberry Matcha Latte", price: 15, station: "bake", dessert: "matcha" },
   // drinks, made at the Bakery Station (recipes in drinks.js)
   { name: "Strawberry Milk",        price: 10, station: "bake", dessert: "milk" },
   { name: "Sakura Tea",             price: 9,  station: "bake", dessert: "sakura" },

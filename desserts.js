@@ -8,8 +8,8 @@
 //   tap    - click the tool a few times          (add strawberries)
 //   hold   - press and hold the tool, let go     (pour batter, pipe cream)
 //            when it reaches the pink zone
-//   timing - turn the tool on, watch the needle   (bake, toast, cook)
-//            rise, press "Turn off!" in the golden zone
+//   timer  - (in the oven or toaster, or on the pan) a timer runs:
+//            stop it at the right time, usually 5 seconds
 //   pipe   - hold the mouse down on the dessert:  (all the creams)
 //            cream flows out where you are; let go in the pink zone
 //   rub    - drag over the dessert to cover it     (sugar)
@@ -89,7 +89,7 @@ function creamMarksSVG(marks, color, r) {
           ${marksSVG(marks, color, r)}</g>`;
 }
 
-// a warm oven glow behind things that are baking
+// a warm glow (not used any more: things bake inside the real oven now)
 function ovenGlow(on) {
   if (!on) return "";
   return `
@@ -135,48 +135,62 @@ function crepeArt(st) {
       ${st.flow ? `<circle cx="${st.flow.x}" cy="${st.flow.y + 8}" r="7" fill="${shade}" ${DL} stroke-width="2"/>` : ""}`);
   }
 
-  // on the plate: flat, folding, or folded
-  const p = st.done("fold") ? 1 : (v.fold || 0);
+  // on the plate. Fold 1 brings the bottom half up (a half-moon),
+  // fold 2 wraps it into a cone.
+  const p1 = st.done("fold1") ? 1 : (v.fold1 || 0);
+  const p2 = st.done("fold2") ? 1 : (v.fold2 || 0);
   const hw = (y) => 64 * (190 - y) / 132;              // half the cone's width at height y
-  let d = "";
+  let d = "", flap = "";
   for (let i = 0; i < 48; i++) {
     const a = (i / 48) * Math.PI * 2;
+    const top = Math.sin(a) < 0;
+    // the flat circle
     const cx = 100 + 72 * Math.cos(a), cy = 104 + 72 * Math.sin(a);
-    let tx, ty;
-    if (Math.sin(a) < 0) {                              // the top edge of the cone
-      tx = 100 + 64 * Math.cos(a); ty = 58 + 10 * Math.sin(a);
-    } else {                                            // the two sides, down to the tip
+    // the half-moon: the bottom half lies flat along the middle line
+    const hx = cx, hy = top ? cy : 104;
+    // the cone
+    let kx, ky;
+    if (top) { kx = 100 + 64 * Math.cos(a); ky = 58 + 10 * Math.sin(a); }
+    else {
       const u = a / Math.PI;                            // 0 at the right, 1 at the left
-      if (u < 0.5) { tx = 164 + (100 - 164) * u * 2; ty = 58 + 132 * u * 2; }
-      else         { tx = 100 + (36 - 100) * (u - 0.5) * 2; ty = 190 - 132 * (u - 0.5) * 2; }
+      if (u < 0.5) { kx = 164 + (100 - 164) * u * 2; ky = 58 + 132 * u * 2; }
+      else         { kx = 100 + (36 - 100) * (u - 0.5) * 2; ky = 190 - 132 * (u - 0.5) * 2; }
     }
-    d += (i === 0 ? "M" : "L") + (cx + (tx - cx) * p).toFixed(1) + " " + (cy + (ty - cy) * p).toFixed(1) + " ";
+    const x1 = cx + (hx - cx) * p1, y1 = cy + (hy - cy) * p1;
+    d += (i === 0 ? "M" : "L") + (x1 + (kx - x1) * p2).toFixed(1) + " " + (y1 + (ky - y1) * p2).toFixed(1) + " ";
+    // the folded-up bottom half, swinging over the top like a page
+    if (!top) flap += (flap ? "L" : "M") + cx.toFixed(1) + " " + (104 + 72 * Math.sin(a) * (1 - 2 * p1)).toFixed(1) + " ";
   }
   d += "Z";
+  flap += "Z";
 
   const clip = uid("crepe");
-  const lift = -22 * p;                                 // the fillings rise as it folds
-  const berries = [[64, 80, -12], [90, 70, 6], [116, 72, -4], [140, 80, 14]]
-    .slice(0, Math.min(4, v.berries || 0))
+  const lift = -24 * p1;                                // the fillings peek out as it folds
+  const berries = [[64, 80, -12], [90, 70, 6], [116, 72, -4], [140, 80, 14], [52, 90, 20], [150, 92, -20], [100, 86, 0]]
+    .slice(0, Math.min(7, v.berries || 0))
     .map(([x, y, r]) => berryHalf(x, y + lift, 0.95, 180 + r)).join("");
 
   let cream;
-  if (p > 0 || st.done("cream")) {
-    cream = [[50, 80], [74, 72], [100, 68], [126, 72], [150, 80], [88, 84], [114, 84]]
+  if (p1 > 0 || st.done("cream")) {
+    const amount = st.done("cream") ? Math.min(7, Math.max(2, Math.round((v.cream || 0.7) * 8))) : 7;
+    cream = [[50, 80], [74, 72], [100, 68], [126, 72], [150, 80], [88, 84], [114, 84]].slice(0, amount)
       .map(([x, y]) => puff(x, y + lift, 1.1)).join("");
   } else {
     cream = `<g clip-path="url(#${clip})">${creamMarksSVG(st.marks.cream || [], "#fffaf1", 10)}</g>`;
   }
 
-  const folded = p >= 1;
+  const folded = p2 >= 1;
   const wrapClip = uid("wrap");
   const wrap = `M${100 - hw(112)} 112 L${100 + hw(134)} 134 L100 192 Z`;
+  const back = mixColor(shade, "#fff3dc", 0.25);       // the other side of the crêpe is paler
   return dessertSVG(`
     ${folded ? "" : plateSVG()}
     <defs><clipPath id="${clip}"><path d="${d}"/></clipPath>
           <clipPath id="${wrapClip}"><path d="${wrap}"/></clipPath></defs>
     <path d="${d}" fill="${shade}" ${DL}/>
-    ${!folded && p < 0.3 ? `<g fill="${edge}" opacity="0.35"><circle cx="70" cy="120" r="5"/><circle cx="124" cy="134" r="4"/><circle cx="100" cy="150" r="3"/><circle cx="140" cy="112" r="3"/></g>` : ""}
+    ${!folded && p1 < 0.3 ? `<g fill="${edge}" opacity="0.35"><circle cx="70" cy="120" r="5"/><circle cx="124" cy="134" r="4"/><circle cx="100" cy="150" r="3"/><circle cx="140" cy="112" r="3"/></g>` : ""}
+    ${p1 > 0 && p2 < 1 ? `<path d="${flap}" fill="${back}" ${DL} opacity="${1 - p2}"/>
+       <path d="M30 104 L170 104" stroke="${edge}" stroke-width="2" stroke-dasharray="5 5" opacity="${(1 - p2) * 0.7}"/>` : ""}
     ${cream}
     ${berries}
     ${folded ? `
@@ -205,7 +219,6 @@ function rollArt(st) {
     const top = 156 - 34 * Math.min(amount, 1);
     const clip = uid("tray");
     return dessertSVG(`
-      ${ovenGlow(st.step === "bake")}
       <g transform="translate(100 140) scale(1.25) translate(-100 -140)">
       <defs><clipPath id="${clip}"><path d="M30 116 L170 116 L162 156 L38 156 Z"/></clipPath></defs>
       <path d="M22 110 L178 110 L166 162 L34 162 Z" fill="#d7d5de" ${DL}/>
@@ -292,19 +305,6 @@ function toastArt(st) {
     <path d="${CRUMB}" fill="${crumb}"/>
     <g fill="${mixColor(crumb, INK, 0.15)}" opacity="0.4"><circle cx="80" cy="90" r="2"/><circle cx="118" cy="104" r="2"/><circle cx="94" cy="132" r="2"/><circle cx="126" cy="146" r="1.6"/></g>`;
 
-  // still in the pink toaster
-  if (!st.done("toast")) {
-    return dessertSVG(`
-      <g transform="translate(0 6)">${bread}</g>
-      ${st.step === "toast" ? `<path d="M40 108 L160 108" stroke="#f39a4b" stroke-width="6" stroke-linecap="round" opacity="0.6"/>` : ""}
-      <rect x="26" y="104" width="148" height="88" rx="28" fill="#f6b8cb" ${DL}/>
-      <rect x="40" y="100" width="120" height="10" rx="5" fill="#e58aa5" ${DL} stroke-width="2.5"/>
-      <path d="M40 128 Q42 118 54 118" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
-      <path d="M100 166 Q90 158 92 151 Q95 146 100 150 Q105 146 108 151 Q110 158 100 166 Z" fill="#fffaf4" ${DL} stroke-width="2"/>
-      <rect x="174" y="120" width="12" height="30" rx="5" fill="#e58aa5" ${DL} stroke-width="2.5"/>
-      <circle cx="58" cy="158" r="7" fill="#fffaf4" ${DL} stroke-width="2"/>`);
-  }
-
   const clip = uid("toast");
   const honey = Math.min(1, (v.honey || 0) / 0.9);
   return dessertSVG(`
@@ -344,8 +344,8 @@ function croissantArt(st) {
   const opened = st.done("slice");
   const cream = Math.min(1.15, v.cream || 0);
   const cw = 64;
-  const berries = [[66, 90, -14], [90, 82, 4], [114, 82, -6], [138, 90, 12]]
-    .slice(0, Math.min(4, v.berries || 0))
+  const berries = [[66, 90, -14], [90, 82, 4], [114, 82, -6], [138, 90, 12], [52, 98, 24], [150, 98, -22], [102, 76, 0]]
+    .slice(0, Math.min(7, v.berries || 0))
     .map(([x, y, r]) => berryHalf(x, y, 0.9, 180 + r)).join("");
 
   const dots = [[0, 0], [6, 4], [-5, 5], [3, -6], [-6, -3]];
@@ -355,8 +355,9 @@ function croissantArt(st) {
   const sugarDots = sugar.map(([x, y]) => dots.map(([dx, dy]) => `<circle cx="${x + dx}" cy="${y + dy}" r="1.8" fill="#ffffff"/>`).join("")).join("");
 
   return dessertSVG(`
-    ${ovenGlow(st.step === "bake")}
-    ${st.step === "bake" || !st.done("bake") ? "" : plateSVG(100, 128, 96, 58)}
+    ${st.done("bake") ? plateSVG(100, 128, 96, 58) : `
+      <path d="M8 138 L192 138 L184 166 L16 166 Z" fill="#d7d5de" ${DL}/>
+      <path d="M16 144 L184 144" stroke="#bdbac6" stroke-width="4"/>`}
     ${body}
     <path d="M58 92 Q70 100 82 94 M118 94 Q130 100 142 92" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
     ${!opened && (v.slice || 0) > 0 ? `<path d="M40 100 L${40 + 120 * v.slice} 100" stroke="${INK}" stroke-width="3" stroke-dasharray="6 4"/>` : ""}
@@ -368,6 +369,44 @@ function croissantArt(st) {
     ${berries}
     ${sugarDots}`);
 }
+
+
+// ---------- The oven and the toaster ----------
+// They stand on the right of the work table. You drag the dessert in,
+// a timer runs, and you take it out. a = { loaded, on, shade }
+const APPLIANCE_ART = {
+  oven: (a) => `
+    <svg viewBox="0 0 200 210" class="art">
+      <rect x="10" y="20" width="180" height="182" rx="22" fill="#f6b8cb" ${DL}/>
+      <rect x="10" y="20" width="180" height="40" rx="20" fill="#e58aa5" ${DL}/>
+      <rect x="96" y="27" width="66" height="24" rx="8" fill="#4b3a3a" ${DL} stroke-width="2.5"/>
+      <circle cx="34" cy="40" r="9" fill="#fffaf4" ${DL} stroke-width="2.5"/><path d="M34 40 L34 33" ${DL} stroke-width="2.5"/>
+      <circle cx="64" cy="40" r="9" fill="#fffaf4" ${DL} stroke-width="2.5"/><path d="M64 40 L70 36" ${DL} stroke-width="2.5"/>
+      <rect x="50" y="66" width="100" height="8" rx="4" fill="#fffaf4" ${DL} stroke-width="2.5"/>
+      <rect x="30" y="80" width="140" height="100" rx="16" fill="${a.on ? "#f9c784" : "#5b4a48"}" ${DL}/>
+      ${a.on ? `<rect x="36" y="86" width="128" height="88" rx="12" fill="#fde3a8" opacity="0.6"/>` : ""}
+      <path d="M42 92 L60 92" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+      <path d="M100 196 Q90 190 92 185 Q95 181 100 184 Q105 181 108 185 Q110 190 100 196 Z" fill="#fffaf4" ${DL} stroke-width="1.5"/>
+      <rect x="24" y="200" width="20" height="8" rx="3" fill="#e58aa5" ${DL} stroke-width="2"/>
+      <rect x="156" y="200" width="20" height="8" rx="3" fill="#e58aa5" ${DL} stroke-width="2"/>
+    </svg>`,
+  toaster: (a) => {
+    const t = a.shade || 0;
+    const crust = bakeColor(Math.min(1, 0.35 + t * 0.8));
+    const crumb = bakeColor(t * 0.75);
+    return `
+    <svg viewBox="0 0 200 210" class="art">
+      ${a.loaded ? `<g transform="translate(28 ${a.on ? 46 : 8}) scale(0.72)">
+          <path d="${BREAD}" fill="${crust}" ${DL} stroke-width="4"/><path d="${CRUMB}" fill="${crumb}"/></g>` : ""}
+      <rect x="18" y="86" width="164" height="114" rx="38" fill="#f6b8cb" ${DL}/>
+      <rect x="44" y="80" width="112" height="14" rx="7" fill="#e58aa5" ${DL} stroke-width="2.5"/>
+      ${a.on ? `<path d="M50 87 L150 87" stroke="#f39a4b" stroke-width="5" stroke-linecap="round"/>` : ""}
+      <path d="M36 112 Q38 100 54 100" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+      <rect x="180" y="${a.on ? 150 : 110}" width="14" height="30" rx="6" fill="#e58aa5" ${DL} stroke-width="2.5"/>
+      <path d="M100 186 Q88 177 90 170 Q93 164 100 168 Q107 164 110 170 Q112 177 100 186 Z" fill="#fffaf4" ${DL} stroke-width="2"/>
+    </svg>`;
+  },
+};
 
 
 // ---------- Tools (the things on the shelf) ----------
@@ -447,18 +486,20 @@ const DESSERTS = {
     steps: [
       { id: "batter", type: "pour", tool: "batter", carry: "batterBowl", text: "Pour the batter",
         area: { x: 14, y: 14, w: 160, h: 176 }, target: [0.72, 0.95], max: 1.15, speed: 0.34,
-        hint: "Pick up the batter bowl and hold it over the pan to pour. Stop in the pink zone!" },
-      { id: "cook", type: "timing", tool: "spatula", text: "Flip when golden", zone: [0.42, 0.68],
-        start: "Cook it", stop: "Flip!",
-        hint: "Click the spatula to start cooking. Press Flip! when the needle reaches the green zone." },
+        hint: "Pick up the batter bowl and hold it over the pan to pour. Stop in the pink zone, then press Next step." },
+      { id: "cook", type: "timer", tool: "spatula", seconds: 5, text: "Cook for 5 seconds",
+        start: "Start cooking", stop: "Flip!",
+        hint: "Click the spatula to start cooking. Press Flip! when the timer says 5 seconds." },
       { id: "cream", type: "pipe", tool: "piping", carry: "piping", text: "Pipe the cream",
         area: { cx: 100, cy: 80, rx: 62, ry: 30 }, target: [0.55, 0.85], max: 1.1, speed: 0.3,
-        hint: "Pick up the piping bag. Hold it over the top of the crêpe and the cream flows out. Stop in the pink zone." },
+        hint: "Pick up the piping bag. Hold it over the top of the crêpe and the cream flows out. Stop in the pink zone, then press Next step." },
       { id: "berries", type: "drop", tool: "berries", carry: "berry", times: 4, text: "Add 4 strawberries",
         area: { x: 28, y: 28, w: 144, h: 150 },
-        hint: "Drag a strawberry from the bowl onto the crêpe. 4 times!" },
-      { id: "fold", type: "swipe", tool: "fold", dir: [0, -1], text: "Fold into a cone",
-        hint: "Drag upwards on the crêpe to fold it into a cone." },
+        hint: "Drag strawberries from the bowl onto the crêpe. The recipe says 4. Then press Next step." },
+      { id: "fold1", type: "swipe", tool: "fold", dir: [0, -1], text: "Fold it in half",
+        hint: "Fold 1: drag upwards on the crêpe to fold the bottom half up." },
+      { id: "fold2", type: "swipe", tool: "fold", dir: [-1, 0], text: "Fold into a cone",
+        hint: "Fold 2: drag to the left on the crêpe to wrap it into a cone." },
       DECORATE("Add a bunny cookie, pocky sticks and a chocolate drizzle! Press Done when it's cute."),
     ],
   },
@@ -471,13 +512,12 @@ const DESSERTS = {
     steps: [
       { id: "batter", type: "pour", tool: "batter", carry: "batterBowl", text: "Pour the batter",
         area: { x: 0, y: 0, w: 200, h: 150 }, target: [0.75, 0.95], max: 1.15, speed: 0.34,
-        hint: "Pick up the batter bowl and hold it over the tray to pour. Stop in the pink zone!" },
-      { id: "bake", type: "timing", tool: "oven", text: "Bake until golden", zone: [0.42, 0.66],
-        start: "Turn on", stop: "Turn off!",
-        hint: "Click the oven to turn it on. Press Turn off! when the needle reaches the green zone." },
+        hint: "Pick up the batter bowl and hold it over the tray to pour. Stop in the pink zone, then press Next step." },
+      { id: "bake", type: "timer", appliance: "oven", tool: "oven", seconds: 5, text: "Bake for 5 seconds", stop: "Take out!",
+        hint: "Drag the tray into the oven. Take it out when the timer says 5 seconds!" },
       { id: "cream", type: "pipe", tool: "piping", carry: "piping", text: "Pipe strawberry cream",
         area: { x: 16, y: 96, w: 168, h: 44 }, target: [0.55, 0.85], max: 1.1, speed: 0.3,
-        hint: "Pick up the piping bag and move it along the sponge. The pink cream flows out! Stop in the pink zone." },
+        hint: "Pick up the piping bag and move it along the sponge. The pink cream flows out! Stop in the pink zone, then press Next step." },
       { id: "roll", type: "swipe", tool: "roll", dir: [1, 0], text: "Roll it up",
         hint: "Drag to the right on the cake to roll it up, nice and tight." },
       { id: "slice", type: "swipe", tool: "knife", carry: "knife", dir: [0, 1], text: "Cut a slice",
@@ -493,15 +533,14 @@ const DESSERTS = {
     oneTool: true,
     tray: ["daisy", "heart", "mint", "cream"],
     steps: [
-      { id: "toast", type: "timing", tool: "toaster", text: "Toast until golden", zone: [0.4, 0.66],
-        start: "Push down", stop: "Pop up!",
-        hint: "Click the toaster to start. Press Pop up! when the needle reaches the green zone." },
+      { id: "toast", type: "timer", appliance: "toaster", tool: "toaster", seconds: 5, text: "Toast for 5 seconds", stop: "Pop up!",
+        hint: "Drag the bread into the toaster. Pop it up when the timer says 5 seconds!" },
       { id: "spread", type: "pipe", tool: "piping", carry: "piping", text: "Pipe pink cream",
         area: { x: 56, y: 40, w: 90, h: 126 }, target: [0.6, 0.9], max: 1.15, speed: 0.28,
-        hint: "Pick up the piping bag and move it all over the toast: the pink cream flows out. Stop in the pink zone." },
+        hint: "Pick up the piping bag and move it all over the toast: the pink cream flows out. Stop in the pink zone, then press Next step." },
       { id: "honey", type: "drizzle", tool: "honeyJar", carry: "dipper", text: "Drizzle honey",
         area: { x: 50, y: 30, w: 100, h: 140 }, target: [0.5, 0.85], max: 1.1, speed: 0.32,
-        hint: "Pick up the honey dipper. Honey drips wherever you hold it! Stop in the pink zone." },
+        hint: "Pick up the honey dipper. Honey drips wherever you hold it! Stop in the pink zone, then press Next step." },
       DECORATE("Chop strawberries (they're heart-shaped!) and add little daisies. Press Done when it's cute."),
     ],
   },
@@ -512,21 +551,20 @@ const DESSERTS = {
     oneTool: true,
     tray: ["cream", "mint", "heart", "choco"],
     steps: [
-      { id: "bake", type: "timing", tool: "oven", text: "Bake until golden", zone: [0.45, 0.7],
-        start: "Turn on", stop: "Turn off!",
-        hint: "Click the oven to turn it on. Press Turn off! when the needle reaches the green zone." },
+      { id: "bake", type: "timer", appliance: "oven", tool: "oven", seconds: 5, text: "Bake for 5 seconds", stop: "Take out!",
+        hint: "Drag the croissant into the oven. Take it out when the timer says 5 seconds!" },
       { id: "slice", type: "swipe", tool: "knife", carry: "knife", dir: [1, 0], text: "Slice it open",
         area: { x: 16, y: 60, w: 168, h: 100 },
         hint: "Pick up the knife and move it from left to right along the croissant." },
       { id: "cream", type: "pipe", tool: "piping", carry: "piping", text: "Pipe the cream",
         area: { cx: 100, cy: 94, rx: 66, ry: 22 }, target: [0.6, 0.9], max: 1.15, speed: 0.32,
-        hint: "Pick up the piping bag and move it along inside the croissant: the cream flows out. Stop in the pink zone." },
+        hint: "Pick up the piping bag and move it along inside the croissant: the cream flows out. Stop in the pink zone, then press Next step." },
       { id: "berries", type: "drop", tool: "berries", carry: "berry", times: 4, text: "Add 4 strawberries",
         area: { x: 26, y: 50, w: 148, h: 110 },
-        hint: "Drag a strawberry from the bowl into the croissant. 4 times!" },
+        hint: "Drag strawberries from the bowl into the croissant. The recipe says 4. Then press Next step." },
       { id: "sugar", type: "rub", tool: "sifter", carry: "sifter", text: "Dust with sugar",
         area: { cx: 100, cy: 120, rx: 70, ry: 36 },
-        hint: "Pick up the sifter and move it over the croissant to dust it with sugar." },
+        hint: "Pick up the sifter and move it over the croissant to dust it all over. Then press Next step." },
       DECORATE("Add some finishing touches. Press Done when it's cute."),
     ],
   },
@@ -538,7 +576,7 @@ function perfectDessertArt(id) {
   const v = {};
   recipe.steps.forEach(function (s) {
     if (s.target) v[s.id] = (s.target[0] + s.target[1]) / 2;
-    else if (s.type === "timing") v[s.id] = (s.zone[0] + s.zone[1]) / 2;
+    else if (s.type === "timer") v[s.id] = 0.55;
     else if (s.type === "tap" || s.type === "drop") v[s.id] = s.times;
     else v[s.id] = 1;
   });

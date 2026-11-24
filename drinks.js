@@ -43,7 +43,7 @@ function strawberryMilkArt(st) {
   const milkColor = mixColor("#fbf0dc", pink, mix);
   const pureeColor = mixColor("#ec5574", pink, mix);
 
-  const ices = [[82, 0, -12], [116, 6, 14], [98, 16, 4]].slice(0, Math.min(3, v.ice || 0)).map(([x, dy, r], k) =>
+  const ices = [[82, 0, -12], [116, 6, 14], [98, 16, 4], [74, 20, 20], [124, 22, -8], [100, -6, 30]].slice(0, Math.min(6, v.ice || 0)).map(([x, dy, r], k) =>
     iceCube(x, milk > 0 ? milkTop + 12 + dy : pureeTop - 12 - k * 20, r)).join("");
 
 
@@ -100,7 +100,7 @@ function sakuraTeaArt(st) {
   const color = teaColor(0.06 + stir * 0.49);           // stirring turns it pink
   const spin = stir * 14;                                // the flowers swirl while you stir
 
-  const flowers = [[78, 0], [104, 8], [128, -2]].slice(0, Math.min(3, v.blossoms || 0)).map(([x, dy], k) =>
+  const flowers = [[78, 0], [104, 8], [128, -2], [90, 14], [116, -8], [66, 10]].slice(0, Math.min(6, v.blossoms || 0)).map(([x, dy], k) =>
     water > 0
       ? blossom(x + Math.sin(spin + k * 2.1) * 12, top + 6 + dy * 0.4, 1.05)
       : blossom(x, 176 - dy, 1.05)).join("");
@@ -173,6 +173,10 @@ const CARRY_ART = {
   ice:        { size: 0.12, tip: [0.5, 0.5], art: () => `<svg viewBox="-14 -14 28 28" class="art">${iceCube(0, 0, -10)}</svg>` },
   milkBottle: { size: 0.24, tip: [0.5, 0.06], tilt: 130, art: () => milkBottleSVG() },
   pitcher:    { size: 0.22, tip: [0.14, 0.2], tilt: -38, art: () => TOOL_ART.pitcher() },
+  scoop:      { size: 0.2,  tip: [0.12, 0.55], art: () => TOOL_ART.scoop() },
+  whisk:      { size: 0.16, tip: [0.5, 0.92], art: () => whiskSVG() },
+  matchaBowl: { size: 0.46, tip: [0.97, 0.27], tilt: 48, art: () => matchaBowlSVG({ powder: 2, water: true, froth: 100 }) },
+  creamJar:   { size: 0.22, tip: [0.16, 0.29], tilt: -62, art: () => strawberryCreamSVG() },
 };
 
 // a little pink kettle; the spout tip is at the top right
@@ -239,7 +243,7 @@ function honeyCoffeeArt(st) {
     <rect x="52" y="0" width="96" height="26" rx="6" fill="#d7d5de" ${DL}/>
     <path d="M64 26 L136 26 L130 40 L70 40 Z" fill="#6d6670" ${DL}/>
     <rect x="130" y="28" width="46" height="9" rx="4.5" fill="#9b7766" ${DL} stroke-width="2.5"/>
-    ${(v.grind || 0) > 0 ? `<path d="M74 26 Q100 ${26 - 4 * Math.min(4, v.grind)} 126 26 Z" fill="#6b4632" ${DL} stroke-width="2"/>` : ""}
+    ${(v.grind || 0) > 0 ? `<path d="M74 26 Q100 ${26 - 4 * Math.min(7, v.grind)} 126 26 Z" fill="#6b4632" ${DL} stroke-width="2"/>` : ""}
     <circle cx="66" cy="13" r="4" fill="#f6b8cb" ${DL} stroke-width="1.5"/>
     ${brewing ? `<path d="M100 40 L100 ${SURFACE.cy}" stroke="${coffeeColor(v.brew)}" stroke-width="6" stroke-linecap="round"/>` : ""}` : "";
 
@@ -266,6 +270,55 @@ function honeyCoffeeArt(st) {
         <path d="M84 76 Q78 66 84 56 Q90 46 84 38"/><path d="M116 76 Q110 66 116 56 Q122 46 116 38"/></g>` : ""}
     ${machine}
     ${st.flow && st.step === "honey" ? pourStream(st.flow, Math.max(st.flow.y, 98), "#f2c157", 3.5) : ""}`);
+}
+
+
+// ================= Strawberry Matcha Latte =================
+// Scoop matcha into the bowl, add hot water, whisk until frothy,
+// pour it into the jar, pour milk to the pink lines, top with strawberry cream.
+
+// put one of the matcha.js drawings at a spot inside our 200 x 200 drawing
+function placeSVG(svg, x, y, w, h) {
+  return svg.replace(/^\s*<svg /, `<svg x="${x}" y="${y}" width="${w}" height="${h}" `).replace(/class="[^"]*"/, "");
+}
+
+function matchaLatteArt(st) {
+  const v = st.v;
+  const bowlGone = st.done("pour");
+  const bowl = {
+    powder: Math.min(5, v.scoop || 0),
+    water: (v.water || 0) > 0,
+    froth: Math.min(100, (st.done("whisk") ? Math.max(v.whisk, 0.3) : (v.whisk || 0)) * 100),
+  };
+  const jar = {
+    matcha: 40 * Math.min(1.1, v.pour || 0),
+    milk: 100 * (v.milk || 0),
+    berry: 100 * (v.cream || 0),
+    sparkle: st.done("cream"),
+  };
+  // the jar moves to the middle once the bowl is put away
+  const J = bowlGone ? { x: 45, y: 22, w: 110, h: 156 } : { x: 100, y: 36, w: 96, h: 136 };
+  const B = { x: 0, y: 116, w: 108, h: 79 };
+  const scale = J.w / 120;
+  const jarTop = J.y + (JAR_BOTTOM - jar.matcha - jar.milk - jar.berry) * scale;
+  const bowlTop = B.y + 46 * (B.w / 220);
+
+  let stream = "";
+  if (st.flow) {
+    const colors = { water: "#e6f4f8", pour: "#8fb565", milk: "#fbf3e3", cream: "#f4aab5" };
+    const toY = st.step === "water" ? bowlTop : jarTop;
+    stream = pourStream(st.flow, toY, colors[st.step] || "#ffffff", 7);
+  }
+  const spill = (v.water || 0) > 1.02 ? `<ellipse cx="54" cy="194" rx="${50 + (v.water - 1) * 160}" ry="5" fill="#a9d16c" opacity="0.6"/>` : "";
+  const over = jar.matcha + jar.milk + jar.berry > 150
+    ? `<path d="M${J.x + 8} ${J.y + 20} Q${J.x} ${J.y + 60} ${J.x + 6} ${J.y + 80}" stroke="#fbf3e3" stroke-width="7" stroke-linecap="round" fill="none"/>` : "";
+
+  return dessertSVG(`
+    <ellipse cx="${J.x + J.w / 2}" cy="${J.y + J.h - 2}" rx="${J.w * 0.45}" ry="6" fill="#e9d6cf" opacity="0.7"/>
+    ${placeSVG(jarSVG(jar, st.step === "milk"), J.x, J.y, J.w, J.h)}
+    ${over}
+    ${bowlGone ? "" : spill + placeSVG(matchaBowlSVG(bowl), B.x, B.y, B.w, B.h)}
+    ${stream}`);
 }
 
 
@@ -315,6 +368,15 @@ Object.assign(TOOL_ART, {
     <path d="M22 28 L58 28 L54 38 L26 38 Z" fill="#6d6670" ${DL}/>
     <path d="M40 40 L40 52" stroke="#7a4a2e" stroke-width="4" stroke-linecap="round"/>
     <path d="M26 54 L54 54 L52 72 L28 72 Z" fill="#f6b8cb" ${DL}/>`),
+  tin: () => matchaTinSVG(),
+  scoop: () => T(`
+    <path d="M70 66 Q40 52 18 44" fill="none" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M70 66 Q40 52 18 44" fill="none" stroke="#dcb56d" stroke-width="4.5" stroke-linecap="round"/>
+    <ellipse cx="14" cy="42" rx="11" ry="7" fill="#dcb56d" ${DL} stroke-width="2.5"/>
+    <ellipse cx="14" cy="38" rx="9" ry="5" fill="#8fbd57" ${DL} stroke-width="2"/>`),
+  whisk: () => whiskSVG(),
+  matchaBowl: () => matchaBowlSVG({ powder: 2, water: true, froth: 100 }),
+  creamJar: () => strawberryCreamSVG(),
   pitcher: () => T(`
     <path d="M22 26 L54 26 L60 70 L18 70 Z" fill="#eef3f5" ${DL}/>
     <path d="M22 26 L12 18" ${DL} stroke-width="4"/>
@@ -326,11 +388,40 @@ Object.assign(TOOL_NAMES, {
   masher: "Masher", ice: "Ice", milk: "Milk", spoon: "Spoon", sakura: "Sakura", kettle: "Hot water",
   timer: "Steep", grinder: "Grinder", brew: "Espresso", pitcher: "Milk foam",
   sakuraBowl: "Sakura flowers", teaKettle: "Hot water", honeyJar: "Honey", batter: "Batter bowl",
+  tin: "Matcha", whisk: "Bamboo whisk", matchaBowl: "Matcha bowl", creamJar: "Strawberry cream",
 });
 
 
 // ---------- The drink recipes ----------
 Object.assign(DESSERTS, {
+  matcha: {
+    name: "Strawberry Matcha Latte",
+    draw: matchaLatteArt,
+    oneTool: true,
+    tray: ["cream", "sakura", "mint", "heart"],
+    steps: [
+      { id: "scoop", type: "drop", tool: "tin", carry: "scoop", times: 2, text: "2 scoops of matcha",
+        area: { x: 0, y: 90, w: 116, h: 110 },
+        hint: "Drag the bamboo scoop from the matcha tin into the bowl. The recipe says 2 scoops. Then press Next step." },
+      { id: "water", type: "pour", tool: "teaKettle", carry: "kettle", text: "Add hot water",
+        area: { x: 0, y: 20, w: 116, h: 150 }, target: [0.6, 0.9], max: 1.15, speed: 0.32,
+        hint: "Pick up the kettle and hold it over the bowl. Stop in the pink zone, then press Next step." },
+      { id: "whisk", type: "stir", tool: "whisk", carry: "whisk", times: 12, text: "Whisk until frothy",
+        area: { x: 0, y: 100, w: 116, h: 100 },
+        hint: "Pick up the whisk, put it in the bowl and whisk fast side to side until it's frothy. Then press Next step." },
+      { id: "pour", type: "pour", tool: "matchaBowl", carry: "matchaBowl", text: "Pour it into the jar",
+        area: { x: 96, y: 0, w: 104, h: 130 }, target: [0.85, 1.02], max: 1.1, speed: 0.4,
+        hint: "Pick up the bowl and pour the matcha into the jar. Pour it all, but don't spill! Then press Next step." },
+      { id: "milk", type: "pour", tool: "milk", carry: "milkBottle", text: "Milk to the pink lines",
+        area: { x: 40, y: 0, w: 120, h: 130 }, target: [MILK_TARGET[0] / 100, MILK_TARGET[1] / 100], max: 0.8, speed: 0.2,
+        hint: "Pick up the milk and pour into the jar. Stop between the pink lines, then press Next step." },
+      { id: "cream", type: "pour", tool: "creamJar", carry: "creamJar", text: "Top with strawberry cream",
+        area: { x: 40, y: 0, w: 120, h: 130 }, target: [0.2, 0.32], max: 0.45, speed: 0.14,
+        hint: "Pick up the strawberry cream and pour a pink layer on top. Stop in the pink zone, then press Next step." },
+      DECORATE("Chop strawberries and decorate however you like. Press Done when it's cute."),
+    ],
+  },
+
   milk: {
     name: "Strawberry Milk",
     draw: strawberryMilkArt,
@@ -339,16 +430,16 @@ Object.assign(DESSERTS, {
     steps: [
       { id: "mash", type: "stir", axis: "y", tool: "masher", carry: "masher", times: 6, text: "Mash the strawberries",
         area: { x: 50, y: 20, w: 100, h: 176 },
-        hint: "Pick up the masher, put it in the glass and move it up and down to squish the strawberries." },
+        hint: "Pick up the masher, put it in the glass and move it up and down to squish the strawberries. Then press Next step." },
       { id: "ice", type: "drop", tool: "ice", carry: "ice", times: 3, text: "Add 3 ice cubes",
         area: { x: 40, y: 10, w: 120, h: 186 },
-        doneText: "Clink, clink, clink!", hint: "Drag an ice cube into the glass, 3 times." },
+        hint: "Drag ice cubes into the glass. The recipe says 3. Then press Next step." },
       { id: "milk", type: "pour", tool: "milk", carry: "milkBottle", text: "Pour the milk",
         area: { x: 44, y: 0, w: 112, h: 120 }, target: [0.68, 0.92], max: 1.12, speed: 0.3,
-        hint: "Pick up the milk bottle and hold it over the glass to pour. Stop in the pink zone!" },
+        hint: "Pick up the milk bottle and hold it over the glass to pour. Stop in the pink zone, then press Next step." },
       { id: "stir", type: "stir", tool: "spoon", carry: "spoon", times: 8, text: "Stir until pink",
         area: { x: 50, y: 40, w: 100, h: 156 },
-        hint: "Pick up the spoon, put it in the glass, and stir side to side until it's all pink!" },
+        hint: "Pick up the spoon, put it in the glass, and stir side to side until it's all pink. Then press Next step." },
       DECORATE("Top it with cream, hearts and a strawberry. Press Done when it's cute."),
     ],
   },
@@ -361,16 +452,16 @@ Object.assign(DESSERTS, {
     steps: [
       { id: "blossoms", type: "drop", tool: "sakuraBowl", carry: "flower", times: 3, text: "Drop in 3 sakura flowers", doneText: "So pretty, they're floating!",
         area: { x: 40, y: 10, w: 120, h: 186 },
-        hint: "Drag a flower from the bowl and drop it into the glass. Do it 3 times!" },
+        hint: "Drag flowers from the bowl into the glass. The recipe says 3. Then press Next step." },
       { id: "water", type: "pour", tool: "teaKettle", carry: "kettle", text: "Pour hot water to the heart",
         area: { x: 46, y: 0, w: 108, h: 120 }, target: [TEA_MARK - 0.06, TEA_MARK + 0.06], max: 1.15, speed: 0.3,
         hint: "Pick up the kettle and hold it over the glass to pour. Stop at the heart line, or it overflows!" },
       { id: "stir", type: "stir", tool: "spoon", carry: "spoon", times: 8, text: "Stir until pink",
         area: { x: 50, y: 50, w: 100, h: 142 },
-        hint: "Pick up the spoon, put it in the glass, and stir side to side until the tea turns pink." },
+        hint: "Pick up the spoon, put it in the glass, and stir side to side until the tea turns pink. Then press Next step." },
       { id: "honey", type: "drizzle", tool: "honeyJar", carry: "dipper", text: "Drizzle honey",
         area: { x: 46, y: 0, w: 108, h: 140 }, target: [0.45, 0.8], max: 1.05, speed: 0.32,
-        hint: "Pick up the honey dipper and hold it over the glass. The honey drips wherever you move it! Stop in the pink zone." },
+        hint: "Pick up the honey dipper and hold it over the glass. The honey drips wherever you move it! Stop in the pink zone, then press Next step." },
       DECORATE("Float some petals on top. Press Done when it's cute."),
     ],
   },
@@ -381,17 +472,17 @@ Object.assign(DESSERTS, {
     oneTool: true,
     tray: ["heart", "choco", "cream", "sakura"],
     steps: [
-      { id: "grind", type: "tap", tool: "grinder", times: 4, text: "Grind the beans",
-        hint: "Click the grinder 4 times. Smells so good!" },
-      { id: "brew", type: "timing", tool: "brew", text: "Brew a shot", zone: [0.42, 0.68],
+      { id: "grind", type: "tap", tool: "grinder", times: 4, text: "Grind the beans (4 turns)",
+        hint: "Click the grinder to turn it. The recipe says 4 turns. Then press Next step." },
+      { id: "brew", type: "timer", tool: "brew", seconds: 5, text: "Brew for 5 seconds",
         start: "Brew", stop: "Stop shot!",
-        hint: "Click the espresso machine to brew. Press Stop shot! when it's in the green zone." },
+        hint: "Click the espresso machine to brew. Press Stop shot! when the timer says 5 seconds." },
       { id: "honey", type: "drizzle", tool: "honeyJar", carry: "dipper", text: "Drizzle honey",
         area: { x: 50, y: 20, w: 100, h: 96 }, target: [0.5, 0.82], max: 1.05, speed: 0.32,
-        hint: "Pick up the honey dipper and hold it over the coffee. Honey drips wherever you move it! Stop in the pink zone." },
+        hint: "Pick up the honey dipper and hold it over the coffee. Honey drips wherever you move it! Stop in the pink zone, then press Next step." },
       { id: "latte", type: "pipe", tool: "pitcher", carry: "pitcher", text: "Pour latte art",
         area: { cx: 100, cy: 98, rx: 50, ry: 16 }, target: [0.5, 0.85], max: 1.1, speed: 0.28,
-        hint: "Pick up the milk pitcher and move it over the coffee: the foam flows out. Draw a heart! Stop in the pink zone." },
+        hint: "Pick up the milk pitcher and move it over the coffee: the foam flows out. Draw a heart! Stop in the pink zone, then press Next step." },
       DECORATE("Add a few sweet touches. Press Done when it's cute."),
     ],
   },

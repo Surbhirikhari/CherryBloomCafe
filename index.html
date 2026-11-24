@@ -265,52 +265,11 @@
       </div>
     </section>
 
-    <!-- ============ SCREEN 3: THE MATCHA STATION ============ -->
-    <!-- A hands-on mini-game for the Strawberry Matcha Latte (see matcha.js). -->
-    <section id="screen-matcha" class="screen workstation" hidden>
-      <aside class="recipe-note">
-        <p class="note-label">Making</p>
-        <h2>Strawberry Matcha Latte</h2>
-        <ol id="m-steps" class="note-steps"></ol>
-        <div id="m-froth-bar" class="froth-bar" hidden><div id="m-froth" class="froth-fill"></div></div>
-        <p id="m-hint" class="prep-hint" aria-live="polite"></p>
-        <div class="row">
-          <button id="m-restart" class="btn btn-soft">Start over</button>
-          <button id="m-done" class="btn" disabled>Done</button>
-        </div>
-      </aside>
-
-      <div class="work-area work-matcha">
-        <!-- the back shelf: things we use one at a time -->
-        <div class="shelf">
-          <button id="m-tin" class="tool"><span id="m-tin-art"></span><span class="tool-label">Matcha</span></button>
-          <button id="m-kettle" class="tool"><span id="m-kettle-art"></span><span class="tool-label">Hot water</span></button>
-          <button id="m-milk" class="tool"><span id="m-milk-art"></span><span class="tool-label">Milk (hold)</span></button>
-          <button id="m-berry" class="tool"><span id="m-berry-art"></span><span class="tool-label">Strawberry cream</span></button>
-        </div>
-
-        <!-- front of the table: the bowl, the jar, and the cutting board -->
-        <div id="m-bowl-area" class="bowl-area" tabindex="0" aria-label="Tea bowl. To whisk, drag side to side or press the left and right arrow keys.">
-          <div id="m-whisk" class="whisk" hidden></div>
-          <div id="m-bowl"></div>
-          <span class="tool-label">Bowl</span>
-        </div>
-        <div class="vessel-zone">
-          <span id="m-stream" class="stream" hidden></span>
-          <div class="vessel jar-vessel">
-            <div id="m-jar"></div>
-            <div id="m-toppings" class="toppings-layer"></div>
-          </div>
-        </div>
-        <div id="m-decor-zone" class="decor-zone">
-          <div id="decor" class="decor"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ SCREEN 4: THE BAKERY STATION ============ -->
-    <!-- Every dessert is made here. bakery.js runs the recipe from desserts.js:
-         use the glowing tool on the shelf, or drag on the plate. -->
+    <!-- ============ SCREEN 3: THE KITCHEN STATION ============ -->
+    <!-- Everything on the menu is made here. bakery.js runs the recipe
+         (desserts.js, drinks.js). Left: the recipe note. Middle: the dessert.
+         Right: one BIG thing for this step: a tool to pick up, the oven,
+         or the toppings for decorating. -->
     <section id="screen-bake" class="screen workstation" hidden>
       <aside class="recipe-note">
         <p class="note-label">Making</p>
@@ -324,9 +283,8 @@
       </aside>
 
       <div class="work-area work-bake">
-        <div id="b-shelf" class="shelf"></div>
         <div class="plate-zone">
-          <!-- the meter: how much cream or batter, or how golden it is -->
+          <!-- the meter: how much, how many, or the timer -->
           <div id="b-meter-row" class="meter-row" hidden>
             <p id="b-meter-label" class="meter-label"></p>
             <div class="meter-and-button">
@@ -336,17 +294,34 @@
                 <div id="b-needle" class="meter-needle"></div>
               </div>
               <button id="b-action" class="btn stop-btn" hidden></button>
+              <button id="b-next" class="btn next-btn" hidden>Next step ✓</button>
             </div>
           </div>
-          <div id="b-plate" class="plate" tabindex="0" aria-label="The dessert. Drag on it, or use the arrow keys, to spread, fold, roll or slice.">
+          <div id="b-plate" class="plate" tabindex="0" aria-label="The dessert. Drag on it, or use the arrow keys, to fold, roll, stir or dust.">
             <div id="b-art"></div>
             <div id="b-toppings" class="toppings-layer"></div>
-            <div id="b-hand" class="hand-tool" hidden></div>
           </div>
         </div>
-        <div id="b-decor-zone" class="decor-zone"></div>
+
+        <div class="side-zone">
+          <!-- the big tool for this step: pick it up and drag it over -->
+          <button id="b-tool" class="big-tool">
+            <span id="b-tool-art" class="big-tool-art"></span>
+            <span id="b-tool-label" class="big-tool-label"></span>
+          </button>
+          <!-- the oven or toaster, for timer steps -->
+          <div id="b-appliance" class="appliance" hidden>
+            <div id="b-appliance-art"></div>
+            <div id="b-inside" class="appliance-inside"></div>
+            <div id="b-timer" class="timer">0.0s</div>
+          </div>
+          <!-- the cutting board and toppings, for decorating -->
+          <div id="b-decor-zone" class="decor-zone" hidden>
+            <div id="decor" class="decor"></div>
+          </div>
+        </div>
       </div>
-      <!-- the tool you've picked up, following your mouse -->
+      <!-- the thing you've picked up, following your mouse -->
       <div id="b-carry" class="carry" hidden></div>
     </section>
   </main>

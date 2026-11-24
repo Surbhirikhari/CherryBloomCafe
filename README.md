@@ -75,11 +75,11 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `game.js` | The customer loop: arrive → recipe → make → serve → pay → leave |
 | `menu.js` | Everything on the menu, and the prices |
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
-| `matcha.js` | The Matcha Station mini-game (scoop, whisk, pour, layer) |
+| `matcha.js` | The matcha latte drawings: tin, kettle, whisk, bowl, jar |
 | `sparkles.js` | The little sparkle trail behind the flower mouse |
 | `desserts.js` | The dessert drawings, tools and recipes (each step changes the drawing) |
 | `drinks.js` | The drink recipes: strawberry milk, sakura tea, honey coffee |
-| `bakery.js` | The Bakery Station: runs any dessert recipe (hold, tap, timing, rub, swipe) |
+| `bakery.js` | The kitchen station: runs every recipe. Pick up the big tool, use the oven timer, press Next step |
 | `decor.js` | The cutting board and drag-anywhere toppings |
 | `paint.js` | Shared watercolour "brushes" for drawing scenes |
 | `street.js` | Paints the street outside, with walking people |

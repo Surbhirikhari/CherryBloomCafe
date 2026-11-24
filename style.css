@@ -786,8 +786,73 @@ h1 {
     linear-gradient(#f2d5b0, #ddb184);
   box-shadow: 0 10px 0 #c9976a;
 }
-.work-matcha { grid-template-columns: 1.1fr 0.9fr 1.3fr; grid-template-areas: "shelf shelf shelf" "bowl jar decor"; }
-.work-bake   { grid-template-columns: 1.3fr 1fr;       grid-template-areas: "shelf shelf" "plate decor"; }
+.work-bake   { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "plate side"; }
+
+/* the right side of the table: one BIG thing for this step */
+.side-zone {
+  grid-area: side;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.side-zone .decor-zone { width: 100%; }
+.big-tool {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  width: min(100%, 360px);
+  aspect-ratio: 0.85;
+  padding: 18px;
+  border: 3px dashed rgba(65, 44, 44, 0.25);
+  border-radius: 32px;
+  background: radial-gradient(closest-side, rgba(255, 250, 240, 0.9), rgba(255, 250, 240, 0.35));
+  cursor: var(--cursor-grab);
+  touch-action: none;
+  transition: opacity 0.2s;
+}
+.big-tool:not(:disabled):not(.picture) { animation: tool-bob 1.6s ease-in-out infinite; }
+.big-tool:disabled { cursor: var(--cursor); }
+.big-tool.picture { opacity: 0.75; animation: none; }
+.big-tool.lifted { opacity: 0.25; animation: none; }
+.big-tool.arrive { animation: arrive 0.45s ease-out; }
+@keyframes arrive { from { transform: translateX(40px) scale(0.8); opacity: 0; } }
+.big-tool-art { display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; }
+.big-tool-art svg { width: 88%; height: auto; max-height: 300px; filter: drop-shadow(0 8px 4px rgba(65, 44, 44, 0.18)); }
+.big-tool-label { font: 800 1rem var(--font-body); color: var(--ink); background: var(--paper); padding: 4px 12px; border-radius: 999px; border: 2px solid var(--cat-line); }
+.big-tool:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; }
+
+/* the oven and the toaster */
+.appliance { position: relative; width: min(100%, 380px); transition: transform 0.2s, filter 0.2s; }
+.appliance.target { transform: scale(1.04); filter: drop-shadow(0 0 18px #fff1a8); }
+.appliance-inside {
+  position: absolute;
+  left: 15%; top: 38%; width: 70%; height: 47.6%;
+  display: grid; place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  pointer-events: none;
+}
+.appliance-inside svg { height: 100%; width: auto; }
+.appliance.on .appliance-inside { filter: sepia(0.25) saturate(1.2); }
+.timer {
+  position: absolute;
+  display: grid; place-items: center;
+  font: 400 1.1rem var(--font-display);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.oven .timer { left: 48%; top: 12.9%; width: 33%; height: 11.4%; color: #ffe9a8; }
+.toaster .timer { left: 32%; top: 58%; width: 36%; height: 12%; color: var(--ink); background: #fffaf4; border: 2px solid var(--cat-line); border-radius: 999px; }
+.appliance:not(.on) .timer { opacity: 0.6; }
+
+/* the dessert you can pick up and put in the oven */
+.plate.grab { cursor: var(--cursor-grab); filter: drop-shadow(0 0 14px #fff1a8); animation: tool-bob 1.6s ease-in-out infinite; }
+.next-btn { flex: none; padding: 10px 18px; background: var(--matcha-deep); box-shadow: 0 4px 0 #3f6128; }
+.next-btn:active { box-shadow: 0 1px 0 #3f6128; }
 
 /* --- the Bakery Station: the dessert on its plate --- */
 .plate-zone {
@@ -800,6 +865,7 @@ h1 {
   gap: 8px;
 }
 .plate {
+  grid-row: 2;                     /* always below the meter, even when the meter is hidden */
   position: relative;
   height: 100%;
   min-height: 0;
@@ -1099,7 +1165,8 @@ h1 {
   .workstation { position: static; grid-template-columns: 1fr; }
   .recipe-note { transform: none; }
   .work-matcha { grid-template-columns: 1fr 1fr; grid-template-areas: "shelf shelf" "bowl jar" "decor decor"; }
-  .work-bake   { grid-template-columns: 1fr; grid-template-areas: "shelf" "plate" "decor"; }
+  .work-bake   { grid-template-columns: 1fr; grid-template-rows: auto auto; grid-template-areas: "plate" "side"; }
+  .big-tool { width: 200px; }
   .plate { height: auto; width: min(100%, 340px); }
   .vessel-zone { height: 300px; }
   .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }

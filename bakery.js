@@ -1,70 +1,60 @@
 // =========================================================
 // Cherry Blossom Cafe — bakery.js
-// The Bakery Station: one station that can make every recipe in desserts.js.
-// It reads the recipe and runs its steps one by one.
+// The Bakery Station: one station that makes everything on the menu.
+// It reads a recipe (desserts.js, drinks.js) and runs its steps one by one.
 //
-// How each kind of step works:
-//   tap    - click the glowing tool "times" times
-//   hold   - press and hold the tool; the meter fills; let go in the pink zone
-//   timing - click the tool to turn it on; the needle rises slowly;
-//            press the big stop button ("Turn off!") in the green zone
-//   pipe   - hold the mouse down on the dessert: cream flows out right there
-//            (and grows while you stay still); let go in the pink zone
-//   rub    - drag over the dessert; we count how much of the area you covered
-//   swipe  - drag over the dessert in one direction
-//   stir   - drag side to side over the drink, like stirring with a spoon
+// The work table: the dessert (or drink) on the left, and on the right
+// ONE BIG thing for this step: a tool to pick up, the oven, or the
+// toppings for decorating.
 //
-// Carrying (Sakura Tea): if a step has "carry", you pick its tool up
-// off the shelf and move it over the glass:
-//   drop    - drop things in (a sakura flower), "times" times
-//   pour    - the kettle tilts and pours while it's over the glass; stop at the marker
-//   drizzle - honey drips straight down wherever you hold the dipper
-//   pipe    - cream flows out of the piping bag wherever you hold it
-//   stir    - put the spoon in the glass and move it side to side
-//             (axis "y": up and down, like the masher)
+// Kinds of steps:
+//   drop    - drag things in (strawberries, ice, flowers, matcha scoops)
+//   pour    - carry the kettle, bowl or bottle over: it pours while it's over
+//   pipe    - carry the piping bag: cream flows out wherever you hold it
+//   drizzle - carry the honey dipper: honey drips wherever you hold it
+//   stir    - put the spoon (whisk, masher) in and move it side to side
+//             (axis "y": up and down)
 //   rub     - move the sifter over the dessert to dust it
-//   swipe   - move the knife through the dessert to slice it
+//   tap     - click the big tool (the coffee grinder)
+//   swipe   - drag on the dessert to fold, roll or slice it
+//   timer   - put it in the oven or toaster (or start the pan), a timer
+//             runs, and you stop it at the right time (5 seconds)
 //   decorate - the cutting board and toppings (decor.js), then Done
+//
+// Like a real kitchen, YOU decide when a step is finished: press
+// "Next step". Too much, too little, too many or too few all cost points.
 // =========================================================
 
 
 // ---------- Grab the page parts ----------
-const bTitle      = document.getElementById("b-title");
-const bSteps      = document.getElementById("b-steps");
-const bMeterRow   = document.getElementById("b-meter-row");
-const bMeterLabel = document.getElementById("b-meter-label");
-const bMeter      = document.getElementById("b-meter");
-const bZone       = document.getElementById("b-zone");
-const bFill       = document.getElementById("b-fill");
-const bNeedle     = document.getElementById("b-needle");
-const bAction     = document.getElementById("b-action");
-const bHint       = document.getElementById("b-hint");
-const bRestart    = document.getElementById("b-restart");
-const bDone       = document.getElementById("b-done");
-const bShelf      = document.getElementById("b-shelf");
-const bPlate      = document.getElementById("b-plate");
-const bArt        = document.getElementById("b-art");
-const bToppings   = document.getElementById("b-toppings");
-const bHand       = document.getElementById("b-hand");
-const bDecorZone  = document.getElementById("b-decor-zone");
-const bCarry      = document.getElementById("b-carry");
+const $ = (id) => document.getElementById(id);
+const bTitle = $("b-title"), bSteps = $("b-steps"), bHint = $("b-hint");
+const bRestart = $("b-restart"), bDone = $("b-done");
+const bMeterRow = $("b-meter-row"), bMeterLabel = $("b-meter-label"), bMeter = $("b-meter");
+const bZone = $("b-zone"), bFill = $("b-fill"), bNeedle = $("b-needle");
+const bAction = $("b-action"), bNext = $("b-next");
+const bPlate = $("b-plate"), bArt = $("b-art"), bToppings = $("b-toppings");
+const bTool = $("b-tool"), bToolArt = $("b-tool-art"), bToolLabel = $("b-tool-label");
+const bAppliance = $("b-appliance"), bApplianceArt = $("b-appliance-art"), bInside = $("b-inside"), bTimer = $("b-timer");
+const bDecorZone = $("b-decor-zone"), bCarry = $("b-carry");
 
 
 // ---------- The station's memory ----------
 const bake = {
   id: null,             // which recipe, e.g. "crepe"
-  recipe: null,         // the recipe from DESSERTS
+  recipe: null,         // the recipe itself
   index: 0,             // which step we're on
   v: {},                // how far each step got, e.g. { batter: 0.8, cook: 0.5 }
-  marks: {},            // spots where cream flowed (or sugar was rubbed)
+  marks: {},            // where cream, honey or sugar landed
   done: new Set(),      // the steps that are finished
-  scores: [],           // how well each judged step went: { label, pct }
+  scores: [],           // how well each step went: { label, pct }
   busy: false,          // true for a moment between steps
-  holding: false,       // holding a "hold" tool
-  heating: false,       // a "timing" step is running
+  timer: { phase: "", t: 0 },   // for timer steps: "load", "ready", "running", "done"
   onDone: null,         // what to call when it's served
-  tools: {},            // the tool buttons on the shelf, by name
 };
+
+const FLOWS = ["pour", "pipe", "drizzle"];                     // something flows out of the tool
+const COMMIT = ["pour", "pipe", "drizzle", "drop", "stir", "rub", "tap"];   // finished with "Next step"
 
 function bStep() { return bake.recipe.steps[bake.index]; }
 
@@ -76,41 +66,12 @@ function openBakeStation(id, onDone) {
   bake.onDone = onDone;
   bTitle.textContent = bake.recipe.name;
   Decor.attach(bDecorZone, bToppings, bake.recipe.tray);
-  buildShelf();
   resetBake();
 }
 
-// one button per tool this recipe uses (each tool only once)
-function buildShelf() {
-  bShelf.innerHTML = "";
-  bake.tools = {};
-  bake.recipe.steps.forEach(function (s) {
-    if (s.type === "decorate" || bake.tools[s.tool]) return;
-    const button = document.createElement("button");
-    button.className = "tool";
-    button.innerHTML = `<span>${TOOL_ART[s.tool]()}</span><span class="tool-label"></span>`;
-    bake.tools[s.tool] = button;
-    bShelf.appendChild(button);
-
-    button.addEventListener("click", (event) => onToolClick(s.tool, event));
-    button.addEventListener("pointerdown", (event) => { onToolHold(event, s.tool); startCarry(event, s.tool); });
-    button.addEventListener("keydown", function (event) {
-      if ((event.key === " " || event.key === "Enter") && !event.repeat && bStep().type === "hold") onToolHold(event, s.tool);
-      keyboardFlow(event, s.tool, true);
-    });
-    button.addEventListener("keyup", function (event) {
-      if (event.key === " " || event.key === "Enter") stopHold();
-      keyboardFlow(event, s.tool, false);
-    });
-    ["pointerup", "pointerleave", "pointercancel"].forEach((type) => button.addEventListener(type, stopHold));
-  });
-}
-
 function resetBake() {
-  bake.heating = false;
-  bake.holding = false;
-  pipe.on = false;
   endCarry(null, true);
+  bake.timer = { phase: "", t: 0 };
   bake.index = 0;
   bake.v = {};
   bake.marks = {};
@@ -125,18 +86,20 @@ function resetBake() {
 function startStep() {
   const s = bStep();
   bHint.textContent = s.hint;
+  bake.v[s.id] = 0;
+  if (FLOWS.includes(s.type)) bake.marks[s.id] = [];
   if (s.type === "rub") prepareRub(s);
-  if (s.type === "pipe") { bake.marks[s.id] = []; bake.v[s.id] = 0; }
-  if (s.type === "swipe" || s.type === "timing" || s.type === "stir") bake.v[s.id] = 0;
+  if (s.type === "timer") bake.timer = { phase: s.appliance ? "load" : "ready", t: 0 };
+  bArt.style.visibility = "";
+  bTool.dataset.tool = "";
   drawBake();
 }
 
 function nextBakeStep(message) {
-  if (carry.on) endCarry(null, true);        // put the tool back on the shelf
+  endCarry(null, true);
   const s = bStep();
   bake.done.add(s.id);
   bake.busy = true;
-  bake.heating = false;
   bHint.textContent = message;
   drawBake();
   restartAnimation(bPlate, "yay");
@@ -144,14 +107,49 @@ function nextBakeStep(message) {
     bake.busy = false;
     bake.index = bake.index + 1;
     startStep();
-  }, 700);
+  }, 900);
+}
+
+
+// ---------- Scores ----------
+// How close is "value" to the zone from lo to hi? 100% inside it;
+// outside it, you lose points the further off you are ("range" = how quickly).
+function closeness(value, lo, hi, range) {
+  if (value >= lo && value <= hi) return 100;
+  const off = value < lo ? lo - value : value - hi;
+  return Math.max(30, Math.round(100 - (off / range) * 100));
+}
+
+// "Next step": you say this step is finished, so we score it
+function commitStep() {
+  const s = bStep();
+  if (bake.busy || !COMMIT.includes(s.type)) return;
+  endCarry(null, true);
+  const value = bake.v[s.id] || 0;
+  let pct, why = "";
+  if (s.target) {
+    pct = closeness(value, s.target[0], s.target[1], s.max * 0.5);
+    why = value > s.target[1] ? "A bit too much. " : "Not quite enough. ";
+  } else if (s.type === "stir") {
+    pct = Math.max(30, Math.round(Math.min(1, value) * 100));
+    why = "Not quite mixed. ";
+  } else if (s.type === "rub") {
+    pct = Math.max(30, Math.min(100, Math.round((value / 0.85) * 100)));
+    why = "Some bits were missed. ";
+  } else {
+    pct = Math.max(30, 100 - Math.abs(value - s.times) * 25);
+    why = value > s.times ? "A few too many. " : "A few too few. ";
+  }
+  bake.scores.push({ label: s.text, pct });
+  nextBakeStep(pct === 100 ? "Perfect! 100%" : why + pct + "%");
 }
 
 
 // ---------- Drawing ----------
 function artState() {
-  // flow: where the kettle or honey is pouring from right now (or null)
-  const flow = carry.on && carry.over && FLOWS.includes(carry.s.type) ? { x: carry.x, y: carry.y } : null;
+  // flow: where the kettle, bag or honey is pouring from right now (or null)
+  const flow = carry.on && carry.over && FLOWS.includes(carry.s.type) && (bake.v[carry.s.id] || 0) < carry.s.max
+    ? { x: carry.x, y: carry.y } : null;
   return { v: bake.v, marks: bake.marks, step: bStep().id, done: (id) => bake.done.has(id), flow };
 }
 
@@ -159,25 +157,12 @@ function drawDessert() {
   bArt.innerHTML = bake.recipe.draw(artState());
 }
 
-// steps you do by dragging on the plate
-function onPlate(s) { return !s.carry && (s.type === "rub" || s.type === "swipe" || s.type === "pipe" || s.type === "stir"); }
-
 function drawBake() {
   const s = bStep();
   drawDessert();
-
-  // only this step's tool can be used, and it glows and bobs
-  Object.keys(bake.tools).forEach(function (name) {
-    const tool = bake.tools[name];
-    const mine = name === s.tool && !bake.busy;
-    tool.classList.toggle("active", mine);
-    tool.disabled = !mine || onPlate(s) || bake.heating;
-    // some recipes only put the tool you need right now on the shelf
-    if (bake.recipe.oneTool) tool.hidden = name !== s.tool;
-    tool.querySelector(".tool-label").textContent = toolLabel(name, mine ? s : null);
-  });
-  bPlate.classList.toggle("active", !bake.busy && onPlate(s));
-  bShelf.classList.toggle("empty", Object.values(bake.tools).every((t) => t.hidden));
+  drawSide(s);
+  bPlate.classList.toggle("active", !bake.busy && s.type === "swipe" && !s.carry);
+  bPlate.classList.toggle("grab", !bake.busy && s.type === "timer" && bake.timer.phase === "load");
 
   // the checklist
   bSteps.innerHTML = "";
@@ -189,200 +174,191 @@ function drawBake() {
     bSteps.appendChild(li);
   });
 
-  drawMeter();
+  drawMeter(s);
   Decor.enable(s.type === "decorate");
   bDone.disabled = s.type !== "decorate";
 }
 
-const TOOL_NAMES = {
-  batter: "Batter", spatula: "Spatula", piping: "Cream", berries: "Strawberries", fold: "Fold",
-  oven: "Oven", toaster: "Toaster", knife: "Knife", roll: "Roll", honey: "Honey", sifter: "Sugar",
-};
-function toolLabel(name, step) {
-  const base = TOOL_NAMES[name] || step?.label || name;
-  if (!step) return base;
-  if (step.carry) return base + " (drag it)";
-  if (step.type === "hold") return base + " (hold)";
-  if (onPlate(step)) return base + " (use on plate)";
-  if (step.type === "tap") return base + " (" + (bake.v[step.id] || 0) + "/" + step.times + ")";
-  if (step.type === "timing") return bake.heating ? base + "…" : base + ": " + (step.start || "Start");
-  return base;
+// the right side of the table: the big tool, the oven/toaster, or the toppings
+function drawSide(s) {
+  const decorating = s.type === "decorate";
+  const appliance = s.type === "timer" && s.appliance;
+  bDecorZone.hidden = !decorating;
+  bAppliance.hidden = !appliance;
+  bTool.hidden = decorating || !!appliance;
+  if (appliance) drawAppliance(s);
+  if (bTool.hidden) return;
+
+  if (bTool.dataset.tool !== s.tool) {                 // a new tool arrives on the table
+    bToolArt.innerHTML = TOOL_ART[s.tool]();
+    bTool.dataset.tool = s.tool;
+    restartAnimation(bTool, "arrive");
+  }
+  bToolLabel.textContent = toolLabel(s);
+  bTool.disabled = bake.busy || (s.type === "swipe" && !s.carry) || (s.type === "timer" && bake.timer.phase !== "ready");
+  bTool.classList.toggle("lifted", carry.on);
+  bTool.classList.toggle("picture", s.type === "swipe" && !s.carry);
 }
 
-// the meter on the table, above the dessert
-function drawMeter() {
-  const s = bStep();
+const TOOL_NAMES = {
+  batter: "Batter bowl", spatula: "Spatula", piping: "Piping bag", berries: "Strawberries", fold: "Fold",
+  oven: "Oven", toaster: "Toaster", knife: "Knife", roll: "Roll", honey: "Honey", sifter: "Sugar sifter",
+};
+function toolLabel(s) {
+  const name = TOOL_NAMES[s.tool] || s.tool;
+  if (s.carry) return name + " · drag it over";
+  if (s.type === "swipe") return "Drag on the dessert";
+  if (s.type === "tap") return name + " · click it";
+  if (s.type === "timer") return bake.timer.phase === "running" ? "Cooking…" : name + " · click to " + (s.start || "start").toLowerCase();
+  return name;
+}
+
+// the oven or toaster, with the dessert inside and the timer on the front
+function drawAppliance(s) {
+  const loaded = bake.timer.phase === "running" || bake.timer.phase === "done";
+  const on = bake.timer.phase === "running";
+  bAppliance.className = "appliance " + s.appliance + (on ? " on" : "");
+  bApplianceArt.innerHTML = APPLIANCE_ART[s.appliance]({ loaded, on, shade: bake.v[s.id] || 0 });
+  bInside.innerHTML = s.appliance === "oven" && loaded ? bake.recipe.draw(artState()) : "";
+  bTimer.textContent = bake.timer.t.toFixed(1) + "s";
+}
+
+// the meter above the dessert, and the Next step / stop buttons
+function drawMeter(s) {
   const value = bake.v[s.id] || 0;
-  const amount = s.type === "hold" || s.type === "pipe" || s.type === "pour" || s.type === "drizzle";
-
   bMeterRow.hidden = s.type === "decorate";
-  bMeter.className = "meter" + (s.type === "timing" ? " timing" : "");
-  bZone.hidden = !(amount || s.type === "timing");
-  bNeedle.hidden = s.type !== "timing";
-  bAction.hidden = !(s.type === "timing" && bake.heating);
+  bNext.hidden = !COMMIT.includes(s.type);
+  bNext.disabled = bake.busy || value <= 0;
+  bAction.hidden = !(s.type === "timer" && bake.timer.phase === "running");
   bAction.textContent = s.stop || "Stop!";
+  bMeter.className = "meter" + (s.type === "timer" ? " timing" : "");
+  bNeedle.hidden = s.type !== "timer";
+  bZone.hidden = s.type === "swipe";
 
-  if (amount) {
-    bMeterLabel.textContent = "Let go in the pink zone 💗";
-    bZone.style.left = (s.target[0] / s.max) * 100 + "%";
-    bZone.style.width = ((s.target[1] - s.target[0]) / s.max) * 100 + "%";
+  const zone = (lo, hi) => { bZone.style.left = lo * 100 + "%"; bZone.style.width = (hi - lo) * 100 + "%"; };
+  if (s.target) {
+    bMeterLabel.textContent = "Stop in the pink zone 💗";
+    zone(s.target[0] / s.max, s.target[1] / s.max);
     bFill.style.width = Math.min(100, (value / s.max) * 100) + "%";
-  } else if (s.type === "timing") {
-    bMeterLabel.textContent = bake.heating ? "Stop it in the green zone ✨" : "Raw · Golden · Burnt";
-    bZone.style.left = s.zone[0] * 100 + "%";
-    bZone.style.width = (s.zone[1] - s.zone[0]) * 100 + "%";
-    bNeedle.style.left = value * 100 + "%";
+  } else if (s.type === "timer") {
+    const t = bake.timer.t;
+    bMeterLabel.textContent =
+      bake.timer.phase === "load" ? "Drag it into the " + s.appliance + " →" :
+      bake.timer.phase === "ready" ? "Click the " + (TOOL_NAMES[s.tool] || s.tool).toLowerCase() + " to start" :
+      "⏱ " + t.toFixed(1) + "s · stop at " + s.seconds.toFixed(1) + "s";
+    zone((s.seconds - 0.3) / 10, (s.seconds + 0.3) / 10);
+    bNeedle.style.left = Math.min(100, t * 10) + "%";
     bFill.style.width = "0";
-  } else if (s.type === "tap" || s.type === "drop") {
-    bMeterLabel.textContent = (bake.v[s.id] || 0) + " of " + s.times;
-    bFill.style.width = (value / s.times) * 100 + "%";
+  } else if (s.times && s.type !== "stir") {
+    const most = s.times + 3;
+    bMeterLabel.textContent = value + " in · the recipe says " + s.times;
+    zone((s.times - 0.5) / most, (s.times + 0.5) / most);
+    bFill.style.width = Math.min(100, (value / most) * 100) + "%";
+  } else if (s.type === "stir") {
+    bMeterLabel.textContent = value >= 1 ? "All mixed! Press Next step" : "Keep going…";
+    zone(0.95, 1);
+    bFill.style.width = Math.min(100, value * 100) + "%";
+  } else if (s.type === "rub") {
+    bMeterLabel.textContent = value >= 0.85 ? "All covered! Press Next step" : "Cover it all over…";
+    zone(0.85, 1);
+    bFill.style.width = Math.min(100, value * 100) + "%";
   } else {
     bMeterLabel.textContent = "Keep going!";
     bFill.style.width = Math.min(100, value * 100) + "%";
   }
 }
 
-// How close is "value" to the zone from lo to hi? 100% inside it;
-// outside it, you lose points the further off you are ("range" = how quickly).
-function closeness(value, lo, hi, range) {
-  if (value >= lo && value <= hi) return 100;
-  const off = value < lo ? lo - value : value - hi;
-  return Math.max(30, Math.round(100 - (off / range) * 100));
-}
 
-// Is the amount right? Used when you stop pouring, piping or drizzling.
-function judgeAmount(s, value) {
-  if (value < s.target[0] * 0.6) { bHint.textContent = "A bit more… keep going."; drawBake(); return; }
-  const pct = closeness(value, s.target[0], s.target[1], s.max * 0.5);
-  bake.scores.push({ label: s.text, pct });
-  if (pct === 100) nextBakeStep("Perfect amount! 100%");
-  else nextBakeStep((value > s.target[1] ? "A little too much! " : "A little less than the recipe. ") + pct + "%");
-}
-
-
-// ---------- tap, and turning things on ----------
-function onToolClick(name, event) {
+// ---------- The big tool: click it, or pick it up ----------
+bTool.addEventListener("pointerdown", function (event) {
   const s = bStep();
-  if (bake.busy || s.tool !== name || s.type === "hold") return;
-  restartAnimation(bake.tools[name], "tapped");
+  if (bake.busy || !s.carry) return;
+  startCarry(event, CARRY_ART[s.carry]);
+});
 
+bTool.addEventListener("click", function (event) {
+  const s = bStep();
+  if (bake.busy) return;
   if (s.type === "tap") {
-    bake.v[s.id] = (bake.v[s.id] || 0) + 1;
-    if (bake.v[s.id] >= s.times) nextBakeStep("Yum, all in!");
-    else { bHint.textContent = (s.times - bake.v[s.id]) + " more!"; drawBake(); }
+    if (bake.v[s.id] >= s.times + 3) { bHint.textContent = "That's plenty!"; return; }
+    bake.v[s.id] = bake.v[s.id] + 1;
+    restartAnimation(bTool, "tapped");
+    bHint.textContent = bake.v[s.id] + (bake.v[s.id] === 1 ? " turn." : " turns.") + " Press Next step when you think it's right.";
+    drawBake();
   }
-  if (s.type === "timing" && !bake.heating) startTiming(s);
-  if (s.type === "drop" && event?.detail === 0) dropOne(s);     // keyboard: Enter drops one
-}
+  if (s.type === "timer" && bake.timer.phase === "ready") startTimer(s);
+  if (s.type === "drop" && event.detail === 0) dropOne(s);          // keyboard: Enter drops one
+});
 
-
-// ---------- hold ----------
-function onToolHold(event, name) {
+// keyboard: hold Space or Enter on a pouring tool to pour into the middle
+bTool.addEventListener("keydown", (event) => keyboardFlow(event, true));
+bTool.addEventListener("keyup", (event) => keyboardFlow(event, false));
+function keyboardFlow(event, down) {
   const s = bStep();
-  if (bake.busy || s.tool !== name || s.type !== "hold" || bake.holding) return;
+  if (!s.carry || !FLOWS.includes(s.type) || (event.key !== " " && event.key !== "Enter")) return;
   event.preventDefault();
-  bake.holding = true;
-  bake.tools[name].classList.add("pouring");
-
-  let last = performance.now();
-  function tick(now) {
-    if (!bake.holding) return;
-    bake.v[s.id] = Math.min(s.max, (bake.v[s.id] || 0) + s.speed * (Math.min(0.1, (now - last) / 1000)));
-    last = now;
-    drawDessert();
-    drawMeter();
-    if (bake.v[s.id] >= s.max) { stopHold(); return; }
-    requestAnimationFrame(tick);
+  if (down && !carry.on && !event.repeat) {
+    const a = s.area;
+    Object.assign(carry, { on: true, s, over: true, look: null });
+    carry.x = a.rx ? a.cx : a.x + a.w / 2;
+    carry.y = a.rx ? a.cy : s.type === "pipe" ? a.y + a.h / 2 : a.y + 20;
+    startFlow(s);
+  } else if (!down) {
+    endCarry(null, false);
   }
-  requestAnimationFrame(tick);
 }
 
-function stopHold() {
-  if (!bake.holding) return;
-  bake.holding = false;
+
+// ---------- Carrying something (a tool, or the dessert into the oven) ----------
+const carry = { on: false, s: null, look: null, x: 0, y: 0, over: false, overAppliance: false, swiping: false };
+
+function startCarry(event, look) {
   const s = bStep();
-  bake.tools[s.tool].classList.remove("pouring");
-  judgeAmount(s, bake.v[s.id] || 0);
-}
-
-
-// ---------- timing: on, watch it rise, Turn off! ----------
-// The needle only goes one way, slowly (about 9 seconds from raw to burnt).
-const BAKE_SECONDS = 9;
-
-function startTiming(s) {
-  bake.heating = true;
-  bake.v[s.id] = 0;
-  bHint.textContent = "It's cooking! Press " + (s.stop || "Stop!") + " in the green zone.";
-  drawBake();
-  bAction.focus();
-
-  let last = performance.now();
-  function tick(now) {
-    if (!bake.heating || bStep() !== s) return;
-    bake.v[s.id] = Math.min(1, bake.v[s.id] + Math.min(0.1, (now - last) / 1000) / BAKE_SECONDS);
-    last = now;
-    drawDessert();
-    drawMeter();
-    if (bake.v[s.id] >= 1) { stopTiming(); return; }     // left it too long!
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-function stopTiming() {
-  const s = bStep();
-  if (!bake.heating || s.type !== "timing") return;
-  bake.heating = false;
-  const value = bake.v[s.id];
-  const pct = closeness(value, s.zone[0], s.zone[1], 0.5);
-  bake.scores.push({ label: s.text, pct });
-  if (pct === 100) nextBakeStep("Golden and perfect! 100%");
-  else nextBakeStep((value < s.zone[0] ? "A little pale. " : "A bit too dark! ") + pct + "%");
-}
-
-bAction.addEventListener("click", stopTiming);
-
-
-// ---------- carrying a tool over to the glass ----------
-const carry = { on: false, s: null, x: 0, y: 0, over: false, swiping: false };
-const FLOWS = ["pour", "drizzle", "pipe"];        // steps where something flows out of the tool
-
-// Where is the pointer on the drawing? (0–200 across and down, even outside the plate)
-function startCarry(event, name) {
-  const s = bStep();
-  if (bake.busy || s.tool !== name || !s.carry || carry.on) return;
+  if (carry.on) return;
   event.preventDefault();
-  const look = CARRY_ART[s.carry];
-  carry.on = true;
-  carry.s = s;
-  carry.over = false;
+  Object.assign(carry, { on: true, s, look, over: false, overAppliance: false, swiping: false });
+  stir.dir = 0; stir.travel = 0; stir.lastX = null;
   bCarry.innerHTML = look.art();
   bCarry.style.width = bPlate.getBoundingClientRect().width * look.size + "px";
   bCarry.style.transformOrigin = look.tip[0] * 100 + "% " + look.tip[1] * 100 + "%";
   bCarry.style.setProperty("--tilt", (look.tilt || 0) + "deg");
   bCarry.hidden = false;
-  bake.tools[name].classList.add("lifted");
-  carry.swiping = false;
-  stir.dir = 0; stir.travel = 0; stir.lastX = null;
+  bTool.classList.add("lifted");
   moveCarry(event);
   document.addEventListener("pointermove", moveCarry);
   document.addEventListener("pointerup", onCarryUp);
   if (FLOWS.includes(s.type)) startFlow(s);
 }
 
+// Where is the pointer on the drawing? (0–200 across and down, even outside the plate)
+function plateXY(event) {
+  const box = bPlate.getBoundingClientRect();
+  return { x: ((event.clientX - box.left) / box.width) * 200, y: ((event.clientY - box.top) / box.height) * 200 };
+}
+
+function insideArea(area, x, y) {
+  if (!area) return false;
+  if (area.rx) return ((x - area.cx) / area.rx) ** 2 + ((y - area.cy) / area.ry) ** 2 <= 1;
+  return x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h;
+}
+
 function moveCarry(event) {
-  if (!carry.on) return;
-  const look = CARRY_ART[carry.s.carry];
-  const w = bCarry.offsetWidth, h = bCarry.offsetHeight;
+  if (!carry.on || !carry.look) return;
+  const look = carry.look, s = carry.s;
   // put the tool's tip (the kettle spout, the spoon bowl…) right on the pointer
-  bCarry.style.left = event.clientX - w * look.tip[0] + "px";
-  bCarry.style.top = event.clientY - h * look.tip[1] + "px";
+  bCarry.style.left = event.clientX - bCarry.offsetWidth * look.tip[0] + "px";
+  bCarry.style.top = event.clientY - bCarry.offsetHeight * look.tip[1] + "px";
   const p = plateXY(event);
   carry.x = p.x;
   carry.y = p.y;
-  carry.over = insideArea(carry.s.area, p.x, p.y);
-  const s = carry.s;
+  carry.over = insideArea(s.area, p.x, p.y);
+
+  if (s.type === "timer") {                    // carrying the dessert to the oven
+    const box = bAppliance.getBoundingClientRect();
+    carry.overAppliance = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+    bAppliance.classList.toggle("target", carry.overAppliance);
+    return;
+  }
   bCarry.classList.toggle("tilted", carry.over && (s.type === "pour" || s.type === "drizzle"));
   bCarry.classList.toggle("squeeze", carry.over && s.type === "pipe");
   bCarry.classList.toggle("in-glass", carry.over && (s.type === "stir" || s.type === "swipe"));
@@ -403,68 +379,68 @@ function moveCarry(event) {
 
 function onCarryUp() { endCarry(null, false); }
 
-// let go of the tool: it goes back on the shelf
+// let go: the tool goes back on the table
 function endCarry(event, quiet) {
   if (!carry.on) return;
   const s = carry.s;
-  const wasOver = carry.over;
+  const wasOver = carry.over, intoAppliance = carry.overAppliance;
   carry.on = false;
   carry.over = false;
+  carry.overAppliance = false;
   bCarry.hidden = true;
   bCarry.classList.remove("tilted", "in-glass", "squeeze");
+  bAppliance.classList.remove("target");
+  bTool.classList.remove("lifted");
   document.removeEventListener("pointermove", moveCarry);
   document.removeEventListener("pointerup", onCarryUp);
-  if (bake.tools[s.tool]) bake.tools[s.tool].classList.remove("lifted");
-  if (quiet || bStep() !== s) return;
+  if (s.type === "timer" && bake.timer.phase === "load") bArt.style.visibility = "";
+  if (quiet || bake.busy || bStep() !== s) return;
 
   if (s.type === "drop") {
     if (wasOver) dropOne(s);
-    else bHint.textContent = "Drop it into the glass!";
+    else bHint.textContent = "Drop it in!";
   }
-  if (FLOWS.includes(s.type)) {
-    drawDessert();
-    if ((bake.v[s.id] || 0) > 0) judgeAmount(s, bake.v[s.id]);
+  if (s.type === "timer" && bake.timer.phase === "load") {
+    if (intoAppliance) startTimer(s);
+    else bHint.textContent = "Drop it into the " + s.appliance + "!";
   }
+  if (FLOWS.includes(s.type)) drawBake();
 }
 
-// drop: one more thing goes into the glass
+// drop: one more thing goes in
 function dropOne(s) {
-  bake.v[s.id] = (bake.v[s.id] || 0) + 1;
+  if (bake.v[s.id] >= s.times + 3) { bHint.textContent = "That's plenty!"; return; }
+  bake.v[s.id] = bake.v[s.id] + 1;
   restartAnimation(bPlate, "yay");
-  if (bake.v[s.id] >= s.times) { nextBakeStep(s.doneText || "All in!"); return; }
-  bHint.textContent = "Plop! " + (s.times - bake.v[s.id]) + " more.";
+  bHint.textContent = "Plop! " + bake.v[s.id] + " in. The recipe says " + s.times + ". Press Next step when you're happy.";
   drawBake();
 }
 
-// pour and drizzle: while the tool is over the glass, it keeps flowing
+// pour, pipe and drizzle: while the tool is over the dessert, it keeps flowing
 function startFlow(s) {
   let last = performance.now();
+  let warned = false;
   function tick(now) {
     if (!carry.on || carry.s !== s) return;
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    if (carry.over) {
-      bake.v[s.id] = Math.min(s.max, (bake.v[s.id] || 0) + s.speed * dt);
+    if (carry.over && bake.v[s.id] < s.max) {
+      bake.v[s.id] = Math.min(s.max, bake.v[s.id] + s.speed * dt);
+      const marks = bake.marks[s.id];
+      const lastMark = marks[marks.length - 1];
+      const near = lastMark && Math.hypot(lastMark.x - carry.x, lastMark.y - carry.y) < (s.type === "pipe" ? 6 : 5);
       if (s.type === "pipe") {
         // cream comes out right under the nozzle: a new blob when you move, a bigger one if you stay
-        const marks = bake.marks[s.id];
-        const lastMark = marks[marks.length - 1];
-        if (lastMark && Math.hypot(lastMark.x - carry.x, lastMark.y - carry.y) < 6) lastMark.r = Math.min(18, (lastMark.r || 7) + 14 * dt);
+        if (near) lastMark.r = Math.min(18, lastMark.r + 14 * dt);
         else marks.push({ x: carry.x, y: carry.y, r: 7 });
       }
       if (s.type === "drizzle") {
-        // honey lands where you are: a new drip when you move, a bigger one if you stay
-        const marks = bake.marks[s.id] || (bake.marks[s.id] = []);
-        const lastMark = marks[marks.length - 1];
-        if (lastMark && Math.abs(lastMark.x - carry.x) < 5) lastMark.r = Math.min(9, lastMark.r + 6 * dt);
+        if (near) lastMark.r = Math.min(9, lastMark.r + 6 * dt);
         else marks.push({ x: carry.x, y: carry.y, r: 2.5 });
       }
-      drawMeter();
-      if (bake.v[s.id] >= s.max) {               // overflowing!
-        drawDessert();
-        endCarry(null, false);
-        return;
-      }
+      bNext.disabled = false;
+      if (bake.v[s.id] >= s.max && !warned) { warned = true; bHint.textContent = "Oops, it's overflowing! Press Next step (or Start over)."; }
+      drawMeter(s);
     }
     drawDessert();
     requestAnimationFrame(tick);
@@ -472,78 +448,49 @@ function startFlow(s) {
   requestAnimationFrame(tick);
 }
 
-// keyboard: Space or Enter on a pour/drizzle tool pours into the middle of the glass
-function keyboardFlow(event, name, down) {
-  const s = bStep();
-  if (!s.carry || s.tool !== name || !FLOWS.includes(s.type)) return;
-  if (event.key !== " " && event.key !== "Enter") return;
-  event.preventDefault();
-  if (down && !carry.on && !event.repeat) {
-    const a = s.area;
-    carry.on = true; carry.s = s; carry.over = true;
-    carry.x = a.rx ? a.cx : a.x + a.w / 2;
-    carry.y = a.rx ? a.cy : s.type === "pipe" ? a.y + a.h / 2 : a.y + 20;
-    startFlow(s);
-  } else if (!down) {
-    endCarry(null, false);
-  }
-}
 
-
-// ---------- dragging on the plate: pipe, rub and swipe ----------
-const drag2 = { down: false, startX: 0, startY: 0, cells: [], touched: new Set() };
-const pipe = { on: false, x: 0, y: 0 };
-
-// Where is the pointer on the drawing? (0–200 across and down)
-function plateXY(event) {
-  const box = bPlate.getBoundingClientRect();
-  return { x: ((event.clientX - box.left) / box.width) * 200, y: ((event.clientY - box.top) / box.height) * 200 };
-}
-
-function insideArea(area, x, y) {
-  if (area.rx) return ((x - area.cx) / area.rx) ** 2 + ((y - area.cy) / area.ry) ** 2 <= 1;
-  return x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h;
-}
-
-// --- pipe: cream flows while the mouse is held down ---
-function startPipe(s, x, y) {
-  pipe.on = true;
-  pipe.x = x;
-  pipe.y = y;
-  bHand.classList.add("flowing");
+// ---------- timer: the oven, the toaster, the pan, the espresso machine ----------
+function startTimer(s) {
+  bake.timer = { phase: "running", t: 0 };
+  if (s.appliance) bArt.style.visibility = "hidden";     // it's inside the oven now
+  bHint.textContent = "The timer is running! Press " + s.stop + " at " + s.seconds + " seconds.";
+  drawBake();
+  bAction.focus();
   let last = performance.now();
   function tick(now) {
-    if (!pipe.on || bStep() !== s) return;
-    const dt = Math.min(0.1, (now - last) / 1000);
+    if (bake.timer.phase !== "running" || bStep() !== s) return;
+    bake.timer.t += Math.min(0.1, (now - last) / 1000);
     last = now;
-    // only cream that lands on the dessert counts
-    if (insideArea(s.area, pipe.x, pipe.y)) {
-      bake.v[s.id] = Math.min(s.max, bake.v[s.id] + s.speed * dt);
-      const marks = bake.marks[s.id];
-      const lastMark = marks[marks.length - 1];
-      if (lastMark && Math.hypot(lastMark.x - pipe.x, lastMark.y - pipe.y) < 6) {
-        lastMark.r = Math.min(18, (lastMark.r || 7) + 14 * dt);    // stay still: the blob grows
-      } else {
-        marks.push({ x: pipe.x, y: pipe.y, r: 7 });                // moving: a new blob
-      }
-      drawDessert();
-      drawMeter();
-      if (bake.v[s.id] >= s.max) { stopPipe(); return; }          // overflowing!
-    }
+    bake.v[s.id] = Math.min(1, bake.timer.t * 0.11);      // golden at 5 seconds, burnt at 9
+    if (s.appliance) drawAppliance(s); else drawDessert();
+    drawMeter(s);
+    if (bake.timer.t >= 10) { stopTimer(); return; }      // left it far too long!
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 }
 
-function stopPipe() {
-  if (!pipe.on) return;
-  pipe.on = false;
-  bHand.classList.remove("flowing");
+function stopTimer() {
   const s = bStep();
-  if (s.type === "pipe") judgeAmount(s, bake.v[s.id]);
+  if (s.type !== "timer" || bake.timer.phase !== "running") return;
+  bake.timer.phase = "done";
+  bArt.style.visibility = "";
+  const t = bake.timer.t;
+  const pct = closeness(t, s.seconds - 0.3, s.seconds + 0.3, 4);
+  bake.scores.push({ label: s.text, pct });
+  nextBakeStep(pct === 100
+    ? "Perfect timing! " + t.toFixed(1) + "s · 100%"
+    : (t < s.seconds ? "A little early (" : "A little late (") + t.toFixed(1) + "s) · " + pct + "%");
 }
 
-// --- rub: split the area into a grid; rubbing near a square "covers" it ---
+bAction.addEventListener("click", stopTimer);
+bNext.addEventListener("click", commitStep);
+
+
+// ---------- rub, swipe and stir ----------
+const drag2 = { down: false, startX: 0, startY: 0, cells: [], touched: new Set() };
+
+// split the area into a grid of little squares; dusting near one "covers" it
 function prepareRub(s) {
   const a = s.area;
   const left = a.rx ? a.cx - a.rx : a.x, top = a.rx ? a.cy - a.ry : a.y;
@@ -557,45 +504,37 @@ function prepareRub(s) {
     }
   }
   bake.marks[s.id] = [];
-  bake.v[s.id] = 0;
 }
 
 function rubAt(s, x, y) {
-  // only count spots on (or very near) the dessert
-  const near = insideArea(s.area, x, y) || drag2.cells.some((c) => Math.hypot(c.x - x, c.y - y) < 14);
-  if (!near) return;
   const marks = bake.marks[s.id];
   const lastMark = marks[marks.length - 1];
   if (lastMark && Math.hypot(lastMark.x - x, lastMark.y - y) < 6) return;
   marks.push({ x, y });
   drag2.cells.forEach(function (c, i) { if (Math.hypot(c.x - x, c.y - y) < 18) drag2.touched.add(i); });
   bake.v[s.id] = drag2.touched.size / drag2.cells.length;
+  bNext.disabled = false;
   drawDessert();
-  drawMeter();
-  if (bake.v[s.id] >= 0.85) {
-    bake.v[s.id] = 1;
-    drag2.down = false;
-    nextBakeStep(s.tool === "sifter" ? "Like fresh snow!" : "So smooth!");
-  }
+  drawMeter(s);
 }
 
-// --- swipe: how far have you dragged in the right direction? ---
+// swipe: how far have you dragged in the right direction? (finishes by itself)
 function swipeTo(s, x, y) {
   const along = (x - drag2.startX) * s.dir[0] + (y - drag2.startY) * s.dir[1];
   const progress = Math.max(bake.v[s.id] || 0, Math.min(1, along / 110));
   if (progress === bake.v[s.id]) return;
   bake.v[s.id] = progress;
   drawDessert();
-  drawMeter();
+  drawMeter(s);
   if (progress >= 1) {
     drag2.down = false;
-    const done = { fold: "A perfect little cone!", roll: "All rolled up!", slice: "Look at that swirl!" };
+    const done = { fold1: "Folded in half!", fold2: "A perfect little cone!", roll: "All rolled up!", slice: "Look at that!" };
     nextBakeStep(done[s.id] || "Lovely!");
   }
 }
 
-// --- stir: each time you change direction after a decent swish, it mixes more ---
-const stir = { lastX: 0, dir: 0, travel: 0 };
+// stir: each time you change direction after a decent swish, it mixes more
+const stir = { lastX: null, dir: 0, travel: 0 };
 function stirTo(s, x) {
   if (stir.lastX === null) stir.lastX = x;
   const dx = x - stir.lastX;
@@ -610,81 +549,59 @@ function stirTo(s, x) {
   stir.travel += Math.abs(dx);
 }
 function addStir(s) {
-  if (bake.busy || bStep() !== s) return;
+  if (bake.busy || bStep() !== s || bake.v[s.id] >= 1) return;
   bake.v[s.id] = Math.min(1, bake.v[s.id] + 1 / s.times);
   drawDessert();
-  drawMeter();
-  if (bake.v[s.id] >= 1) { drag2.down = false; endCarry(null, true); nextBakeStep("All mixed and pink!"); }
+  drawMeter(s);
+  bNext.disabled = false;
 }
 
-// the tool follows your mouse over the plate
-function moveHand(event) {
-  const s = bStep();
-  const show = !bake.busy && onPlate(s) && s.type !== "stir";   // stirring uses the spoon in the glass
-  bHand.hidden = !show;
-  if (!show) return;
-  if (bHand.dataset.tool !== s.tool) { bHand.innerHTML = TOOL_ART[s.tool](); bHand.dataset.tool = s.tool; }
-  const box = bPlate.getBoundingClientRect();
-  bHand.style.left = ((event.clientX - box.left) / box.width) * 100 + "%";
-  bHand.style.top = ((event.clientY - box.top) / box.height) * 100 + "%";
-  bHand.classList.toggle("pressed", drag2.down && s.type !== "pipe");
-}
 
+// ---------- Dragging on the dessert itself ----------
 bPlate.addEventListener("pointerdown", function (event) {
   const s = bStep();
-  if (bake.busy || !onPlate(s)) return;
+  if (bake.busy) return;
+  // a timer step with an oven: pick the dessert up and carry it over
+  if (s.type === "timer" && bake.timer.phase === "load") {
+    const art = bArt.innerHTML;
+    startCarry(event, { size: 0.62, tip: [0.5, 0.5], art: () => art });
+    bArt.style.visibility = "hidden";
+    return;
+  }
+  if (s.type !== "swipe" || s.carry) return;
   event.preventDefault();
   bPlate.setPointerCapture(event.pointerId);
   drag2.down = true;
   const p = plateXY(event);
-  moveHand(event);
-  if (s.type === "pipe") { startPipe(s, p.x, p.y); return; }
-  if (s.type === "stir") { stir.lastX = p.x; stir.dir = 0; stir.travel = 0; return; }
-  // a swipe continues from where you got to last time
-  const sofar = (bake.v[s.id] || 0) * 110;
-  drag2.startX = p.x - (s.dir ? s.dir[0] * sofar : 0);
-  drag2.startY = p.y - (s.dir ? s.dir[1] * sofar : 0);
-  if (s.type === "rub") rubAt(s, p.x, p.y);
+  const sofar = (bake.v[s.id] || 0) * 110;       // a swipe carries on from where you got to
+  drag2.startX = p.x - s.dir[0] * sofar;
+  drag2.startY = p.y - s.dir[1] * sofar;
 });
 
 bPlate.addEventListener("pointermove", function (event) {
-  moveHand(event);
   const s = bStep();
+  if (!drag2.down || bake.busy || s.type !== "swipe") return;
   const p = plateXY(event);
-  if (pipe.on) { pipe.x = p.x; pipe.y = p.y; return; }
-  if (!drag2.down || bake.busy) return;
-  if (s.type === "rub") rubAt(s, p.x, p.y);
-  if (s.type === "swipe") swipeTo(s, p.x, p.y);
-  if (s.type === "stir") stirTo(s, p.x);
+  swipeTo(s, p.x, p.y);
 });
 
 ["pointerup", "pointercancel"].forEach(function (type) {
-  bPlate.addEventListener(type, function (event) { drag2.down = false; stopPipe(); moveHand(event); });
+  bPlate.addEventListener(type, function () { drag2.down = false; });
 });
-bPlate.addEventListener("pointerleave", function () { if (!pipe.on) bHand.hidden = true; });
 
-// keyboard: hold Space on the plate to pipe; arrow keys rub, swipe and stir
+// keyboard: Enter on the dessert puts it in the oven; arrow keys swipe, stir and dust
 bPlate.addEventListener("keydown", function (event) {
   const s = bStep();
   if (bake.busy) return;
-  if (s.type === "pipe" && event.key === " " && !event.repeat) {
-    event.preventDefault();
-    const a = s.area;
-    startPipe(s, a.rx ? a.cx : a.x + a.w / 2, a.rx ? a.cy : a.y + a.h / 2);
-    return;
-  }
+  if (s.type === "timer" && bake.timer.phase === "load" && event.key === "Enter") { startTimer(s); return; }
   if (!event.key.startsWith("Arrow")) return;
   event.preventDefault();
-  if (s.type === "pipe" && pipe.on) {           // move the piping bag around
-    pipe.x += event.key === "ArrowRight" ? 10 : event.key === "ArrowLeft" ? -10 : 0;
-    pipe.y += event.key === "ArrowDown" ? 10 : event.key === "ArrowUp" ? -10 : 0;
-  }
   if (s.type === "rub") {
     const c = drag2.cells[Math.floor(Math.random() * drag2.cells.length)];
     rubAt(s, c.x + Math.random() * 6 - 3, c.y + Math.random() * 6 - 3);
   }
-  if (s.type === "stir" && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-    const dir = event.key === "ArrowLeft" ? -1 : 1;
+  if (s.type === "stir") {
+    const dir = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
     if (dir !== stir.dir) addStir(s);
     stir.dir = dir;
   }
@@ -694,7 +611,6 @@ bPlate.addEventListener("keydown", function (event) {
     swipeTo(s, s.dir[0] * next, s.dir[1] * next);
   }
 });
-bPlate.addEventListener("keyup", function (event) { if (event.key === " ") stopPipe(); });
 
 
 // ---------- Start over, and Done ----------
