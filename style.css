@@ -799,6 +799,8 @@ h1 {
   gap: 12px;
 }
 .side-zone .decor-zone { width: 100%; }
+/* oven and toaster steps: the right side gets more room */
+.work-bake.big-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
 .big-tool {
   display: grid;
   justify-items: center;
@@ -826,7 +828,7 @@ h1 {
 .big-tool:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; }
 
 /* the oven and the toaster */
-.appliance { position: relative; width: min(100%, 380px); transition: transform 0.2s, filter 0.2s; }
+.appliance { position: relative; width: min(100%, 560px, calc((100vh - 200px) * 0.95)); transition: transform 0.2s, filter 0.2s; }
 .appliance.target, .plate.target { transform: scale(1.04); filter: drop-shadow(0 0 18px #fff1a8); }
 .appliance.popped { cursor: var(--cursor-grab); }
 .appliance.pop { animation: toaster-pop 0.4s ease-out; }
@@ -853,6 +855,11 @@ h1 {
 .appliance:not(.on) .timer { opacity: 0.6; }
 
 /* the dessert you can pick up and put in the oven */
+/* the crêpe pan: click the crêpe to flip it */
+.plate.clickable { cursor: var(--cursor-click); }
+.plate.clickable #b-art { filter: drop-shadow(0 0 14px #fff1a8); }
+#b-art.flip { animation: flip 0.5s ease-in-out; }
+@keyframes flip { 50% { transform: scaleY(0.08) translateY(-30px); } }
 .plate.grab { cursor: var(--cursor-grab); filter: drop-shadow(0 0 14px #fff1a8); animation: tool-bob 1.6s ease-in-out infinite; }
 .next-btn { flex: none; padding: 10px 18px; background: var(--matcha-deep); box-shadow: 0 4px 0 #3f6128; }
 .next-btn:active { box-shadow: 0 1px 0 #3f6128; }

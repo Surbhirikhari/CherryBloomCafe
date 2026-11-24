@@ -47,9 +47,9 @@ then send them off happy (and earn a few coins on the way).
 | 🍓 **Strawberry Milk** | Mash strawberries with the masher, drop in ice, carry the milk over to pour, stir until it's all pink | 10 coins |
 | 🌸 **Sakura Tea** | Pick up each tool: drop in 3 flowers, pour hot water to the heart line (don't overflow!), stir it pink with a spoon, drip honey anywhere | 9 coins |
 | 🍯 **Honey Coffee** | Grind beans, brew a shot, drip honey with the dipper, pour your own latte art | 11 coins |
-| 🍦 **Strawberry Crêpe** | Carry the batter bowl to the pan, flip when golden, pipe cream, drop in strawberries, fold into a cone, add a bunny cookie | 16 coins |
+| 🍦 **Strawberry Crêpe** | Carry the batter bowl to the pan, click the crêpe to flip it at 5 seconds, pipe cream, drop in strawberries, fold into a cone, add a bunny cookie | 16 coins |
 | 🍥 **Strawberry Roll Cake** | Pour batter in the tray, bake, pipe pink cream, roll it up, slice through with the knife | 18 coins |
-| 🍞 **Strawberry Cream Toast** | Pop the toast when golden, pipe pink cream, drip honey anywhere, add heart strawberries and daisies | 12 coins |
+| 🍞 **Strawberry Cream Toast** | Push the bread down, lift it out when the toaster pops, pipe pink cream, drip honey anywhere, add heart strawberries and daisies | 12 coins |
 | 🥐 **Strawberry Croissant** | Bake, slice it open with the knife, pipe cream, drop in strawberries, dust with the sifter | 14 coins |
 
 Every drink can be decorated. Customers love toppings! 💕

@@ -22,6 +22,8 @@
 //             The pan and the espresso machine have Start/Stop under them.
 //             "autoStop" (the toaster): it pops up BY ITSELF at the right time,
 //             and you lift the toast out onto the plate.
+//             "clickPlate" (the crêpe pan): it starts cooking by itself,
+//             and you click the crêpe to flip it.
 //   decorate - the cutting board and toppings (decor.js), then Done
 //
 // Like a real kitchen, YOU decide when a step is finished: press
@@ -97,6 +99,7 @@ function startStep() {
   bArt.style.visibility = "";
   bTool.dataset.tool = "";
   drawBake();
+  if (s.type === "timer" && s.clickPlate) startTimer(s);      // the pan is already hot
 }
 
 function nextBakeStep(message) {
@@ -168,6 +171,9 @@ function drawBake() {
   drawSide(s);
   bPlate.classList.toggle("active", !bake.busy && s.type === "swipe" && !s.carry);
   bPlate.classList.toggle("grab", !bake.busy && s.type === "timer" && bake.timer.phase === "load");
+  bPlate.classList.toggle("clickable", !bake.busy && s.type === "timer" && !!s.clickPlate && bake.timer.phase === "running");
+  // give the oven and toaster more room on the table
+  bPlate.closest(".work-area").classList.toggle("big-side", s.type === "timer" && !!s.appliance);
 
   // the checklist
   bSteps.innerHTML = "";
@@ -235,6 +241,7 @@ function drawControls(s) {
   bCtlTimer.textContent = bake.timer.t.toFixed(1) + "s";
   bCtlBtn.textContent = phase === "running" ? (s.autoStop ? "Toasting…" : s.stop) : (s.start || "Start ▶");
   bCtlBtn.disabled = phase === "running" && !!s.autoStop;
+  bCtlBtn.hidden = !!s.clickPlate;                 // on the pan, you click the crêpe itself
   bCtlBtn.classList.toggle("stop", phase === "running" && !s.autoStop);
 }
 
@@ -276,6 +283,7 @@ function drawMeter(s) {
       bake.timer.phase === "load" ? "Drag it into the " + s.appliance + " →" :
       bake.timer.phase === "popped" ? "Pop! Lift it out onto the plate ←" :
       bake.timer.phase === "ready" ? "Press " + (s.start || "Start ▶") + (s.appliance ? " on the " + s.appliance : "") :
+      s.clickPlate ? "⏱ " + t.toFixed(1) + "s · click the crêpe to flip it at " + s.seconds.toFixed(1) + "s" :
       "⏱ " + t.toFixed(1) + "s · stop at " + s.seconds.toFixed(1) + "s";
     zone((s.seconds - 0.3) / 10, (s.seconds + 0.3) / 10);
     bNeedle.style.left = Math.min(100, t * 10) + "%";
@@ -501,9 +509,11 @@ function startFlow(s) {
 function startTimer(s) {
   bake.timer = { phase: "running", t: 0 };
   if (s.appliance) bArt.style.visibility = "hidden";     // it's inside the oven now
-  bHint.textContent = "The timer is running! Press " + s.stop + " at " + s.seconds + " seconds.";
+  bHint.textContent = s.clickPlate
+    ? "It's cooking! Click the crêpe to flip it at " + s.seconds + " seconds."
+    : "The timer is running! Press " + s.stop + " at " + s.seconds + " seconds.";
   drawBake();
-  bCtlBtn.focus();
+  if (!s.clickPlate) bCtlBtn.focus();
   let last = performance.now();
   function tick(now) {
     if (bake.timer.phase !== "running" || bStep() !== s) return;
@@ -538,6 +548,12 @@ bAppliance.addEventListener("pointerdown", function (event) {
   startCarry(event, { size: 0.62, tip: [0.5, 0.5], art: () => art });
   drawAppliance(s);
 });
+
+// flip! (a quick flip animation, then the timer is judged)
+function flipIt() {
+  restartAnimation(bArt, "flip");
+  stopTimer();
+}
 
 function stopTimer() {
   const s = bStep();
@@ -629,6 +645,8 @@ function addStir(s) {
 bPlate.addEventListener("pointerdown", function (event) {
   const s = bStep();
   if (bake.busy) return;
+  // the pan: click the crêpe to flip it
+  if (s.type === "timer" && s.clickPlate && bake.timer.phase === "running") { flipIt(); return; }
   // a timer step with an oven: pick the dessert up and carry it over
   if (s.type === "timer" && bake.timer.phase === "load") {
     const art = bArt.innerHTML;
@@ -661,6 +679,9 @@ bPlate.addEventListener("pointermove", function (event) {
 bPlate.addEventListener("keydown", function (event) {
   const s = bStep();
   if (bake.busy) return;
+  if (s.type === "timer" && s.clickPlate && bake.timer.phase === "running" && (event.key === "Enter" || event.key === " ")) {
+    event.preventDefault(); flipIt(); return;
+  }
   if (s.type === "timer" && bake.timer.phase === "popped" && event.key === "Enter") {
     bArt.style.visibility = ""; nextBakeStep("Golden, crispy toast!"); return;
   }
