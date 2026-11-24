@@ -16,6 +16,7 @@ const unscoopButton = document.getElementById("btn-unscoop");
 const scoopCount    = document.getElementById("scoop-count");
 const powder        = document.getElementById("powder");
 const chef          = document.getElementById("chef");
+const mochi         = document.getElementById("mochi");
 
 
 // ---------- 2. The game's memory ("state") ----------
@@ -29,8 +30,25 @@ const MAX_SCOOPS = 5;
 
 // ---------- 3. Small helper functions ----------
 // A function is a reusable set of instructions. We "call" it with mochiSays("hi").
-function mochiSays(text) {
+// mood can be "awake" (the default) or "happy".
+// After a few seconds of quiet, Mochi drifts back to sleep.
+let napTimer = null;
+
+function mochiSays(text, mood = "awake") {
   mochiBubble.textContent = text;
+  setMochiMood(mood);
+}
+
+function setMochiMood(mood) {
+  // Setting it to sleepy first means "happy" replays its stretch even twice in a row.
+  mochi.dataset.mood = "sleepy";
+  mochi.getBoundingClientRect();
+  mochi.dataset.mood = mood;         // this changes data-mood="..." in the HTML
+
+  clearTimeout(napTimer);            // cancel any nap that was planned
+  napTimer = setTimeout(function () {
+    mochi.dataset.mood = "sleepy";   // 5 seconds later: back to sleep, Zzz
+  }, 5000);
 }
 
 // Redraw the bowl so it matches the number of scoops.
@@ -75,7 +93,7 @@ function mochiReactsToScoops() {
     mochiSays("A little more… one more scoop!");
     chefDoes("nod");
   } else if (scoops === PERFECT_SCOOPS) {
-    mochiSays("Two scoops! That's exactly 2 grams. Purr-fect!");
+    mochiSays("Two scoops! That's exactly 2 grams. Purr-fect!", "happy");
     chefDoes("hop");
   } else {
     mochiSays("Too much! It will taste bitter. Take one out?");
@@ -91,6 +109,14 @@ const CHEF_CLICK_LINES = [
   "Psst… she sneaks me cream when nobody's looking.",
 ];
 
+// Things Mochi says when you wake him up by clicking him.
+const MOCHI_CLICK_LINES = [
+  "Mrrp? I was napping…",
+  "Five more minutes, nya…",
+  "Is it treat time? It smells like treat time.",
+  "I'm not sleeping, I'm supervising.",
+];
+
 
 // ---------- 4. What happens when you click things ----------
 // addEventListener("click", fn) means: "when this is clicked, run fn".
@@ -100,6 +126,11 @@ openButton.addEventListener("click", function () {
   kitchenScreen.hidden = false;     // show the kitchen
   mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
   chefDoes("hop");
+});
+
+mochi.addEventListener("click", function () {
+  const index = Math.floor(Math.random() * MOCHI_CLICK_LINES.length);
+  mochiSays(MOCHI_CLICK_LINES[index]);
 });
 
 chef.addEventListener("click", function () {

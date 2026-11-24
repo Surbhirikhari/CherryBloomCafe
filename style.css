@@ -28,7 +28,8 @@
   --ribbon: #c4566b;
   --sleeve: #ffffff;
   --cat: #ffffff;
-  --cat-line: #e7c4cf;
+  --cat-line: #6e3a30;   /* Mochi's brown ink outline */
+  --cat-shade: #e6edf2;  /* soft blue-grey shadow on his white fur */
   --bowl: #f9d7e1;
   --bowl-inside: #fbeef2;
   --bowl-foot: #e8a9bc;
@@ -214,17 +215,52 @@ h1 {
   45% { transform: rotate(4deg); }
   70% { transform: rotate(-2deg); }
 }
-.mochi { width: 120px; margin-top: -40px; margin-left: 110px; }
+.mochi { width: 140px; margin-top: -60px; margin-left: 90px; cursor: pointer; overflow: visible; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
-/* Mochi's tail wags forever */
+/* ---------- Mochi's animations ---------- */
+
+/* idle: his loaf body squishes gently as he breathes */
+.mochi-body {
+  transform-origin: 110px 186px;
+  animation: mochi-breathe 3s ease-in-out infinite;
+}
+@keyframes mochi-breathe {
+  50% { transform: scale(1.03, 0.97); }
+}
+
+/* idle: tail wags */
 .mochi-tail {
-  transform-origin: 110px 86px;
+  transform-origin: 150px 182px;
   animation: wag 1.6s ease-in-out infinite;
 }
 @keyframes wag {
   0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(-14deg); }
+  50%      { transform: rotate(-10deg); }
+}
+
+/* moods: only show the eyes that match data-mood */
+.mochi-eyes { display: none; }
+.mochi[data-mood="sleepy"] .eyes-sleepy,
+.mochi[data-mood="awake"]  .eyes-awake,
+.mochi[data-mood="happy"]  .eyes-happy { display: inline; }
+
+/* sleepy: the Zzz float up one after another */
+.mochi-zzz { opacity: 0; transition: opacity 0.4s; }
+.mochi[data-mood="sleepy"] .mochi-zzz { opacity: 1; }
+.z { animation: zzz 2.4s ease-in-out infinite; }
+.z2 { animation-delay: 0.4s; }
+.z3 { animation-delay: 0.8s; }
+@keyframes zzz {
+  0%, 100% { transform: translateY(4px); opacity: 0.2; }
+  50%      { transform: translateY(-4px); opacity: 1; }
+}
+
+/* happy: a big stretchy squish */
+.mochi[data-mood="happy"] .mochi-body { animation: mochi-stretch 0.8s ease-in-out; }
+@keyframes mochi-stretch {
+  35% { transform: scale(1.12, 0.86); }
+  70% { transform: scale(0.95, 1.06); }
 }
 
 /* Speech bubble */
@@ -320,12 +356,12 @@ h1 {
   .crew { grid-template-columns: auto auto; align-items: end; }
   .bubble { grid-column: 1 / -1; }
   .chef { width: 120px; }
-  .mochi { width: 90px; margin: 0; }
+  .mochi { width: 110px; margin: 0; }
   .crew-names { display: none; }
 }
 
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
-  .mochi-tail, .bounce,
+  .mochi-tail, .mochi-body, .z, .bounce,
   .chef-body, .chef-lids { animation: none; }
 }

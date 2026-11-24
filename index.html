@@ -67,27 +67,72 @@
           <path class="chef-heart" d="M270 34 C258 18 240 32 270 56 C300 32 282 18 270 34 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
         </svg>
 
-        <!-- Mochi the cat -->
-        <svg class="mochi" viewBox="0 0 140 110" role="img" aria-label="Mochi, a round white cat">
-          <g class="mochi-tail">
-            <path d="M110 86 Q142 72 126 44" fill="none" stroke="var(--cat-line)" stroke-width="14" stroke-linecap="round"/>
-            <path d="M110 86 Q142 72 126 44" fill="none" stroke="var(--cat)" stroke-width="9" stroke-linecap="round"/>
+        <!-- Mochi the cat, drawn as a sleepy loaf in a rough, hand-drawn style.
+             data-mood decides which eyes show: "sleepy", "awake" or "happy".
+             game.js changes the mood. -->
+        <svg id="mochi" class="mochi" data-mood="sleepy" viewBox="0 0 220 200" role="img" aria-label="Mochi, a round white cat">
+          <defs>
+            <!-- The "rough" filter makes random noise, then uses it to nudge
+                 every line a little, so smooth shapes look drawn by hand. -->
+            <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+              <feDisplacementMap in="SourceGraphic" scale="3.5"/>
+            </filter>
+          </defs>
+
+          <g class="mochi-body" filter="url(#rough)" stroke="var(--cat-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+            <!-- tail, curling out to the side -->
+            <g class="mochi-tail">
+              <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke-width="17"/>
+              <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke="var(--cat)" stroke-width="8"/>
+            </g>
+
+            <!-- ears (drawn first so the body covers their base) -->
+            <path d="M48 56 L60 16 Q80 24 92 36" fill="var(--cat)"/>
+            <path d="M57 48 L64 27 Q75 31 83 38 Z" fill="var(--blossom)" stroke="none"/>
+            <path d="M138 42 Q160 26 174 32 Q174 54 166 72" fill="var(--cat)"/>
+            <path d="M146 44 Q160 35 167 39 Q166 52 161 62 Z" fill="var(--blossom)" stroke="none"/>
+
+            <!-- the big round loaf body (head and body in one) -->
+            <path d="M40 72 Q40 34 92 32 Q142 30 170 74 Q192 110 188 150 Q186 186 150 186 L62 186 Q30 186 30 150 Q30 102 40 72 Z" fill="var(--cat)"/>
+            <path d="M40 150 Q46 176 70 180 L150 180 Q178 178 182 148 Q170 166 140 168 L80 168 Q54 166 40 150 Z" fill="var(--cat-shade)" stroke="none"/>
+
+            <!-- front paws tucked together -->
+            <path d="M84 186 Q84 166 98 164 Q108 168 108 186" fill="var(--cat)"/>
+            <path d="M108 186 Q110 168 122 164 Q134 168 132 186" fill="var(--cat)"/>
+
+            <!-- little matcha-green bow by his ear -->
+            <path d="M74 44 L64 36 L64 52 Z M74 44 L84 36 L84 52 Z" fill="var(--matcha)" stroke-width="3"/>
+
+            <!-- whiskers -->
+            <path d="M40 98 L20 93 M40 107 L20 109 M164 98 L186 91 M166 107 L188 106" fill="none" stroke-width="3"/>
+
+            <!-- cheeks, nose, mouth -->
+            <ellipse cx="64" cy="108" rx="11" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".8"/>
+            <ellipse cx="136" cy="108" rx="11" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".8"/>
+            <path d="M95 103 L105 103 L100 109 Z" fill="var(--blossom-deep)" stroke="none"/>
+            <path d="M92 113 Q96 118 100 112 Q104 118 108 113" fill="none" stroke-width="3"/>
+
+            <!-- three sets of eyes; CSS shows only the one for the current mood -->
+            <g class="mochi-eyes eyes-sleepy" fill="none">
+              <path d="M70 92 Q79 99 88 92"/><path d="M112 92 Q121 99 130 92"/>
+            </g>
+            <g class="mochi-eyes eyes-awake" stroke="none">
+              <ellipse cx="79" cy="92" rx="5.5" ry="7" fill="var(--cat-line)"/>
+              <ellipse cx="121" cy="92" rx="5.5" ry="7" fill="var(--cat-line)"/>
+              <circle cx="81" cy="89" r="2" fill="var(--cat)"/><circle cx="123" cy="89" r="2" fill="var(--cat)"/>
+            </g>
+            <g class="mochi-eyes eyes-happy" fill="none">
+              <path d="M70 96 Q79 84 88 96"/><path d="M112 96 Q121 84 130 96"/>
+            </g>
           </g>
-          <ellipse cx="72" cy="82" rx="48" ry="25" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5"/>
-          <path d="M28 38 L30 12 L50 28 Z" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M56 28 L74 10 L78 38 Z" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M33 31 L34 20 L43 28 Z M62 28 L71 19 L73 32 Z" fill="var(--blossom)"/>
-          <circle cx="52" cy="54" r="29" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5"/>
-          <circle cx="42" cy="53" r="3.5" fill="var(--ink)"/>
-          <circle cx="63" cy="53" r="3.5" fill="var(--ink)"/>
-          <path d="M50 59 L55 59 L52.5 62 Z" fill="var(--blossom-deep)"/>
-          <path d="M48 64 Q52 68 52.5 63 Q53 68 57 64" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
-          <ellipse cx="35" cy="62" rx="5" ry="3" fill="var(--blossom)"/>
-          <ellipse cx="70" cy="62" rx="5" ry="3" fill="var(--blossom)"/>
-          <g stroke="var(--cat-line)" stroke-width="1.5" stroke-linecap="round">
-            <path d="M30 60 L16 57 M30 64 L17 66"/><path d="M75 60 L89 57 M75 64 L88 66"/>
+
+          <!-- floating Zzz, only while he's sleepy -->
+          <g class="mochi-zzz" fill="none" stroke="var(--cat-line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path class="z z1" d="M178 40 L187 40 L178 49 L187 49"/>
+            <path class="z z2" d="M192 20 L204 20 L192 32 L204 32"/>
+            <path class="z z3" d="M208 -6 L223 -6 L208 9 L223 9"/>
           </g>
-          <path d="M42 80 L52 85 L62 80 L56 90 L48 90 Z" fill="var(--matcha)"/>
         </svg>
         <p class="crew-names">Chef &amp; Mochi</p>
       </aside>
