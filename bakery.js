@@ -19,7 +19,11 @@
 //   drop    - drop things in (a sakura flower), "times" times
 //   pour    - the kettle tilts and pours while it's over the glass; stop at the marker
 //   drizzle - honey drips straight down wherever you hold the dipper
+//   pipe    - cream flows out of the piping bag wherever you hold it
 //   stir    - put the spoon in the glass and move it side to side
+//             (axis "y": up and down, like the masher)
+//   rub     - move the sifter over the dessert to dust it
+//   swipe   - move the knife through the dessert to slice it
 //   decorate - the cutting board and toppings (decor.js), then Done
 // =========================================================
 
@@ -128,6 +132,7 @@ function startStep() {
 }
 
 function nextBakeStep(message) {
+  if (carry.on) endCarry(null, true);        // put the tool back on the shelf
   const s = bStep();
   bake.done.add(s.id);
   bake.busy = true;
@@ -146,7 +151,7 @@ function nextBakeStep(message) {
 // ---------- Drawing ----------
 function artState() {
   // flow: where the kettle or honey is pouring from right now (or null)
-  const flow = carry.on && carry.over && (carry.s.type === "pour" || carry.s.type === "drizzle") ? { x: carry.x, y: carry.y } : null;
+  const flow = carry.on && carry.over && FLOWS.includes(carry.s.type) ? { x: carry.x, y: carry.y } : null;
   return { v: bake.v, marks: bake.marks, step: bStep().id, done: (id) => bake.done.has(id), flow };
 }
 
@@ -330,7 +335,8 @@ bAction.addEventListener("click", stopTiming);
 
 
 // ---------- carrying a tool over to the glass ----------
-const carry = { on: false, s: null, x: 0, y: 0, over: false, lastFrame: 0 };
+const carry = { on: false, s: null, x: 0, y: 0, over: false, swiping: false };
+const FLOWS = ["pour", "drizzle", "pipe"];        // steps where something flows out of the tool
 
 // Where is the pointer on the drawing? (0–200 across and down, even outside the plate)
 function startCarry(event, name) {
@@ -347,10 +353,12 @@ function startCarry(event, name) {
   bCarry.style.setProperty("--tilt", (look.tilt || 0) + "deg");
   bCarry.hidden = false;
   bake.tools[name].classList.add("lifted");
+  carry.swiping = false;
+  stir.dir = 0; stir.travel = 0; stir.lastX = null;
   moveCarry(event);
   document.addEventListener("pointermove", moveCarry);
   document.addEventListener("pointerup", onCarryUp);
-  if (s.type === "pour" || s.type === "drizzle") startFlow(s);
+  if (FLOWS.includes(s.type)) startFlow(s);
 }
 
 function moveCarry(event) {
@@ -364,10 +372,22 @@ function moveCarry(event) {
   carry.x = p.x;
   carry.y = p.y;
   carry.over = insideArea(carry.s.area, p.x, p.y);
-  bCarry.classList.toggle("tilted", carry.over && (carry.s.type === "pour" || carry.s.type === "drizzle"));
-  if (carry.s.type === "stir") {
-    bCarry.classList.toggle("in-glass", carry.over);
-    if (carry.over) stirTo(carry.s, p.x);
+  const s = carry.s;
+  bCarry.classList.toggle("tilted", carry.over && (s.type === "pour" || s.type === "drizzle"));
+  bCarry.classList.toggle("squeeze", carry.over && s.type === "pipe");
+  bCarry.classList.toggle("in-glass", carry.over && (s.type === "stir" || s.type === "swipe"));
+  if (!carry.over) { carry.swiping = false; return; }
+
+  if (s.type === "stir") stirTo(s, s.axis === "y" ? p.y : p.x);
+  if (s.type === "rub") rubAt(s, p.x, p.y);
+  if (s.type === "swipe") {
+    if (!carry.swiping) {                       // the knife just touched the dessert
+      carry.swiping = true;
+      const sofar = (bake.v[s.id] || 0) * 110;
+      drag2.startX = p.x - s.dir[0] * sofar;
+      drag2.startY = p.y - s.dir[1] * sofar;
+    }
+    swipeTo(s, p.x, p.y);
   }
 }
 
@@ -381,7 +401,7 @@ function endCarry(event, quiet) {
   carry.on = false;
   carry.over = false;
   bCarry.hidden = true;
-  bCarry.classList.remove("tilted", "in-glass");
+  bCarry.classList.remove("tilted", "in-glass", "squeeze");
   document.removeEventListener("pointermove", moveCarry);
   document.removeEventListener("pointerup", onCarryUp);
   if (bake.tools[s.tool]) bake.tools[s.tool].classList.remove("lifted");
@@ -391,7 +411,7 @@ function endCarry(event, quiet) {
     if (wasOver) dropOne(s);
     else bHint.textContent = "Drop it into the glass!";
   }
-  if (s.type === "pour" || s.type === "drizzle") {
+  if (FLOWS.includes(s.type)) {
     drawDessert();
     if ((bake.v[s.id] || 0) > 0) judgeAmount(s, bake.v[s.id]);
   }
@@ -401,7 +421,7 @@ function endCarry(event, quiet) {
 function dropOne(s) {
   bake.v[s.id] = (bake.v[s.id] || 0) + 1;
   restartAnimation(bPlate, "yay");
-  if (bake.v[s.id] >= s.times) { nextBakeStep("So pretty, they're floating!"); return; }
+  if (bake.v[s.id] >= s.times) { nextBakeStep(s.doneText || "All in!"); return; }
   bHint.textContent = "Plop! " + (s.times - bake.v[s.id]) + " more.";
   drawBake();
 }
@@ -415,6 +435,13 @@ function startFlow(s) {
     last = now;
     if (carry.over) {
       bake.v[s.id] = Math.min(s.max, (bake.v[s.id] || 0) + s.speed * dt);
+      if (s.type === "pipe") {
+        // cream comes out right under the nozzle: a new blob when you move, a bigger one if you stay
+        const marks = bake.marks[s.id];
+        const lastMark = marks[marks.length - 1];
+        if (lastMark && Math.hypot(lastMark.x - carry.x, lastMark.y - carry.y) < 6) lastMark.r = Math.min(18, (lastMark.r || 7) + 14 * dt);
+        else marks.push({ x: carry.x, y: carry.y, r: 7 });
+      }
       if (s.type === "drizzle") {
         // honey lands where you are: a new drip when you move, a bigger one if you stay
         const marks = bake.marks[s.id] || (bake.marks[s.id] = []);
@@ -438,13 +465,14 @@ function startFlow(s) {
 // keyboard: Space or Enter on a pour/drizzle tool pours into the middle of the glass
 function keyboardFlow(event, name, down) {
   const s = bStep();
-  if (!s.carry || s.tool !== name || (s.type !== "pour" && s.type !== "drizzle")) return;
+  if (!s.carry || s.tool !== name || !FLOWS.includes(s.type)) return;
   if (event.key !== " " && event.key !== "Enter") return;
   event.preventDefault();
   if (down && !carry.on && !event.repeat) {
     const a = s.area;
     carry.on = true; carry.s = s; carry.over = true;
-    carry.x = a.x + a.w / 2; carry.y = a.y + 20;
+    carry.x = a.rx ? a.cx : a.x + a.w / 2;
+    carry.y = a.rx ? a.cy : s.type === "pipe" ? a.y + a.h / 2 : a.y + 20;
     startFlow(s);
   } else if (!down) {
     endCarry(null, false);
@@ -559,6 +587,7 @@ function swipeTo(s, x, y) {
 // --- stir: each time you change direction after a decent swish, it mixes more ---
 const stir = { lastX: 0, dir: 0, travel: 0 };
 function stirTo(s, x) {
+  if (stir.lastX === null) stir.lastX = x;
   const dx = x - stir.lastX;
   stir.lastX = x;
   if (Math.abs(dx) < 0.5) return;

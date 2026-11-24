@@ -827,6 +827,7 @@ h1 {
 .carry svg { display: block; width: 100%; height: auto; }
 .carry.tilted { rotate: var(--tilt, 0deg); }
 .carry.in-glass { filter: none; }
+.carry.squeeze { animation: squeeze 0.4s ease-in-out infinite; }
 .tool.lifted { opacity: 0.2 !important; animation: none; filter: none; }
 .shelf.empty { visibility: hidden; }
 .shelf .tool[hidden] { display: none; }

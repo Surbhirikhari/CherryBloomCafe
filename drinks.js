@@ -33,7 +33,7 @@ function iceCube(x, y, rot) {
 function strawberryMilkArt(st) {
   const v = st.v;
   const clip = uid("smilk");
-  const mash = Math.min(4, v.mash || 0) / 4;
+  const mash = st.done("mash") ? 1 : Math.min(1, v.mash || 0);
   const pureeTop = 190 - 36 * mash;
   const milk = Math.min(v.milk || 0, 1.12);
   const milkTop = pureeTop - (pureeTop - 46) * Math.min(milk, 1);
@@ -46,8 +46,6 @@ function strawberryMilkArt(st) {
   const ices = [[82, 0, -12], [116, 6, 14], [98, 16, 4]].slice(0, Math.min(3, v.ice || 0)).map(([x, dy, r], k) =>
     iceCube(x, milk > 0 ? milkTop + 12 + dy : pureeTop - 12 - k * 20, r)).join("");
 
-  const stirring = st.step === "stir" && !st.done("stir");
-  const tilt = Math.floor((v.stir || 0) * 10) % 2 ? -10 : 10;
 
   return dessertSVG(`
     <defs><clipPath id="${clip}"><path d="${TALL_GLASS}"/></clipPath></defs>
@@ -68,11 +66,8 @@ function strawberryMilkArt(st) {
       ${ices}
     </g>
     ${milk > 1.02 ? `<path d="M50 42 Q42 70 48 84 Q56 74 54 46 Z M150 42 Q158 70 152 84 Q144 74 146 46 Z" fill="${milkColor}" ${DL} stroke-width="2"/>` : ""}
-    ${stirring ? `<g transform="rotate(${tilt} 100 120)">
-        <path d="M100 0 L100 120" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
-        <path d="M100 0 L100 120" stroke="#d7d5de" stroke-width="4.5" stroke-linecap="round"/>
-        <ellipse cx="100" cy="128" rx="9" ry="13" fill="#d7d5de" ${DL} stroke-width="2.5"/></g>` : ""}
-    ${glassFront(clip)}`);
+    ${glassFront(clip)}
+    ${st.flow ? pourStream(st.flow, milk > 0 ? milkTop : pureeTop, "#fbf0dc", 8) : ""}`);
 }
 
 
@@ -169,6 +164,15 @@ const CARRY_ART = {
       <path d="M8 104 Q9 100 12 99" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
     </svg>` },
   dipper: { size: 0.1, tip: [0.5, 0.97], art: () => honeyDipperSVG() },
+  batterBowl: { size: 0.34, tip: [0.9, 0.5], tilt: 42, art: () => TOOL_ART.batter() },
+  piping:     { size: 0.25, tip: [0.48, 0.88], art: () => TOOL_ART.piping() },
+  berry:      { size: 0.14, tip: [0.5, 0.5], art: () => `<svg viewBox="-28 -28 56 56" class="art">${berryHalf(0, 0, 1, 180)}</svg>` },
+  knife:      { size: 0.34, tip: [0.14, 0.58], art: () => TOOL_ART.knife() },
+  sifter:     { size: 0.26, tip: [0.5, 0.72], art: () => TOOL_ART.sifter() },
+  masher:     { size: 0.32, tip: [0.5, 0.72], art: () => TOOL_ART.masher() },
+  ice:        { size: 0.12, tip: [0.5, 0.5], art: () => `<svg viewBox="-14 -14 28 28" class="art">${iceCube(0, 0, -10)}</svg>` },
+  milkBottle: { size: 0.24, tip: [0.5, 0.06], tilt: 130, art: () => milkBottleSVG() },
+  pitcher:    { size: 0.22, tip: [0.14, 0.2], tilt: -38, art: () => TOOL_ART.pitcher() },
 };
 
 // a little pink kettle; the spout tip is at the top right
@@ -252,13 +256,16 @@ function honeyCoffeeArt(st) {
     <ellipse cx="${SURFACE.cx}" cy="${SURFACE.cy}" rx="${SURFACE.rx}" ry="${SURFACE.ry}" fill="${surface}" stroke="${INK}" stroke-width="2"/>
     <g clip-path="url(#${clip})">
       ${hasCoffee ? `<ellipse cx="100" cy="98" rx="40" ry="10" fill="none" stroke="${mixColor(surface, "#ffffff", 0.3)}" stroke-width="3" opacity="0.6"/>` : ""}
-      ${(v.honey || 0) > 0 ? `<path d="${swirl}" fill="none" stroke="#f2c157" stroke-width="3.5" stroke-linecap="round"
+      ${(st.marks.honey || []).length
+        ? creamMarksSVG(st.marks.honey.map((m) => ({ x: m.x, y: Math.max(86, Math.min(110, m.y)), r: m.r * 0.8 })), "#f2c157", 3)
+        : (v.honey || 0) > 0 ? `<path d="${swirl}" fill="none" stroke="#f2c157" stroke-width="3.5" stroke-linecap="round"
           pathLength="100" stroke-dasharray="${(honey * 100).toFixed(1)} 200"/>` : ""}
       ${latte}
     </g>
     ${hasCoffee ? `<g fill="none" stroke="#c9c6cf" stroke-width="3" stroke-linecap="round" opacity="0.7">
         <path d="M84 76 Q78 66 84 56 Q90 46 84 38"/><path d="M116 76 Q110 66 116 56 Q122 46 116 38"/></g>` : ""}
-    ${machine}`);
+    ${machine}
+    ${st.flow && st.step === "honey" ? pourStream(st.flow, Math.max(st.flow.y, 98), "#f2c157", 3.5) : ""}`);
 }
 
 
@@ -318,7 +325,7 @@ Object.assign(TOOL_ART, {
 Object.assign(TOOL_NAMES, {
   masher: "Masher", ice: "Ice", milk: "Milk", spoon: "Spoon", sakura: "Sakura", kettle: "Hot water",
   timer: "Steep", grinder: "Grinder", brew: "Espresso", pitcher: "Milk foam",
-  sakuraBowl: "Sakura flowers", teaKettle: "Hot water", honeyJar: "Honey",
+  sakuraBowl: "Sakura flowers", teaKettle: "Hot water", honeyJar: "Honey", batter: "Batter bowl",
 });
 
 
@@ -327,16 +334,21 @@ Object.assign(DESSERTS, {
   milk: {
     name: "Strawberry Milk",
     draw: strawberryMilkArt,
+    oneTool: true,
     tray: ["cream", "heart", "berry", "mint"],
     steps: [
-      { id: "mash", type: "tap", tool: "masher", times: 4, text: "Mash 4 strawberries",
-        hint: "Click the masher 4 times to squish the strawberries." },
-      { id: "ice", type: "tap", tool: "ice", times: 3, text: "Add 3 ice cubes",
-        hint: "Click the ice 3 times. Clink, clink, clink!" },
-      { id: "milk", type: "hold", tool: "milk", text: "Pour the milk (hold)", target: [0.68, 0.92], max: 1.12, speed: 0.38,
-        hint: "Hold the milk bottle to pour. Let go in the pink zone, near the top." },
-      { id: "stir", type: "stir", tool: "spoon", times: 8, text: "Stir until pink",
-        hint: "Drag side to side on the glass to stir, until it's all pink!" },
+      { id: "mash", type: "stir", axis: "y", tool: "masher", carry: "masher", times: 6, text: "Mash the strawberries",
+        area: { x: 50, y: 20, w: 100, h: 176 },
+        hint: "Pick up the masher, put it in the glass and move it up and down to squish the strawberries." },
+      { id: "ice", type: "drop", tool: "ice", carry: "ice", times: 3, text: "Add 3 ice cubes",
+        area: { x: 40, y: 10, w: 120, h: 186 },
+        doneText: "Clink, clink, clink!", hint: "Drag an ice cube into the glass, 3 times." },
+      { id: "milk", type: "pour", tool: "milk", carry: "milkBottle", text: "Pour the milk",
+        area: { x: 44, y: 0, w: 112, h: 120 }, target: [0.68, 0.92], max: 1.12, speed: 0.3,
+        hint: "Pick up the milk bottle and hold it over the glass to pour. Stop in the pink zone!" },
+      { id: "stir", type: "stir", tool: "spoon", carry: "spoon", times: 8, text: "Stir until pink",
+        area: { x: 50, y: 40, w: 100, h: 156 },
+        hint: "Pick up the spoon, put it in the glass, and stir side to side until it's all pink!" },
       DECORATE("Top it with cream, hearts and a strawberry. Press Done when it's cute."),
     ],
   },
@@ -347,7 +359,7 @@ Object.assign(DESSERTS, {
     oneTool: true,                       // only the tool for this step is on the shelf
     tray: ["sakura", "heart", "mint", "daisy"],
     steps: [
-      { id: "blossoms", type: "drop", tool: "sakuraBowl", carry: "flower", times: 3, text: "Drop in 3 sakura flowers",
+      { id: "blossoms", type: "drop", tool: "sakuraBowl", carry: "flower", times: 3, text: "Drop in 3 sakura flowers", doneText: "So pretty, they're floating!",
         area: { x: 40, y: 10, w: 120, h: 186 },
         hint: "Drag a flower from the bowl and drop it into the glass. Do it 3 times!" },
       { id: "water", type: "pour", tool: "teaKettle", carry: "kettle", text: "Pour hot water to the heart",
@@ -366,6 +378,7 @@ Object.assign(DESSERTS, {
   coffee: {
     name: "Honey Coffee",
     draw: honeyCoffeeArt,
+    oneTool: true,
     tray: ["heart", "choco", "cream", "sakura"],
     steps: [
       { id: "grind", type: "tap", tool: "grinder", times: 4, text: "Grind the beans",
@@ -373,11 +386,12 @@ Object.assign(DESSERTS, {
       { id: "brew", type: "timing", tool: "brew", text: "Brew a shot", zone: [0.42, 0.68],
         start: "Brew", stop: "Stop shot!",
         hint: "Click the espresso machine to brew. Press Stop shot! when it's in the green zone." },
-      { id: "honey", type: "hold", tool: "honey", text: "Swirl in honey (hold)", target: [0.5, 0.82], max: 1.05, speed: 0.36,
-        hint: "Hold the honey jar. Let go in the pink zone." },
-      { id: "latte", type: "pipe", tool: "pitcher", text: "Pour latte art", area: { cx: 100, cy: 98, rx: 50, ry: 16 },
-        target: [0.5, 0.85], max: 1.1, speed: 0.28,
-        hint: "Hold the mouse down on the coffee and move: the milk foam flows out. Draw a heart! Let go in the pink zone." },
+      { id: "honey", type: "drizzle", tool: "honeyJar", carry: "dipper", text: "Drizzle honey",
+        area: { x: 50, y: 20, w: 100, h: 96 }, target: [0.5, 0.82], max: 1.05, speed: 0.32,
+        hint: "Pick up the honey dipper and hold it over the coffee. Honey drips wherever you move it! Stop in the pink zone." },
+      { id: "latte", type: "pipe", tool: "pitcher", carry: "pitcher", text: "Pour latte art",
+        area: { cx: 100, cy: 98, rx: 50, ry: 16 }, target: [0.5, 0.85], max: 1.1, speed: 0.28,
+        hint: "Pick up the milk pitcher and move it over the coffee: the foam flows out. Draw a heart! Stop in the pink zone." },
       DECORATE("Add a few sweet touches. Press Done when it's cute."),
     ],
   },
