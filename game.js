@@ -15,6 +15,7 @@ const scoopButton   = document.getElementById("btn-scoop");
 const unscoopButton = document.getElementById("btn-unscoop");
 const scoopCount    = document.getElementById("scoop-count");
 const powder        = document.getElementById("powder");
+const chef          = document.getElementById("chef");
 
 
 // ---------- 2. The game's memory ("state") ----------
@@ -46,24 +47,49 @@ function drawPowder() {
   }
 
   // Give the bowl a little squish so the click feels alive.
-  const bowl = powder.closest("svg");
-  bowl.classList.remove("bounce");
-  void bowl.offsetWidth;            // trick: forces the animation to restart
-  bowl.classList.add("bounce");
+  restartAnimation(powder.closest("svg"), "bounce");
 }
 
-// Mochi reacts to how many scoops are in the bowl.
+// Play a CSS animation again, even if it already played before.
+// (Removing and re-adding the same class wouldn't restart it on its own,
+//  so in between we ask the browser to measure the element, which "resets" it.)
+function restartAnimation(element, className) {
+  element.classList.remove(className);
+  element.getBoundingClientRect();
+  element.classList.add(className);
+}
+
+// Make the owner do a move: "hop", "nod" or "shake".
+// The matching CSS lives in style.css under ".chef.do-hop" etc.
+function chefDoes(move) {
+  chef.classList.remove("do-hop", "do-nod", "do-shake");
+  restartAnimation(chef, "do-" + move);
+}
+
+// Mochi reacts to how many scoops are in the bowl, and so does the owner.
 function mochiReactsToScoops() {
   if (scoops === 0) {
     mochiSays("The bowl is empty, nya. Add some matcha!");
+    chefDoes("nod");
   } else if (scoops < PERFECT_SCOOPS) {
     mochiSays("A little more… one more scoop!");
+    chefDoes("nod");
   } else if (scoops === PERFECT_SCOOPS) {
     mochiSays("Two scoops! That's exactly 2 grams. Purr-fect!");
+    chefDoes("hop");
   } else {
     mochiSays("Too much! It will taste bitter. Take one out?");
+    chefDoes("shake");
   }
 }
+
+// Things Mochi says when you click on the owner.
+const CHEF_CLICK_LINES = [
+  "She says hi! She's been up since 6 baking.",
+  "Her ribbons were a gift from her grandma, nya.",
+  "She hums while she whisks. Very off-key.",
+  "Psst… she sneaks me cream when nobody's looking.",
+];
 
 
 // ---------- 4. What happens when you click things ----------
@@ -73,6 +99,14 @@ openButton.addEventListener("click", function () {
   titleScreen.hidden = true;        // hide the title screen
   kitchenScreen.hidden = false;     // show the kitchen
   mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
+  chefDoes("hop");
+});
+
+chef.addEventListener("click", function () {
+  // Pick a random line: Math.random() gives 0–0.999…, times the list length, rounded down.
+  const index = Math.floor(Math.random() * CHEF_CLICK_LINES.length);
+  mochiSays(CHEF_CLICK_LINES[index]);
+  chefDoes("hop");
 });
 
 scoopButton.addEventListener("click", function () {

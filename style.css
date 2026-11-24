@@ -20,8 +20,13 @@
 
   /* characters and objects */
   --ink: #5a3a46;        /* our "black": a soft plum brown */
-  --hair: #6b4038;
-  --skin: #ffe1d3;
+  --line: #4a3236;       /* outline colour for the hand-drawn look */
+  --hair: #fbe7a3;       /* the owner's blonde hair */
+  --skin: #fff1ea;
+  --dress: #f2a6b8;
+  --dress-shade: #d9798f;
+  --ribbon: #c4566b;
+  --sleeve: #ffffff;
   --cat: #ffffff;
   --cat-line: #e7c4cf;
   --bowl: #f9d7e1;
@@ -139,7 +144,87 @@ h1 {
   justify-items: center;
   gap: 8px;
 }
-.chef  { width: 180px; }
+.chef  { width: 210px; cursor: pointer; overflow: visible; }
+
+/* ---------- The owner's animations ----------
+   "Idle" animations loop forever (infinite).
+   "Move" animations play once when game.js adds a class like .do-hop  */
+
+/* idle: gently sway from her feet */
+.chef-body {
+  transform-origin: 100px 280px;
+  animation: sway 4s ease-in-out infinite;
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50%      { transform: rotate(1.2deg); }
+}
+
+/* idle: blink every few seconds (squash the eyes flat for a moment) */
+.chef-eyes {
+  transform-origin: 100px 116px;
+  animation: blink 4.5s infinite;
+}
+@keyframes blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  96%           { transform: scaleY(0.1); }
+}
+
+/* idle: hair flows a little behind the sway */
+.chef-hair-back {
+  transform-origin: 100px 60px;
+  animation: hair-flow 4s ease-in-out infinite;
+  animation-delay: -0.6s;
+}
+@keyframes hair-flow {
+  0%, 100% { transform: skewX(1.5deg); }
+  50%      { transform: skewX(-1.5deg); }
+}
+
+/* idle: ribbons wiggle */
+.chef-ribbon { animation: ribbon 1.8s ease-in-out infinite alternate; }
+.chef-ribbon-left  { transform-origin: 50px 104px; }
+.chef-ribbon-right { transform-origin: 150px 104px; animation-delay: -0.9s; }
+@keyframes ribbon {
+  from { transform: rotate(-6deg); }
+  to   { transform: rotate(6deg); }
+}
+
+/* the heart is invisible until she hops */
+.chef-heart { opacity: 0; transform-origin: 160px 44px; }
+
+/* hover: tilt her head curiously */
+.chef-head { transform-origin: 100px 150px; transition: transform 0.3s; }
+.chef:hover .chef-head { transform: rotate(-5deg); }
+
+/* move: happy hop (and the heart floats up) */
+.chef.do-hop { animation: hop 0.6s ease-out; }
+.chef.do-hop .chef-heart { animation: heart-up 1s ease-out; }
+@keyframes hop {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-18px); }
+  65%  { transform: translateY(0) scale(1.03, 0.97); }
+  100% { transform: translateY(0); }
+}
+@keyframes heart-up {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.5); }
+  30%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(1); }
+}
+
+/* move: nod ("yes, good!") */
+.chef.do-nod .chef-head { animation: nod 0.6s ease-in-out; }
+@keyframes nod {
+  40% { transform: rotate(4deg) translateY(3px); }
+}
+
+/* move: worried head shake ("oh no!") */
+.chef.do-shake .chef-head { animation: shake 0.6s ease-in-out; }
+@keyframes shake {
+  20% { transform: rotate(-7deg); }
+  45% { transform: rotate(7deg); }
+  70% { transform: rotate(-4deg); }
+}
 .mochi { width: 120px; margin-top: -40px; margin-left: 110px; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
@@ -252,5 +337,6 @@ h1 {
 
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
-  .mochi-tail, .bounce { animation: none; }
+  .mochi-tail, .bounce,
+  .chef-body, .chef-eyes, .chef-hair-back, .chef-ribbon { animation: none; }
 }

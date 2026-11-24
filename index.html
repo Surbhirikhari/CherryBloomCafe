@@ -36,28 +36,81 @@
       <aside class="crew">
         <div class="bubble" id="mochi-says">Hello!</div>
 
-        <!-- The chef, drawn with SVG shapes (circles, ellipses, paths) -->
-        <svg class="chef" viewBox="0 0 200 250" role="img" aria-label="The chef, smiling, with her hair in a bun">
-          <path d="M50 95 Q48 40 100 38 Q152 40 150 95 L152 150 Q100 162 48 150 Z" fill="var(--hair)"/>
-          <path d="M42 250 Q42 172 100 166 Q158 172 158 250 Z" fill="var(--matcha)"/>
-          <path d="M70 250 L74 186 Q100 179 126 186 L130 250 Z" fill="var(--blossom)"/>
-          <path d="M100 222 C92 214 88 222 100 232 C112 222 108 214 100 222 Z" fill="var(--blossom-deep)"/>
-          <rect x="90" y="138" width="20" height="32" rx="8" fill="var(--skin)"/>
-          <ellipse cx="100" cy="100" rx="42" ry="44" fill="var(--skin)"/>
-          <path d="M58 94 Q60 54 100 52 Q140 54 142 94 Q124 74 100 78 Q78 72 58 94 Z" fill="var(--hair)"/>
-          <circle cx="100" cy="42" r="19" fill="var(--hair)"/>
-          <g fill="var(--blossom)">
-            <circle cx="118" cy="30" r="6"/><circle cx="127" cy="36" r="6"/><circle cx="124" cy="46" r="6"/>
-            <circle cx="113" cy="46" r="6"/><circle cx="110" cy="36" r="6"/>
+        <!-- The cafe owner, drawn with SVG shapes.
+             Each <g> is a "group" of shapes we can animate together:
+             .chef-body sways, .chef-hair-back flows, .chef-head nods/shakes,
+             .chef-eyes blink, .chef-ribbon wiggles, .chef-heart pops up when she's happy.
+             Click her to make her hop! -->
+        <svg id="chef" class="chef" viewBox="0 0 200 300" role="img" aria-label="The cafe owner: long blonde hair, a pink headband, red ribbons and a pink dress">
+          <g class="chef-body" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+
+            <!-- long hair behind her back -->
+            <path class="chef-hair-back" d="M54 104 Q50 52 100 48 Q150 52 146 104 L154 208 Q146 220 134 210 L126 160 L74 160 L66 210 Q54 220 46 208 Z" fill="var(--hair)"/>
+
+            <!-- pink dress: skirt with folds, then the top -->
+            <path d="M72 176 L128 176 Q150 220 160 272 Q100 286 40 272 Q50 220 72 176 Z" fill="var(--dress)"/>
+            <path d="M70 232 Q68 250 66 270 M100 238 L100 278 M130 232 Q132 250 134 270" fill="none" stroke-width="2"/>
+            <rect x="92" y="136" width="16" height="18" fill="var(--skin)"/>
+            <path d="M78 152 L122 152 L128 182 L72 182 Z" fill="var(--dress)"/>
+            <g fill="var(--dress-shade)" stroke="none">
+              <circle cx="100" cy="164" r="2.2"/><circle cx="100" cy="172" r="2.2"/>
+            </g>
+
+            <!-- round white collar -->
+            <path d="M100 150 Q86 145 79 154 Q84 165 100 158 Z" fill="var(--sleeve)"/>
+            <path d="M100 150 Q114 145 121 154 Q116 165 100 158 Z" fill="var(--sleeve)"/>
+
+            <!-- puffy white sleeves, arms folded in front -->
+            <path d="M78 154 Q56 160 60 198 Q63 216 98 214 Q100 204 92 199 Q80 193 82 176 Z" fill="var(--sleeve)"/>
+            <path d="M122 154 Q144 160 140 198 Q137 216 102 214 Q100 204 108 199 Q120 193 118 176 Z" fill="var(--sleeve)"/>
+            <ellipse cx="92" cy="214" rx="9" ry="6" fill="var(--skin)"/>
+            <ellipse cx="108" cy="214" rx="9" ry="6" fill="var(--skin)"/>
+
+            <!-- red bow on her chest -->
+            <path d="M100 186 L87 178 L87 194 Z M100 186 L113 178 L113 194 Z" fill="var(--ribbon)"/>
+            <circle cx="100" cy="186" r="4" fill="var(--ribbon)"/>
+
+            <!-- HEAD: everything in here moves together when she nods -->
+            <g class="chef-head">
+              <circle cx="58" cy="116" r="8" fill="var(--skin)"/>
+              <circle cx="142" cy="116" r="8" fill="var(--skin)"/>
+              <ellipse cx="100" cy="110" rx="42" ry="40" fill="var(--skin)"/>
+
+              <!-- fringe (bangs) -->
+              <path d="M58 108 Q54 62 100 58 Q146 62 142 108 Q136 92 130 88 Q128 100 120 104 Q118 86 110 82 Q108 98 100 100 Q96 84 88 82 Q86 98 80 104 Q74 92 70 88 Q64 96 58 108 Z" fill="var(--hair)"/>
+
+              <!-- headband: a thick dark line with a thinner pink line on top -->
+              <path d="M56 98 Q58 50 100 46 Q142 50 144 98" fill="none" stroke="var(--line)" stroke-width="15"/>
+              <path d="M56 98 Q58 50 100 46 Q142 50 144 98" fill="none" stroke="var(--dress)" stroke-width="9"/>
+
+              <!-- red ribbons on each side -->
+              <g class="chef-ribbon chef-ribbon-left" fill="var(--ribbon)">
+                <path d="M50 104 L44 126 L50 124 L53 106 Z"/>
+                <path d="M50 104 L37 95 L37 113 Z M50 104 L59 93 L61 109 Z"/>
+                <circle cx="50" cy="104" r="3.5"/>
+              </g>
+              <g class="chef-ribbon chef-ribbon-right" fill="var(--ribbon)">
+                <path d="M150 104 L156 126 L150 124 L147 106 Z"/>
+                <path d="M150 104 L163 95 L163 113 Z M150 104 L141 93 L139 109 Z"/>
+                <circle cx="150" cy="104" r="3.5"/>
+              </g>
+
+              <!-- face -->
+              <g class="chef-eyes" stroke="none">
+                <ellipse cx="84" cy="116" rx="4.5" ry="6" fill="var(--line)"/>
+                <ellipse cx="116" cy="116" rx="4.5" ry="6" fill="var(--line)"/>
+                <circle cx="85.5" cy="113.5" r="1.6" fill="var(--paper)"/>
+                <circle cx="117.5" cy="113.5" r="1.6" fill="var(--paper)"/>
+              </g>
+              <ellipse cx="74" cy="127" rx="9" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".75"/>
+              <ellipse cx="126" cy="127" rx="9" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".75"/>
+              <circle cx="100" cy="122" r="1.3" fill="var(--line)" stroke="none"/>
+              <path d="M96 129 Q100 132 104 129" fill="none" stroke-width="2"/>
+            </g>
           </g>
-          <circle cx="118" cy="39" r="3.5" fill="var(--paper)"/>
-          <g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
-            <path d="M78 104 Q85 97 92 104"/>
-            <path d="M108 104 Q115 97 122 104"/>
-            <path d="M94 121 Q100 127 106 121"/>
-          </g>
-          <ellipse cx="76" cy="116" rx="8" ry="5" fill="var(--blossom)" opacity=".8"/>
-          <ellipse cx="124" cy="116" rx="8" ry="5" fill="var(--blossom)" opacity=".8"/>
+
+          <!-- a little heart that floats up when she's happy -->
+          <path class="chef-heart" d="M160 40 C152 30 140 38 160 54 C180 38 168 30 160 40 Z" fill="var(--blossom-deep)"/>
         </svg>
 
         <!-- Mochi the cat -->
