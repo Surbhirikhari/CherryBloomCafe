@@ -100,7 +100,7 @@ main {
 .leg { transform-box: fill-box; transform-origin: 50% 0; animation: step 0.55s ease-in-out infinite alternate; }
 .leg-b { animation-direction: alternate-reverse; }
 @keyframes step { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
-.scene-inside  { object-position: 50% 55%; opacity: 0; }
+.scene-inside  { opacity: 0; }
 
 /* walking in: zoom towards the door and fade to white */
 .scene.entering .scene-outside { transform: scale(2.6); opacity: 0; }
@@ -116,7 +116,7 @@ main {
   opacity: 0;
   transition: opacity 0.8s;
 }
-.scene.inside::after { opacity: 0.25; }
+.scene.inside::after { opacity: 0.12; }
 
 /* falling petals (made by game.js), only outside */
 .petals { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.6s; }

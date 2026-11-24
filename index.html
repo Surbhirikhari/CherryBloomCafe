@@ -14,11 +14,11 @@
 </head>
 <body>
 
-  <!-- The background. Outside is the street, painted by street.js.
-       Inside is the cafe painting. game.js switches between them. -->
+  <!-- The background. Outside is the street (street.js), inside is the
+       cafe room (room.js). game.js switches between them. -->
   <div id="scene" class="scene" aria-hidden="true">
     <svg id="street" class="scene-img scene-outside" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice"></svg>
-    <img class="scene-img scene-inside" src="assets/scenes/inside.jpg" alt="">
+    <svg id="room" class="scene-img scene-inside" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice"></svg>
     <div id="petals" class="petals"></div>
   </div>
 
@@ -232,7 +232,9 @@
     </section>
   </main>
 
+  <script src="paint.js"></script>
   <script src="street.js"></script>
+  <script src="room.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
