@@ -46,6 +46,17 @@
   color-scheme: light;
 }
 
+/* ---------- The mouse is a dark pink flower ----------
+   Each cursor is a tiny SVG drawing written right into the CSS ("data:" URL).
+   "16 16" is the hotspot: the flower's centre is the exact spot you click. */
+:root {
+  --cursor:       url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%280 16 16%29%22 fill=%22%23c93a6e%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%2872 16 16%29%22 fill=%22%23c93a6e%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28144 16 16%29%22 fill=%22%23c93a6e%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28216 16 16%29%22 fill=%22%23c93a6e%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28288 16 16%29%22 fill=%22%23c93a6e%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%280 16 16%29%22 fill=%22%23e57a9e%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%2872 16 16%29%22 fill=%22%23e57a9e%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28144 16 16%29%22 fill=%22%23e57a9e%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28216 16 16%29%22 fill=%22%23e57a9e%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28288 16 16%29%22 fill=%22%23e57a9e%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.6%22 fill=%22%23f6d76b%22 stroke=%22%23412c2c%22 stroke-width=%221.3%22/%3E%3C/svg%3E") 16 16, auto;
+  --cursor-click: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%2818 16 16%29%22 fill=%22%23e0457f%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%2890 16 16%29%22 fill=%22%23e0457f%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28162 16 16%29%22 fill=%22%23e0457f%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28234 16 16%29%22 fill=%22%23e0457f%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28306 16 16%29%22 fill=%22%23e0457f%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%2818 16 16%29%22 fill=%22%23f7a8c2%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%2890 16 16%29%22 fill=%22%23f7a8c2%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28162 16 16%29%22 fill=%22%23f7a8c2%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28234 16 16%29%22 fill=%22%23f7a8c2%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28306 16 16%29%22 fill=%22%23f7a8c2%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.6%22 fill=%22%23f6d76b%22 stroke=%22%23412c2c%22 stroke-width=%221.3%22/%3E%3Cpath d=%22M28 2 L29 5 L32 6 L29 7 L28 10 L27 7 L24 6 L27 5 Z%22 fill=%22%23fff6c8%22 stroke=%22%23412c2c%22 stroke-width=%220.8%22/%3E%3C/svg%3E") 16 16, pointer;
+  --cursor-grab:  url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%2836 16 16%29%22 fill=%22%23a82a5a%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28108 16 16%29%22 fill=%22%23a82a5a%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28180 16 16%29%22 fill=%22%23a82a5a%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28252 16 16%29%22 fill=%22%23a82a5a%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%229%22 rx=%225.2%22 ry=%227%22 transform=%22rotate%28324 16 16%29%22 fill=%22%23a82a5a%22 stroke=%22%23412c2c%22 stroke-width=%221.5%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%2836 16 16%29%22 fill=%22%23d9668f%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28108 16 16%29%22 fill=%22%23d9668f%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28180 16 16%29%22 fill=%22%23d9668f%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28252 16 16%29%22 fill=%22%23d9668f%22/%3E%3Cellipse cx=%2216%22 cy=%227.5%22 rx=%221.6%22 ry=%223%22 transform=%22rotate%28324 16 16%29%22 fill=%22%23d9668f%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.6%22 fill=%22%23f6d76b%22 stroke=%22%23412c2c%22 stroke-width=%221.3%22/%3E%3C/svg%3E") 16 16, grab;
+}
+html, body { cursor: var(--cursor); }
+
+
 /* ---------- 2. The page ---------- */
 * { box-sizing: border-box; }
 
@@ -162,7 +173,7 @@ main {
   border: none;
   border-radius: 999px;          /* fully rounded = pill shape */
   padding: 12px 22px;
-  cursor: pointer;
+  cursor: var(--cursor-click);
   box-shadow: 0 4px 0 #b04a6e;   /* the darker "lip" under the button */
   transition: transform 0.08s, box-shadow 0.08s;
 }
@@ -216,14 +227,14 @@ main {
   border-radius: 10px;
   box-shadow: 0 5px 0 #b04a6e;
   text-shadow: 0 2px 0 rgba(65, 44, 44, 0.3);
-  cursor: pointer;
+  cursor: var(--cursor-click);
   transform-origin: 50% -40%;      /* swings from the strings */
   animation: sign-swing 3s ease-in-out infinite;
 }
 .open-sign:hover { filter: brightness(1.08); animation-duration: 1.2s; }
 .open-sign:active { box-shadow: 0 2px 0 #b04a6e; translate: 0 3px; }
 .open-sign:focus-visible { outline: 3px solid var(--matcha-deep); outline-offset: 4px; }
-.open-sign:disabled { cursor: default; }
+.open-sign:disabled { cursor: var(--cursor); }
 @keyframes sign-swing { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; } }
 
 /* the frosted card that holds the title, over the painting */
@@ -312,7 +323,7 @@ h1 {
   left: 9%;
   top: -5%;
   width: 36%;
-  cursor: pointer;
+  cursor: var(--cursor-click);
   overflow: visible;
 }
 
@@ -355,7 +366,7 @@ h1 {
 /* things standing on the counter */
 .counter-props { left: 2%; right: 2%; width: 96%; bottom: 36%; }
 .bowl { left: 31%; width: 22%; bottom: 36%; }   /* right in front of Bloom */
-.mochi { right: 2%; width: 19%; bottom: 37%; cursor: pointer; overflow: visible; }
+.mochi { right: 2%; width: 19%; bottom: 37%; cursor: var(--cursor-click); overflow: visible; }
 
 /* Mochi's speech bubble, up in the corner above him */
 .stage .bubble { right: 0; top: 4%; width: 38%; }
@@ -569,7 +580,7 @@ h1 {
   padding: 0;
   border: 0;
   background: none;
-  cursor: pointer;
+  cursor: var(--cursor-click);
   z-index: 3;
   filter: drop-shadow(0 4px 0 rgba(65, 44, 44, 0.12));
   animation: cloud-float 2.4s ease-in-out infinite;
@@ -787,12 +798,12 @@ h1 {
   padding: 0;
   border: 0;
   background: none;
-  cursor: pointer;
+  cursor: var(--cursor-click);
   opacity: 0.45;
   filter: grayscale(0.4);
   transition: opacity 0.2s, filter 0.2s;
 }
-.tool:disabled { cursor: default; }
+.tool:disabled { cursor: var(--cursor); }
 .tool.active { opacity: 1; filter: drop-shadow(0 0 12px #fff6c8); animation: tool-bob 1.4s ease-in-out infinite; }
 .tool:focus-visible, .bowl-area:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; border-radius: 12px; }
 @keyframes tool-bob { 50% { transform: translateY(-6px); } }
@@ -809,7 +820,7 @@ h1 {
   background: var(--paper);
   border: 3px solid var(--cat-line);
   border-radius: 18px;
-  cursor: pointer;
+  cursor: var(--cursor-click);
   box-shadow: 0 5px 0 rgba(65, 44, 44, 0.25);
   transition: transform 0.1s;
 }
@@ -859,8 +870,8 @@ h1 {
   transition: transform 0.4s;
   transform-origin: 80% 80%;
 }
-.bowl-area.active { cursor: grab; filter: drop-shadow(0 0 12px #fff6c8); }
-.bowl-area.active:active { cursor: grabbing; }
+.bowl-area.active { cursor: var(--cursor-grab); filter: drop-shadow(0 0 12px #fff6c8); }
+.bowl-area.active:active { cursor: var(--cursor-grab); }
 .bowl-area.tilt { transform: rotate(16deg) translate(14px, -14px); }
 .whisk {
   position: absolute;
@@ -915,7 +926,7 @@ h1 {
   align-items: center;
   gap: 3%;
 }
-.berry { width: 31%; padding: 0; border: 0; background: none; cursor: pointer; }
+.berry { width: 31%; padding: 0; border: 0; background: none; cursor: var(--cursor-click); }
 .berry:hover { transform: translateY(-3px); }
 .slice-pile {
   position: absolute;
@@ -925,10 +936,10 @@ h1 {
   padding: 0;
   border: 0;
   background: none;
-  cursor: grab;
+  cursor: var(--cursor-grab);
   touch-action: none;
 }
-.slice-pile:disabled { opacity: 0.35; cursor: default; }
+.slice-pile:disabled { opacity: 0.35; cursor: var(--cursor); }
 .pile-count {
   position: absolute;
   right: -10px;
@@ -964,7 +975,7 @@ h1 {
   background: var(--paper);
   border: 3px solid var(--cat-line);
   border-radius: 16px;
-  cursor: grab;
+  cursor: var(--cursor-grab);
   touch-action: none;
   box-shadow: 0 4px 0 rgba(65, 44, 44, 0.2);
 }
@@ -976,7 +987,7 @@ h1 {
 .topping {
   position: absolute;
   transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
-  cursor: grab;
+  cursor: var(--cursor-grab);
   touch-action: none;
 }
 .topping svg { display: block; width: 100%; height: auto; }
@@ -984,7 +995,7 @@ h1 {
 .topping.plop { animation: plop 0.25s ease-out; }
 @keyframes plop { from { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(0.3); } }
 .decorated { position: relative; }
-.decorated .topping { pointer-events: none; cursor: default; }
+.decorated .topping { pointer-events: none; cursor: var(--cursor); }
 
 /* the topping following your finger or mouse while you drag it */
 .topping-ghost {
