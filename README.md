@@ -46,6 +46,10 @@ then send them off happy (and earn a few coins on the way).
 | 🍓 **Strawberry Milk** | Strawberry, ice, milk | 10 coins |
 | 🌸 **Sakura Tea** | Sakura, hot water, honey | 9 coins |
 | 🍯 **Honey Coffee** | Coffee, honey, milk | 11 coins |
+| 🍦 **Strawberry Crêpe** | Pour batter, flip it when golden, pipe cream, add strawberries, fold into a cone, add a bunny cookie | 16 coins |
+| 🍥 **Strawberry Roll Cake** | Pour batter, bake, spread pink cream, roll it up, slice to see the swirl | 18 coins |
+| 🍞 **Strawberry Cream Toast** | Pop the toast when golden, spread pink cream, drizzle honey, add heart strawberries and daisies | 12 coins |
+| 🥐 **Strawberry Croissant** | Bake, slice it open, pipe cream, add strawberries, dust with sugar | 14 coins |
 
 Every drink can be decorated. Customers love toppings! 💕
 
@@ -72,6 +76,8 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
 | `matcha.js` | The Matcha Station mini-game (scoop, whisk, pour, layer) |
 | `sparkles.js` | The little sparkle trail behind the flower mouse |
+| `desserts.js` | The dessert drawings, tools and recipes (each step changes the drawing) |
+| `bakery.js` | The Bakery Station: runs any dessert recipe (hold, tap, timing, rub, swipe) |
 | `decor.js` | The cutting board and drag-anywhere toppings |
 | `paint.js` | Shared watercolour "brushes" for drawing scenes |
 | `street.js` | Paints the street outside, with walking people |
@@ -95,6 +101,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 
 ## 🌷 Coming soon
 
+- [x] Desserts! Crêpe, roll cake, cream toast and croissant
 - [ ] More drinks and desserts (strawberry shortcake, anyone?)
 - [ ] Day and night, and a daily goal
 - [ ] Sounds: the whisk, the pour, the coin *ding*

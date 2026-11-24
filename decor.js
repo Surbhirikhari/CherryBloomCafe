@@ -1,6 +1,6 @@
 // =========================================================
 // Cherry Blossom Cafe — decor.js
-// Decorating drinks, shared by the Matcha Station and the kitchen table:
+// Decorating, shared by the Matcha Station, the kitchen table and the Bakery Station:
 //   - chop strawberries on the cutting board (3 chops each = 4 slices)
 //   - drag slices and other toppings ANYWHERE on the drink
 //   - drag a topping again to move it, off the drink to remove it,
@@ -95,6 +95,50 @@ function knifeSVG() {
     </svg>`;
 }
 
+// a bunny cookie, like the one on the crêpe
+function bunnySVG() {
+  return `
+    <svg viewBox="0 0 60 64" class="art">
+      <path d="M16 30 Q8 6 16 3 Q25 2 26 26 Z" fill="#e2a165" ${TOP_LINE}/>
+      <path d="M34 26 Q36 2 44 4 Q52 8 44 30 Z" fill="#e2a165" ${TOP_LINE}/>
+      <path d="M17 10 Q20 18 21 24 M43 10 Q40 18 39 24" stroke="#f4b8c4" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse cx="30" cy="43" rx="23" ry="19" fill="#e2a165" ${TOP_LINE}/>
+      <ellipse cx="22" cy="41" rx="2.6" ry="3.2" fill="${INK}"/><ellipse cx="38" cy="41" rx="2.6" ry="3.2" fill="${INK}"/>
+      <path d="M27 48 Q30 51 33 48" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="15" cy="48" rx="4" ry="2.5" fill="#f19bb1" opacity="0.8"/><ellipse cx="45" cy="48" rx="4" ry="2.5" fill="#f19bb1" opacity="0.8"/>
+      <g fill="#fff6ea"><circle cx="24" cy="32" r="1.2"/><circle cx="36" cy="30" r="1.2"/><circle cx="30" cy="56" r="1.2"/></g>
+    </svg>`;
+}
+
+// a pink pocky stick
+function pockySVG() {
+  return `
+    <svg viewBox="0 0 16 100" class="art">
+      <rect x="5" y="62" width="6" height="36" rx="3" fill="#e9c48a" ${TOP_LINE} stroke-width="2"/>
+      <rect x="3" y="2" width="10" height="64" rx="5" fill="#f4a6bc" ${TOP_LINE} stroke-width="2"/>
+      <g fill="#ffffff"><rect x="6" y="12" width="2" height="5" rx="1"/><rect x="9" y="28" width="2" height="5" rx="1"/><rect x="5" y="44" width="2" height="5" rx="1"/></g>
+    </svg>`;
+}
+
+// a wiggly chocolate drizzle
+function chocoSVG() {
+  return `
+    <svg viewBox="0 0 80 40" class="art">
+      <path d="M4 20 Q14 4 22 20 Q30 36 40 20 Q50 4 58 20 Q66 36 76 20" fill="none" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M4 20 Q14 4 22 20 Q30 36 40 20 Q50 4 58 20 Q66 36 76 20" fill="none" stroke="#7a4a35" stroke-width="5" stroke-linecap="round"/>
+      <path d="M12 12 Q15 9 18 12" fill="none" stroke="#c48a6a" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+}
+
+// a little white daisy
+function daisySVG() {
+  let petals = "";
+  for (let k = 0; k < 8; k++) {
+    petals += `<ellipse cx="20" cy="10" rx="4.5" ry="8" fill="#ffffff" ${TOP_LINE} stroke-width="2" transform="rotate(${k * 45} 20 20)"/>`;
+  }
+  return `<svg viewBox="0 0 40 40" class="art">${petals}<circle cx="20" cy="20" r="5.5" fill="#f6c453" ${TOP_LINE} stroke-width="2"/></svg>`;
+}
+
 // size = width as a % of the drink's width
 const TOPPINGS = {
   slice:  { name: "Strawberry",  size: 24, svg: sliceSVG },
@@ -102,7 +146,13 @@ const TOPPINGS = {
   sakura: { name: "Sakura",      size: 22, svg: sakuraSVG },
   mint:   { name: "Mint",        size: 20, svg: mintSVG },
   heart:  { name: "Sugar heart", size: 13, svg: heartSVG },
+  bunny:  { name: "Bunny cookie", size: 26, svg: bunnySVG },
+  pocky:  { name: "Pocky",       size: 7,  svg: pockySVG },
+  choco:  { name: "Chocolate",   size: 34, svg: chocoSVG },
+  daisy:  { name: "Daisy",       size: 14, svg: daisySVG },
+  berry:  { name: "Strawberry",  size: 20, svg: () => wholeBerrySVG(0) },
 };
+const DEFAULT_TRAY = ["cream", "sakura", "mint", "heart"];
 const MAX_TOPPINGS = 16;
 
 
@@ -125,14 +175,19 @@ const pileCount = document.getElementById("pile-count");
 const knifeEl   = document.getElementById("knife");
 const trayEl    = document.getElementById("tray");
 
-["cream", "sakura", "mint", "heart"].forEach(function (kind) {
-  const button = document.createElement("button");
-  button.className = "tray-item";
-  button.innerHTML = TOPPINGS[kind].svg() + "<span>" + TOPPINGS[kind].name + "</span>";
-  button.addEventListener("pointerdown", (event) => startDrag(event, kind, null));
-  button.addEventListener("click", (event) => { if (event.detail === 0) dropRandomly(kind); });  // keyboard
-  trayEl.appendChild(button);
-});
+// fill the tray with these toppings (each station or dessert picks its own)
+function buildTray(kinds) {
+  trayEl.innerHTML = "";
+  kinds.forEach(function (kind) {
+    const button = document.createElement("button");
+    button.className = "tray-item";
+    button.innerHTML = TOPPINGS[kind].svg() + "<span>" + TOPPINGS[kind].name + "</span>";
+    button.addEventListener("pointerdown", (event) => startDrag(event, kind, null));
+    button.addEventListener("click", (event) => { if (event.detail === 0) dropRandomly(kind); });  // keyboard
+    trayEl.appendChild(button);
+  });
+}
+buildTray(DEFAULT_TRAY);
 slicePile.addEventListener("pointerdown", (event) => startDrag(event, "slice", null));
 slicePile.addEventListener("click", (event) => { if (event.detail === 0) dropRandomly("slice"); });
 
@@ -271,10 +326,12 @@ function positionTopping(item) {
 
 // ---------- What the stations use ----------
 const Decor = {
-  // put the board in this station, and toppings go on this layer
-  attach(zoneEl, layerEl) {
+  // put the board in this station, toppings go on this layer,
+  // and the tray holds these toppings
+  attach(zoneEl, layerEl, tray = DEFAULT_TRAY) {
     zoneEl.appendChild(decorEl);
     decor.layer = layerEl;
+    buildTray(tray);
   },
   reset() {
     decor.placed.forEach((t) => t.el.remove());

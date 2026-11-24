@@ -20,12 +20,18 @@ const INGREDIENTS = {
 
 // ---------- The menu ----------
 // "steps" is the order to add things, from the bottom of the glass to the top.
-// A drink with a "station" is made in its own mini-game instead (see matcha.js).
+// A drink with a "station" is made in its own mini-game instead
+// (matcha.js for the latte, bakery.js + desserts.js for desserts).
 const MENU = [
   { name: "Strawberry Matcha Latte", price: 15, station: "matcha" },
   { name: "Strawberry Milk",   price: 10, steps: ["strawberry", "ice", "milk"] },
   { name: "Sakura Tea",        price: 9,  steps: ["sakura", "water", "honey"] },
   { name: "Honey Coffee",      price: 11, steps: ["coffee", "honey", "milk"] },
+  // desserts, made at the Bakery Station (recipes in desserts.js)
+  { name: "Strawberry Crêpe",       price: 16, station: "bake", dessert: "crepe" },
+  { name: "Strawberry Roll Cake",   price: 18, station: "bake", dessert: "roll" },
+  { name: "Strawberry Cream Toast", price: 12, station: "bake", dessert: "toast" },
+  { name: "Strawberry Croissant",   price: 14, station: "bake", dessert: "croissant" },
 ];
 
 const MAX_LAYERS = 4;   // the glass holds 4 pours at most

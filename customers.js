@@ -19,7 +19,7 @@ function randomItem(list) {
 function makeCustomer() {
   return {
     name: randomItem(CUSTOMER_NAMES),
-    order: Math.random() < 0.5 ? MENU[0] : randomItem(MENU.slice(1)),   // half the time, matcha!
+    order: randomItem(MENU),                     // anything on the menu
     look: {
       skin: randomItem(SKIN_TONES),
       hairColor: randomItem(HAIR_COLOURS),

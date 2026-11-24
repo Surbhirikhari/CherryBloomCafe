@@ -8,8 +8,9 @@
 //   4. the customer gets the drink, reacts, pays, and leaves
 //   5. the next customer walks in
 //
-// The drinks live in menu.js, the customer drawings in customers.js,
-// the matcha mini-game in matcha.js, and decorating in decor.js.
+// The menu lives in menu.js, the customer drawings in customers.js,
+// the matcha mini-game in matcha.js, desserts in desserts.js + bakery.js,
+// and decorating in decor.js.
 // =========================================================
 
 
@@ -19,6 +20,7 @@ const titleScreen   = document.getElementById("screen-title");
 const kitchenScreen = document.getElementById("screen-kitchen");
 const prepScreen    = document.getElementById("screen-prep");
 const matchaScreen  = document.getElementById("screen-matcha");
+const bakeScreen    = document.getElementById("screen-bake");
 const openButton    = document.getElementById("btn-open");
 const scene         = document.getElementById("scene");
 const petalLayer    = document.getElementById("petals");
@@ -95,16 +97,20 @@ function chefDoes(move) {
   restartAnimation(chef, "do-" + move);
 }
 
-// What a drink looks like: the matcha latte comes in a jar, the rest in a glass.
+// What an order looks like: the matcha latte comes in a jar,
+// desserts are drawn by desserts.js, and the other drinks come in a glass.
 function drinkArt(drink) {
-  return drink.station === "matcha" ? jarSVG(PERFECT_JAR) : glassSVG(drink.steps);
+  if (drink.station === "matcha") return jarSVG(PERFECT_JAR);
+  if (drink.station === "bake") return perfectDessertArt(drink.dessert);
+  return glassSVG(drink.steps);
 }
 
-// Switch between the counter, the kitchen table, and the matcha station.
+// Switch between the counter, the kitchen table, the matcha station and the bakery.
 function showScreen(name) {
   kitchenScreen.hidden = name !== "counter";
   prepScreen.hidden = name !== "table";
   matchaScreen.hidden = name !== "matcha";
+  bakeScreen.hidden = name !== "bake";
   scene.classList.toggle("blurred", name !== "counter");   // soften the room behind the table
 }
 
@@ -116,6 +122,7 @@ async function customerArrives() {
   customerArt.innerHTML = customerSVG(customer.look);
   customerEl.dataset.mood = "waiting";
   cloudDrink.innerHTML = drinkArt(customer.order);
+  cloudDrink.classList.toggle("is-dessert", customer.order.station === "bake");
   orderCloud.hidden = true;
   customerSays.hidden = true;
   coinPop.hidden = true;
@@ -141,6 +148,7 @@ function showRecipe() {
   recipeFor.textContent = customer.name + "'s order";
   recipeTitle.textContent = drink.name;
   recipeCup.innerHTML = drinkArt(drink);
+  recipeCup.classList.toggle("is-dessert", drink.station === "bake");
   recipePrice.textContent = drink.price;
 
   // one line per step: icon + what to do
@@ -149,6 +157,12 @@ function showRecipe() {
     MATCHA_STEPS.forEach(function (step) {
       const li = document.createElement("li");
       li.innerHTML = step.icon() + "<span>" + step.text + "</span>";
+      recipeSteps.appendChild(li);
+    });
+  } else if (drink.station === "bake") {
+    DESSERTS[drink.dessert].steps.forEach(function (step) {
+      const li = document.createElement("li");
+      li.innerHTML = TOOL_ART[step.tool]() + "<span>" + step.text + "</span>";
       recipeSteps.appendChild(li);
     });
   } else {
@@ -172,6 +186,12 @@ function startMaking() {
   if (customer.order.station === "matcha") {
     openMatchaStation(serve);
     showScreen("matcha");
+    return;
+  }
+  // desserts are made at the Bakery Station
+  if (customer.order.station === "bake") {
+    showScreen("bake");                  // show it first, so the plate has a size
+    openBakeStation(customer.order.dessert, serve);
     return;
   }
 

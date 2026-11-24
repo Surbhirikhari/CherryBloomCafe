@@ -309,6 +309,39 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ SCREEN 5: THE BAKERY STATION ============ -->
+    <!-- Every dessert is made here. bakery.js runs the recipe from desserts.js:
+         use the glowing tool on the shelf, or drag on the plate. -->
+    <section id="screen-bake" class="screen workstation" hidden>
+      <aside class="recipe-note">
+        <p class="note-label">Making</p>
+        <h2 id="b-title"></h2>
+        <ol id="b-steps" class="note-steps"></ol>
+        <div id="b-meter" class="meter" hidden>
+          <div id="b-fill" class="meter-fill"></div>
+          <div id="b-zone" class="meter-zone"></div>
+          <div id="b-needle" class="meter-needle"></div>
+        </div>
+        <p id="b-hint" class="prep-hint" aria-live="polite"></p>
+        <div class="row">
+          <button id="b-restart" class="btn btn-soft">Start over</button>
+          <button id="b-done" class="btn" disabled>Done</button>
+        </div>
+      </aside>
+
+      <div class="work-area work-bake">
+        <div id="b-shelf" class="shelf"></div>
+        <div class="plate-zone">
+          <div id="b-plate" class="plate" tabindex="0" aria-label="The dessert. Drag on it, or use the arrow keys, to spread, fold, roll or slice.">
+            <div id="b-art"></div>
+            <div id="b-toppings" class="toppings-layer"></div>
+            <div id="b-hand" class="hand-tool" hidden></div>
+          </div>
+        </div>
+        <div id="b-decor-zone" class="decor-zone"></div>
+      </div>
+    </section>
   </main>
 
   <script src="paint.js"></script>
@@ -318,6 +351,8 @@
   <script src="customers.js"></script>
   <script src="decor.js"></script>
   <script src="matcha.js"></script>
+  <script src="desserts.js"></script>
+  <script src="bakery.js"></script>
   <script src="game.js"></script>
   <script src="sparkles.js"></script>
 </body>

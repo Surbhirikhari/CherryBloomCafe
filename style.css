@@ -788,6 +788,76 @@ h1 {
 }
 .work-matcha { grid-template-columns: 1.1fr 0.9fr 1.3fr; grid-template-areas: "shelf shelf shelf" "bowl jar decor"; }
 .work-simple { grid-template-columns: 1fr 1.3fr;       grid-template-areas: "shelf shelf" "jar decor"; }
+.work-bake   { grid-template-columns: 1.3fr 1fr;       grid-template-areas: "shelf shelf" "plate decor"; }
+
+/* --- the Bakery Station: the dessert on its plate --- */
+.plate-zone {
+  grid-area: plate;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plate {
+  position: relative;
+  height: 100%;
+  max-height: 560px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  touch-action: none;
+  user-select: none;
+}
+.plate:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; }
+.plate.active { cursor: none; background: radial-gradient(closest-side, rgba(255, 246, 200, 0.55), transparent); }
+.plate.yay { animation: plate-yay 0.5s ease-out; }
+@keyframes plate-yay { 40% { transform: scale(1.04) rotate(-1deg); } }
+#b-art, #b-art svg { width: 100%; height: 100%; }
+
+/* the tool that follows your mouse while you rub or swipe */
+.hand-tool {
+  position: absolute;
+  width: 20%;
+  pointer-events: none;
+  transform: translate(-30%, -70%) rotate(-12deg);
+  filter: drop-shadow(0 6px 4px rgba(65, 44, 44, 0.25));
+  transition: transform 0.1s;
+}
+.hand-tool.pressed { transform: translate(-30%, -62%) rotate(-4deg) scale(0.94); }
+
+/* the meter: how much you've poured, or the cooking needle */
+.meter {
+  position: relative;
+  height: 22px;
+  border: 3px solid var(--cat-line);
+  border-radius: 999px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.meter-fill { height: 100%; width: 0; background: linear-gradient(90deg, #f9c5d2, #e1658e); }
+.meter-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(225, 101, 142, 0.28);
+  border-inline: 2px dashed var(--blossom-deep);
+}
+.meter.timing { background: linear-gradient(90deg, #f7e7bd, #e6a85a 55%, #8a5432); }
+.meter.timing .meter-zone { background: rgba(143, 189, 87, 0.5); border-color: var(--matcha-deep); }
+.meter-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  margin-left: -2.5px;
+  background: var(--cat-line);
+  border-radius: 3px;
+}
+
+/* desserts in the thought cloud and on the recipe card */
+.cloud-drink.is-dessert { left: 30%; top: 6%; width: 38%; }
+.recipe-cup.is-dessert { width: 120px; }
+.cloud-drink .dessert-svg, .recipe-cup .dessert-svg { display: block; width: 100%; height: auto; }
 
 /* the back shelf with the ingredients and tools */
 .shelf {
@@ -979,7 +1049,7 @@ h1 {
 .knife.chop { animation: chop 0.22s ease-in; }
 @keyframes chop { 50% { transform: translateX(-50%) translateY(38%) rotate(0deg); } }
 
-.tray { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tray { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
 .tray-item {
   display: grid;
   justify-items: center;
@@ -994,7 +1064,7 @@ h1 {
   touch-action: none;
   box-shadow: 0 4px 0 rgba(65, 44, 44, 0.2);
 }
-.tray-item svg { width: 56%; }
+.tray-item svg { width: 56%; max-height: 54px; }
 .tray-item:focus-visible, .slice-pile:focus-visible, .berry:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 3px; }
 
 /* toppings sitting on the drink */
@@ -1033,6 +1103,8 @@ h1 {
   .recipe-note { transform: none; }
   .work-matcha { grid-template-columns: 1fr 1fr; grid-template-areas: "shelf shelf" "bowl jar" "decor decor"; }
   .work-simple { grid-template-columns: 1fr; grid-template-areas: "shelf" "jar" "decor"; }
+  .work-bake   { grid-template-columns: 1fr; grid-template-areas: "shelf" "plate" "decor"; }
+  .plate { height: auto; width: min(100%, 340px); }
   .vessel-zone { height: 300px; }
   .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }
 }
