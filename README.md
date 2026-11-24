@@ -9,6 +9,10 @@ Customers drop by with a treat in mind. You pick up real tools and pour,
 pipe, bake, flip, stir and decorate, then send them off happy
 (and earn a few coins on the way).
 
+### 🍓 [Play now → surbhirikhari.github.io/CherryBloomCafe](https://surbhirikhari.github.io/CherryBloomCafe/)
+
+*Works on a computer, a tablet or your iPhone, even offline.*
+
 <img src="docs/screenshots/street.jpg" alt="A close-up of the Cherry Blossom Cafe on a watercolour street, with a wooden welcome board and a pink Open the cafe sign hanging from it" width="820">
 
 *Built step by step while learning HTML, CSS and JavaScript. No frameworks, no installs.*
@@ -63,13 +67,13 @@ Everything ends with decorating. Customers love toppings! 💕
 
 ## 🎀 Play it
 
-1. Download or clone this repo.
-2. Open **`index.html`** in your browser.
-3. Click the pink **Open the cafe** sign hanging from the wooden board, and walk inside.
+**Online:** go to **[https://surbhirikhari.github.io/CherryBloomCafe/](https://surbhirikhari.github.io/CherryBloomCafe/)** and click the pink **Open the cafe** sign hanging from the wooden board.
+
+**On your computer, no internet needed:** download or clone this repo and open **`index.html`** in your browser.
 
 ### 📱 On your iPhone (works offline!)
 
-1. Open **https://surbhirikhari.github.io/CherryBloomCafe/** in **Safari**.
+1. Open **[https://surbhirikhari.github.io/CherryBloomCafe/](https://surbhirikhari.github.io/CherryBloomCafe/)** in **Safari**.
 2. Tap **Share** → **Add to Home Screen**.
 3. Open it from the jam-jar icon: it plays full screen, like a real app, and **works with no internet** after the first visit.
 
