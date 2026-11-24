@@ -827,7 +827,10 @@ h1 {
 
 /* the oven and the toaster */
 .appliance { position: relative; width: min(100%, 380px); transition: transform 0.2s, filter 0.2s; }
-.appliance.target { transform: scale(1.04); filter: drop-shadow(0 0 18px #fff1a8); }
+.appliance.target, .plate.target { transform: scale(1.04); filter: drop-shadow(0 0 18px #fff1a8); }
+.appliance.popped { cursor: var(--cursor-grab); }
+.appliance.pop { animation: toaster-pop 0.4s ease-out; }
+@keyframes toaster-pop { 30% { transform: translateY(-10px) scale(1.03); } }
 .appliance-inside {
   position: absolute;
   left: 15%; top: 38%; width: 70%; height: 47.6%;

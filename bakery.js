@@ -20,6 +20,8 @@
 //   timer   - put it in the oven or toaster, press Start ON the oven,
 //             and press Stop (in the same place) at the right time: 5 seconds.
 //             The pan and the espresso machine have Start/Stop under them.
+//             "autoStop" (the toaster): it pops up BY ITSELF at the right time,
+//             and you lift the toast out onto the plate.
 //   decorate - the cutting board and toppings (decor.js), then Done
 //
 // Like a real kitchen, YOU decide when a step is finished: press
@@ -231,8 +233,9 @@ function drawControls(s) {
   bControls.classList.toggle("on-appliance", !!s.appliance);
   bCtlTimer.hidden = !!s.appliance;                // the oven and toaster show their own timer
   bCtlTimer.textContent = bake.timer.t.toFixed(1) + "s";
-  bCtlBtn.textContent = phase === "running" ? s.stop : (s.start || "Start ▶");
-  bCtlBtn.classList.toggle("stop", phase === "running");
+  bCtlBtn.textContent = phase === "running" ? (s.autoStop ? "Toasting…" : s.stop) : (s.start || "Start ▶");
+  bCtlBtn.disabled = phase === "running" && !!s.autoStop;
+  bCtlBtn.classList.toggle("stop", phase === "running" && !s.autoStop);
 }
 
 bCtlBtn.addEventListener("click", function () {
@@ -244,9 +247,9 @@ bCtlBtn.addEventListener("click", function () {
 
 // the oven or toaster, with the dessert inside and the timer on the front
 function drawAppliance(s) {
-  const loaded = bake.timer.phase !== "load";
+  const loaded = bake.timer.phase !== "load" && !(bake.timer.phase === "popped" && carry.on);
   const on = bake.timer.phase === "running";
-  bAppliance.className = "appliance " + s.appliance + (on ? " on" : "");
+  bAppliance.className = "appliance " + s.appliance + (on ? " on" : "") + (bake.timer.phase === "popped" ? " popped" : "");
   bApplianceArt.innerHTML = APPLIANCE_ART[s.appliance]({ loaded, on, shade: bake.v[s.id] || 0 });
   bInside.innerHTML = s.appliance === "oven" && loaded ? bake.recipe.draw(artState()) : "";
   bTimer.textContent = bake.timer.t.toFixed(1) + "s";
@@ -271,6 +274,7 @@ function drawMeter(s) {
     const t = bake.timer.t;
     bMeterLabel.textContent =
       bake.timer.phase === "load" ? "Drag it into the " + s.appliance + " →" :
+      bake.timer.phase === "popped" ? "Pop! Lift it out onto the plate ←" :
       bake.timer.phase === "ready" ? "Press " + (s.start || "Start ▶") + (s.appliance ? " on the " + s.appliance : "") :
       "⏱ " + t.toFixed(1) + "s · stop at " + s.seconds.toFixed(1) + "s";
     zone((s.seconds - 0.3) / 10, (s.seconds + 0.3) / 10);
@@ -379,10 +383,15 @@ function moveCarry(event) {
   carry.y = p.y;
   carry.over = insideArea(s.area, p.x, p.y);
 
-  if (s.type === "timer") {                    // carrying the dessert to the oven
-    const box = bAppliance.getBoundingClientRect();
-    carry.overAppliance = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-    bAppliance.classList.toggle("target", carry.overAppliance);
+  if (s.type === "timer") {                    // carrying the dessert in (or the toast out)
+    const inBox = (el) => { const r = el.getBoundingClientRect(); return event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom; };
+    if (bake.timer.phase === "popped") {
+      carry.overPlate = inBox(bPlate);
+      bPlate.classList.toggle("target", carry.overPlate);
+    } else {
+      carry.overAppliance = inBox(bAppliance);
+      bAppliance.classList.toggle("target", carry.overAppliance);
+    }
     return;
   }
   bCarry.classList.toggle("tilted", carry.over && (s.type === "pour" || s.type === "drizzle"));
@@ -409,10 +418,12 @@ function onCarryUp() { endCarry(null, false); }
 function endCarry(event, quiet) {
   if (!carry.on) return;
   const s = carry.s;
-  const wasOver = carry.over, intoAppliance = carry.overAppliance;
+  const wasOver = carry.over, intoAppliance = carry.overAppliance, ontoPlate = carry.overPlate;
   carry.on = false;
   carry.over = false;
   carry.overAppliance = false;
+  carry.overPlate = false;
+  bPlate.classList.remove("target");
   bCarry.hidden = true;
   bCarry.classList.remove("tilted", "in-glass", "squeeze");
   bAppliance.classList.remove("target");
@@ -436,6 +447,10 @@ function endCarry(event, quiet) {
     } else {
       bHint.textContent = "Drop it into the " + s.appliance + "!";
     }
+  }
+  if (s.type === "timer" && bake.timer.phase === "popped") {
+    if (ontoPlate) { bArt.style.visibility = ""; nextBakeStep("Golden, crispy toast!"); }
+    else { bHint.textContent = "Put the toast on the plate!"; drawAppliance(s); }
   }
   if (FLOWS.includes(s.type)) drawBake();
 }
@@ -495,6 +510,7 @@ function startTimer(s) {
     bake.timer.t += Math.min(0.1, (now - last) / 1000);
     last = now;
     bake.v[s.id] = Math.min(1, bake.timer.t * 0.11);      // golden at 5 seconds, burnt at 9
+    if (s.autoStop && bake.timer.t >= s.seconds) { popUp(s); return; }
     if (s.appliance) drawAppliance(s); else drawDessert();
     bCtlTimer.textContent = bake.timer.t.toFixed(1) + "s";
     drawMeter(s);
@@ -503,6 +519,25 @@ function startTimer(s) {
   }
   requestAnimationFrame(tick);
 }
+
+// the toaster pops the bread up by itself; now you lift it out
+function popUp(s) {
+  bake.timer.phase = "popped";
+  bake.timer.t = s.seconds;
+  bake.v[s.id] = 0.55;                                  // perfectly golden
+  bHint.textContent = "Pop! The toast is ready. Drag it out onto the plate.";
+  drawBake();
+  restartAnimation(bAppliance, "pop");
+}
+
+// lifting the toast out of the toaster
+bAppliance.addEventListener("pointerdown", function (event) {
+  const s = bStep();
+  if (bake.busy || s.type !== "timer" || bake.timer.phase !== "popped") return;
+  const art = bake.recipe.draw(artState());
+  startCarry(event, { size: 0.62, tip: [0.5, 0.5], art: () => art });
+  drawAppliance(s);
+});
 
 function stopTimer() {
   const s = bStep();
@@ -626,6 +661,9 @@ bPlate.addEventListener("pointermove", function (event) {
 bPlate.addEventListener("keydown", function (event) {
   const s = bStep();
   if (bake.busy) return;
+  if (s.type === "timer" && bake.timer.phase === "popped" && event.key === "Enter") {
+    bArt.style.visibility = ""; nextBakeStep("Golden, crispy toast!"); return;
+  }
   if (s.type === "timer" && bake.timer.phase === "load" && event.key === "Enter") {
     bake.timer.phase = "ready"; bArt.style.visibility = "hidden"; drawBake(); bCtlBtn.focus(); return;
   }

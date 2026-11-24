@@ -533,8 +533,8 @@ const DESSERTS = {
     oneTool: true,
     tray: ["daisy", "heart", "mint", "cream"],
     steps: [
-      { id: "toast", type: "timer", appliance: "toaster", tool: "toaster", seconds: 5, text: "Toast for 5 seconds", start: "Push down ▶", stop: "Pop up!",
-        hint: "Drag the bread into the toaster and press Push down. Press Pop up! at 5 seconds." },
+      { id: "toast", type: "timer", appliance: "toaster", tool: "toaster", seconds: 5, autoStop: true, text: "Toast the bread", start: "Push down ▶",
+        hint: "Drag the bread into the toaster and press Push down. It pops up by itself, then lift the toast out onto the plate." },
       { id: "spread", type: "pipe", tool: "piping", carry: "piping", text: "Pipe pink cream",
         area: { x: 56, y: 40, w: 90, h: 126 }, target: [0.6, 0.9], max: 1.15, speed: 0.28,
         hint: "Pick up the piping bag and move it all over the toast: the pink cream flows out. Stop in the pink zone, then press Next step." },
