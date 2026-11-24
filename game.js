@@ -30,7 +30,7 @@ const MAX_SCOOPS = 5;
 
 // ---------- 3. Small helper functions ----------
 // A function is a reusable set of instructions. We "call" it with mochiSays("hi").
-// mood can be "awake" (the default) or "happy".
+// mood can be "awake" (the default), "happy" or "belly".
 // After a few seconds of quiet, Mochi drifts back to sleep.
 let napTimer = null;
 
@@ -109,7 +109,7 @@ const CHEF_CLICK_LINES = [
   "Psst… she sneaks me cream when nobody's looking.",
 ];
 
-// Things Mochi says when you wake him up by clicking him.
+// Things Mochi says when you click him (he rolls onto his back).
 const MOCHI_CLICK_LINES = [
   "Mrrp? I was napping…",
   "Five more minutes, nya…",
@@ -130,7 +130,7 @@ openButton.addEventListener("click", function () {
 
 mochi.addEventListener("click", function () {
   const index = Math.floor(Math.random() * MOCHI_CLICK_LINES.length);
-  mochiSays(MOCHI_CLICK_LINES[index]);
+  mochiSays(MOCHI_CLICK_LINES[index], "belly");   // he rolls over for belly rubs
 });
 
 chef.addEventListener("click", function () {

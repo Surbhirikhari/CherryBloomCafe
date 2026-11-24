@@ -27,9 +27,6 @@
   --dress-shade: #d9798f;
   --ribbon: #c4566b;
   --sleeve: #ffffff;
-  --cat: #ffffff;
-  --cat-line: #6e3a30;   /* Mochi's brown ink outline */
-  --cat-shade: #e6edf2;  /* soft blue-grey shadow on his white fur */
   --bowl: #f9d7e1;
   --bowl-inside: #fbeef2;
   --bowl-foot: #e8a9bc;
@@ -100,7 +97,7 @@ main {
 .btn-soft {
   color: var(--ink);
   background: var(--paper);
-  box-shadow: 0 4px 0 var(--cat-line);
+  box-shadow: 0 4px 0 var(--blossom);
 }
 .btn-big { font-size: 1.15rem; padding: 16px 32px; }
 
@@ -215,53 +212,46 @@ h1 {
   45% { transform: rotate(4deg); }
   70% { transform: rotate(-2deg); }
 }
-.mochi { width: 140px; margin-top: -60px; margin-left: 90px; cursor: pointer; overflow: visible; }
+.mochi { position: relative; width: 160px; height: 130px; margin-top: -50px; margin-left: 90px; cursor: pointer; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
-/* ---------- Mochi's animations ---------- */
+/* ---------- Mochi's poses and animations ---------- */
 
-/* idle: his loaf body squishes gently as he breathes */
-.mochi-body {
-  transform-origin: 110px 186px;
-  animation: mochi-breathe 3s ease-in-out infinite;
+/* All four pictures sit on top of each other, hidden. */
+.mochi-pose {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;             /* fit the whole picture inside the box */
+  object-position: bottom center;  /* and stand it on the floor */
+  transform-origin: 50% 100%;
+  display: none;
 }
-@keyframes mochi-breathe {
+
+/* Show only the picture for the current mood, each with its own animation.
+   "pose-pop" plays once when the picture appears; the second animation loops. */
+.mochi[data-mood="sleepy"] .pose-sleepy { display: block; animation: mochi-breathe 3s ease-in-out infinite; }
+.mochi[data-mood="awake"]  .pose-awake  { display: block; animation: pose-pop 0.35s ease-out, mochi-bob 2.4s ease-in-out 0.35s infinite; }
+.mochi[data-mood="happy"]  .pose-happy  { display: block; animation: pose-pop 0.35s ease-out, mochi-wiggle 0.5s ease-in-out 0.35s 3; }
+.mochi[data-mood="belly"]  .pose-belly  { display: block; animation: pose-pop 0.35s ease-out, mochi-wiggle 0.9s ease-in-out 0.35s infinite; }
+
+@keyframes pose-pop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  70%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes mochi-breathe {          /* sleepy loaf: slow squish */
   50% { transform: scale(1.03, 0.97); }
 }
-
-/* idle: tail wags */
-.mochi-tail {
-  transform-origin: 150px 182px;
-  animation: wag 1.6s ease-in-out infinite;
+@keyframes mochi-bob {              /* talking: little bob */
+  50% { transform: translateY(-3px); }
 }
-@keyframes wag {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(-10deg); }
+@keyframes mochi-wiggle {           /* stretching / belly up: wiggle */
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
 }
 
-/* moods: only show the eyes that match data-mood */
-.mochi-eyes { display: none; }
-.mochi[data-mood="sleepy"] .eyes-sleepy,
-.mochi[data-mood="awake"]  .eyes-awake,
-.mochi[data-mood="happy"]  .eyes-happy { display: inline; }
-
-/* sleepy: the Zzz float up one after another */
-.mochi-zzz { opacity: 0; transition: opacity 0.4s; }
-.mochi[data-mood="sleepy"] .mochi-zzz { opacity: 1; }
-.z { animation: zzz 2.4s ease-in-out infinite; }
-.z2 { animation-delay: 0.4s; }
-.z3 { animation-delay: 0.8s; }
-@keyframes zzz {
-  0%, 100% { transform: translateY(4px); opacity: 0.2; }
-  50%      { transform: translateY(-4px); opacity: 1; }
-}
-
-/* happy: a big stretchy squish */
-.mochi[data-mood="happy"] .mochi-body { animation: mochi-stretch 0.8s ease-in-out; }
-@keyframes mochi-stretch {
-  35% { transform: scale(1.12, 0.86); }
-  70% { transform: scale(0.95, 1.06); }
-}
 
 /* Speech bubble */
 .bubble {
@@ -356,12 +346,12 @@ h1 {
   .crew { grid-template-columns: auto auto; align-items: end; }
   .bubble { grid-column: 1 / -1; }
   .chef { width: 120px; }
-  .mochi { width: 110px; margin: 0; }
+  .mochi { width: 130px; height: 105px; margin: 0; }
   .crew-names { display: none; }
 }
 
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
-  .mochi-tail, .mochi-body, .z, .bounce,
+  .mochi-pose, .bounce,
   .chef-body, .chef-lids { animation: none; }
 }
