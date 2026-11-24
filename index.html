@@ -23,7 +23,7 @@
     <section id="screen-title" class="screen title-screen">
       <p class="eyebrow">open daily · matcha &amp; sweets</p>
       <h1>Cherry Blossom<br>Cafe</h1>
-      <p class="intro">Our chef and her cat Mochi are ready for the morning rush.
+      <p class="intro">Chef Bloom and her cat Mochi are ready for the morning rush.
         Today's first drink: an iced matcha latte.</p>
       <button id="btn-open" class="btn btn-big">Open the cafe</button>
     </section>
@@ -36,35 +36,43 @@
       <aside class="crew">
         <div class="bubble" id="mochi-says">Hello!</div>
 
-        <!-- The cafe owner. Original art used with the artist's permission.
-             The picture lives in assets/owner.png. We wrap it in an SVG so we can
-             draw small extras on top of it and animate them:
-             .chef-body breathes and sways, .chef-lids blink,
-             .chef-blush and .chef-heart appear when she's happy.
+        <!-- Chef Bloom, built from 17 separate picture layers (assets/bloom/).
+             Original art used with the artist's permission.
+             Layers are stacked in order, back to front, like sheets of paper.
+             Every layer is the same size (296 x 528), so they line up exactly.
+             Groups let parts move on their own:
+               .bloom-body   breathes and sways (everything)
+               .bloom-hair-* flows a little
+               .bloom-head   nods, shakes and tilts
+               .bloom-eye    blinks
+               .bloom-ribbon wiggles
              Click her to make her hop! -->
-        <svg id="chef" class="chef" viewBox="0 -40 297 572" role="img" aria-label="The cafe owner: long blonde hair, a pink headband, red ribbons and a pink dress">
-          <g class="chef-body">
-            <image href="assets/owner.png" x="0" y="0" width="297" height="532"/>
+        <svg id="chef" class="chef" viewBox="0 -40 296 568" role="img" aria-label="Chef Bloom: long blonde hair, a pink headband, red ribbons and a pink dress">
+          <g class="bloom-body">
+            <image class="bloom-hair-L" href="assets/bloom/hair_back_L.png" width="296" height="528"/>
+            <image class="bloom-hair-R" href="assets/bloom/hair_back_R.png" width="296" height="528"/>
+            <image href="assets/bloom/neck.png"  width="296" height="528"/>
+            <image href="assets/bloom/body.png"  width="296" height="528"/>
+            <image href="assets/bloom/bow.png"   width="296" height="528"/>
+            <image href="assets/bloom/hands.png" width="296" height="528"/>
+            <image href="assets/bloom/arm_L.png" width="296" height="528"/>
+            <image href="assets/bloom/arm_R.png" width="296" height="528"/>
 
-            <!-- eyelids for blinking: skin-coloured covers + a closed-eye curve -->
-            <g class="chef-lids">
-              <ellipse cx="120" cy="165" rx="8" ry="12.5" fill="#fbf4f1"/>
-              <ellipse cx="175.5" cy="165" rx="8" ry="12.5" fill="#fbf4f1"/>
-              <g fill="none" stroke="#3b2b2d" stroke-width="3.5" stroke-linecap="round">
-                <path d="M113 166 Q120 171 127 166"/>
-                <path d="M168.5 166 Q175.5 171 182.5 166"/>
-              </g>
-            </g>
-
-            <!-- extra-rosy cheeks for happy moments -->
-            <g class="chef-blush" fill="var(--blossom-deep)">
-              <ellipse cx="102" cy="184" rx="15" ry="8"/>
-              <ellipse cx="192" cy="184" rx="15" ry="8"/>
+            <g class="bloom-head">
+              <image href="assets/bloom/head.png"  width="296" height="528"/>
+              <image class="bloom-blush" href="assets/bloom/blush.png" width="296" height="528"/>
+              <image class="bloom-eye bloom-eye-L" href="assets/bloom/eye_L.png" width="296" height="528"/>
+              <image class="bloom-eye bloom-eye-R" href="assets/bloom/eye_R.png" width="296" height="528"/>
+              <image href="assets/bloom/nose.png" width="296" height="528"/>
+              <image href="assets/bloom/headband.png" width="296" height="528"/>
+              <image href="assets/bloom/hair_front.png" width="296" height="528"/>
+              <image class="bloom-ribbon bloom-ribbon-L" href="assets/bloom/ribbon_L.png" width="296" height="528"/>
+              <image class="bloom-ribbon bloom-ribbon-R" href="assets/bloom/ribbon_R.png" width="296" height="528"/>
             </g>
           </g>
 
           <!-- a little heart that floats up when she's happy -->
-          <path class="chef-heart" d="M270 34 C258 18 240 32 270 56 C300 32 282 18 270 34 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
+          <path class="chef-heart" d="M265 14 C253 -2 235 12 265 36 C295 12 277 -2 265 14 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
         </svg>
 
         <!-- Mochi the cat: four pictures, one for each mood.
@@ -76,7 +84,7 @@
           <img class="mochi-pose pose-happy" src="assets/mochi-happy.png" alt="">
           <img class="mochi-pose pose-belly" src="assets/mochi-belly.png" alt="">
         </div>
-        <p class="crew-names">Chef &amp; Mochi</p>
+        <p class="crew-names">Bloom &amp; Mochi</p>
       </aside>
 
       <!-- Right side: the order ticket and the work station -->

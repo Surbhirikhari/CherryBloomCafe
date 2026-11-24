@@ -77,7 +77,7 @@ function restartAnimation(element, className) {
   element.classList.add(className);
 }
 
-// Make the owner do a move: "hop", "nod" or "shake".
+// Make Chef Bloom do a move: "hop", "nod" or "shake".
 // The matching CSS lives in style.css under ".chef.do-hop" etc.
 function chefDoes(move) {
   chef.classList.remove("do-hop", "do-nod", "do-shake");
@@ -103,8 +103,8 @@ function mochiReactsToScoops() {
 
 // Things Mochi says when you click on the owner.
 const CHEF_CLICK_LINES = [
-  "She says hi! She's been up since 6 baking.",
-  "Her ribbons were a gift from her grandma, nya.",
+  "Bloom says hi! She's been up since 6 baking.",
+  "Bloom's ribbons were a gift from her grandma, nya.",
   "She hums while she whisks. Very off-key.",
   "Psst… she sneaks me cream when nobody's looking.",
 ];

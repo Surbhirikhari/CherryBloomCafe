@@ -144,48 +144,62 @@ h1 {
 }
 .chef  { width: 210px; cursor: pointer; overflow: visible; }
 
-/* ---------- The owner's animations ----------
+/* ---------- Chef Bloom's animations ----------
    "Idle" animations loop forever (infinite).
-   "Move" animations play once when game.js adds a class like .do-hop  */
+   "Move" animations play once when game.js adds a class like .do-hop
+   Numbers like "148px 524px" are spots on her layers (296 wide, 528 tall):
+   148px 524px = her feet, 150px 226px = her neck.  */
 
-/* Numbers like "148px 525px" below are spots on her picture
-   (the picture is 297 wide and 532 tall). 148px 525px = the middle of her feet. */
-
-/* idle: breathe (stretch up a tiny bit) and sway, rocking from her feet */
-.chef-body {
-  transform-origin: 148px 525px;
+/* idle: breathe and sway, rocking from her feet */
+.bloom-body {
+  transform-origin: 148px 524px;
   animation: breathe 3.6s ease-in-out infinite;
 }
 @keyframes breathe {
   0%, 100% { transform: rotate(-1deg) scaleY(1); }
-  50%      { transform: rotate(1deg) scaleY(1.015); }
+  50%      { transform: rotate(1deg) scaleY(1.012); }
 }
 
-/* idle: blink. The "lids" are skin-coloured shapes drawn over her eyes.
-   They're invisible (opacity 0) most of the time and flash on for a moment. */
-.chef-lids {
-  opacity: 0;
-  animation: blink 4.5s infinite;
+/* idle: her long hair flows, each side a little out of step */
+.bloom-hair-L { transform-origin: 87px 166px;  animation: hair-flow 3.6s ease-in-out infinite; }
+.bloom-hair-R { transform-origin: 206px 166px; animation: hair-flow 3.6s ease-in-out -1.8s infinite; }
+@keyframes hair-flow {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50%      { transform: rotate(1.5deg); }
 }
+
+/* idle: blink. Each eye squashes flat for a moment. */
+.bloom-eye { animation: blink 4.5s infinite; }
+.bloom-eye-L { transform-origin: 119.5px 162.5px; }
+.bloom-eye-R { transform-origin: 175px 163.5px; }
 @keyframes blink {
-  0%, 93%, 98%, 100% { opacity: 0; }
-  94%, 97%           { opacity: 1; }
+  0%, 93%, 99%, 100% { transform: scaleY(1); }
+  96%                { transform: scaleY(0.1); }
 }
 
-/* her extra blush and the heart only show during a hop */
-.chef-blush { opacity: 0; }
-.chef-heart { opacity: 0; transform-origin: 270px 40px; }
+/* idle: ribbons wiggle */
+.bloom-ribbon-L { transform-origin: 45px 158px;  animation: ribbon 1.8s ease-in-out infinite alternate; }
+.bloom-ribbon-R { transform-origin: 256px 166px; animation: ribbon 1.8s ease-in-out -0.9s infinite alternate; }
+@keyframes ribbon {
+  from { transform: rotate(-3deg); }
+  to   { transform: rotate(3deg); }
+}
 
-/* hover: lean in curiously */
-.chef { transition: transform 0.3s; }
-.chef:hover { transform: rotate(-3deg); }
+/* the head turns around her neck */
+.bloom-head { transform-origin: 150px 226px; transition: transform 0.3s; }
 
-/* move: happy hop (she blushes and a heart floats up) */
+/* hover: tilt her head curiously */
+.chef:hover .bloom-head { transform: rotate(-3deg); }
+
+/* the heart is invisible until she hops */
+.chef-heart { opacity: 0; transform-origin: 265px 20px; }
+
+/* move: happy hop (she blushes harder and a heart floats up) */
 .chef.do-hop { animation: hop 0.6s ease-out; }
 .chef.do-hop .chef-heart { animation: heart-up 1s ease-out; }
-.chef.do-hop .chef-blush { animation: blush 1.2s ease-out; }
+.chef.do-hop .bloom-blush { animation: blush 1.2s ease-out; }
 @keyframes blush {
-  30%, 70% { opacity: 0.55; }
+  40% { filter: saturate(2.2) brightness(0.95); }
 }
 @keyframes hop {
   0%   { transform: translateY(0); }
@@ -199,19 +213,20 @@ h1 {
   100% { opacity: 0; transform: translateY(-30px) scale(1); }
 }
 
-/* move: a little bow, like a nod ("yes, good!") */
-.chef.do-nod .chef-body { animation: nod 0.6s ease-in-out; }
+/* move: nod ("yes, good!") */
+.chef.do-nod .bloom-head { animation: nod 0.6s ease-in-out; }
 @keyframes nod {
-  40% { transform: rotate(3deg) scaleY(0.97); }
+  40% { transform: rotate(2deg) translateY(4px); }
 }
 
-/* move: worried wiggle ("oh no!") */
-.chef.do-shake .chef-body { animation: shake 0.6s ease-in-out; }
+/* move: worried head shake ("oh no!") */
+.chef.do-shake .bloom-head { animation: shake 0.6s ease-in-out; }
 @keyframes shake {
-  20% { transform: rotate(-4deg); }
-  45% { transform: rotate(4deg); }
+  20% { transform: rotate(-3.5deg); }
+  45% { transform: rotate(3.5deg); }
   70% { transform: rotate(-2deg); }
 }
+
 .mochi { position: relative; width: 160px; height: 130px; margin-top: -50px; margin-left: 90px; cursor: pointer; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
@@ -353,5 +368,5 @@ h1 {
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .mochi-pose, .bounce,
-  .chef-body, .chef-lids { animation: none; }
+  .bloom-body, .bloom-hair-L, .bloom-hair-R, .bloom-eye, .bloom-ribbon-L, .bloom-ribbon-R { animation: none; }
 }
