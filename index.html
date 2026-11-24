@@ -33,30 +33,21 @@
         <p class="eyebrow">open daily · matcha &amp; sweets</p>
         <h1>Cherry Blossom<br>Cafe</h1>
         <p class="intro">Chef Bloom and her cat Mochi are ready for the morning rush.
-          Today's first drink: an iced matcha latte.</p>
+          Serve drinks, make customers happy, earn coins.</p>
         <button id="btn-open" class="btn btn-big">Open the cafe</button>
       </div>
     </section>
 
     <!-- ============ SCREEN 2: KITCHEN ============ -->
     <!-- "hidden" means: don't show this yet. game.js removes it later.
-         Like most cooking games, the chef stands BEHIND the counter and
-         everything we cook with sits ON the counter in front of her. -->
+         Like most cooking games, the chef stands BEHIND the counter,
+         and customers come up beside it to order. -->
     <section id="screen-kitchen" class="screen kitchen" hidden>
 
-      <!-- Top: the order ticket and the recipe steps -->
+      <!-- Top: how many coins we've earned and customers we've served -->
       <div class="hud">
-        <div class="ticket">
-          <span class="ticket-label">Order</span>
-          <strong>Iced Matcha Latte</strong>
-        </div>
-        <!-- The recipe. Only step 1 works for now; we'll build the rest in later lessons. -->
-        <ol class="steps">
-          <li class="current">Scoop</li>
-          <li>Pour water</li>
-          <li>Whisk</li>
-          <li>Add milk</li>
-        </ol>
+        <span class="hud-item"><span class="coin" aria-hidden="true"></span> <strong id="coin-count">0</strong> coins</span>
+        <span class="hud-item">Served <strong id="served-count">0</strong></span>
       </div>
 
       <div class="kitchen-main">
@@ -125,8 +116,6 @@
           <svg class="bowl" viewBox="0 0 260 210" role="img" aria-label="Tea bowl">
             <g stroke="var(--cat-line)" stroke-width="4" stroke-linejoin="round">
               <ellipse cx="130" cy="70" rx="112" ry="26" fill="var(--bowl-inside)" stroke="none"/>
-              <!-- The matcha powder pile. game.js makes it bigger with each scoop. -->
-              <ellipse id="powder" cx="130" cy="82" rx="0" ry="0" fill="var(--powder)" stroke="none"/>
               <rect x="96" y="182" width="68" height="16" rx="5" fill="var(--bowl-foot)"/>
               <path d="M18 70 Q18 190 130 190 Q242 190 242 70 A112 26 0 0 1 18 70 Z" fill="var(--bowl)"/>
               <path d="M40 120 Q60 160 110 170" fill="none" stroke="var(--paper)" stroke-width="6" stroke-linecap="round" opacity=".7"/>
@@ -218,23 +207,66 @@
           <div class="bubble" id="mochi-says">Hello!</div>
         </div>
 
-        <!-- The recipe card: what to do right now -->
-        <div class="panel">
-          <h2>Scoop the matcha</h2>
-          <p>Use the chashaku (bamboo scoop). One scoop is about 1 gram.</p>
-          <p class="readout"><span id="scoop-count">0</span> scoops</p>
-          <div class="row">
-            <button id="btn-scoop" class="btn">Add a scoop</button>
-            <button id="btn-unscoop" class="btn btn-soft">Take one out</button>
-          </div>
+        <!-- The customer stands here, by the counter. game.js draws them. -->
+        <div id="customer" class="customer" hidden>
+          <button id="order-cloud" class="order-cloud" aria-label="See what this customer wants" hidden>
+            <svg viewBox="0 0 160 124" aria-hidden="true">
+              <g fill="var(--paper)" stroke="var(--cat-line)" stroke-width="4" stroke-linejoin="round">
+                <path d="M40 90 Q14 90 16 66 Q10 40 38 38 Q46 14 76 20 Q98 6 118 24 Q148 24 146 52 Q160 74 136 86 Q128 100 104 94 Q84 104 64 94 Q52 100 40 90 Z"/>
+                <circle cx="118" cy="106" r="7"/>
+                <circle cx="130" cy="118" r="4"/>
+              </g>
+            </svg>
+            <span id="cloud-drink" class="cloud-drink"></span>
+          </button>
+          <p id="customer-says" class="customer-says" hidden></p>
+          <span id="coin-pop" class="coin-pop" hidden></span>
+          <div id="customer-art" class="customer-art"></div>
         </div>
       </div>
+
+      <!-- The recipe card pops up when you click the thought cloud -->
+      <div id="recipe-card" class="modal" hidden>
+        <div class="recipe-card" role="dialog" aria-labelledby="recipe-title">
+          <p id="recipe-for" class="recipe-for"></p>
+          <h2 id="recipe-title"></h2>
+          <div id="recipe-cup" class="recipe-cup"></div>
+          <ol id="recipe-steps" class="recipe-steps"></ol>
+          <p class="recipe-price"><span class="coin" aria-hidden="true"></span> <span id="recipe-price"></span> coins</p>
+          <button id="btn-continue" class="btn btn-big">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 3: THE KITCHEN TABLE ============ -->
+    <!-- Here we make the drink: click ingredients to pour them into the glass. -->
+    <section id="screen-prep" class="screen prep" hidden>
+      <div class="prep-table">
+        <div class="cup-spot">
+          <div id="prep-cup" class="prep-cup"></div>
+          <div class="coaster"></div>
+        </div>
+        <div id="ingredients" class="ingredients"></div>
+      </div>
+
+      <aside class="recipe-note">
+        <p class="note-label">Making</p>
+        <h2 id="note-title"></h2>
+        <ol id="note-steps" class="note-steps"></ol>
+        <p id="prep-hint" class="prep-hint" aria-live="polite"></p>
+        <div class="row">
+          <button id="btn-start-over" class="btn btn-soft">Start over</button>
+          <button id="btn-done" class="btn" disabled>Done</button>
+        </div>
+      </aside>
     </section>
   </main>
 
   <script src="paint.js"></script>
   <script src="street.js"></script>
   <script src="room.js"></script>
+  <script src="menu.js"></script>
+  <script src="customers.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

@@ -49,6 +49,7 @@
 
 body {
   margin: 0;
+  overflow-x: clip;               /* customers walk in from off-screen without a sideways scrollbar */
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--ink);
@@ -248,10 +249,8 @@ h1 {
 }
 
 .kitchen-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 16px;
-  align-items: center;
+  position: relative;
+  padding-right: 26%;                  /* room on the right for the customer */
   align-self: end;                     /* sit at the bottom of the screen... */
   margin-bottom: calc(var(--floor-height) * 0.82 - 48px);   /* ...with the counter's base on the floor */
 }
@@ -470,68 +469,289 @@ h1 {
   border-bottom: 0;
 }
 
-/* ---------- 7. Order ticket, steps and recipe card ---------- */
+/* ---------- 7. The customer loop ---------- */
 
-.ticket { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 1.1rem; }
-.ticket-label {
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--paper);
-  background: var(--matcha-deep);
-  border-radius: 6px;
-  padding: 3px 8px;
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* coins and customers served, in the top bar of the kitchen */
+.hud-item { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.coin {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff1b8, #f2c157 60%, #d99a3b);
+  border: 2px solid var(--cat-line);
+  vertical-align: -0.2em;
 }
 
-/* The recipe steps, shown as little numbered pills */
-.steps {
+/* --- the customer, standing on the floor beside the counter --- */
+.customer {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--floor-height) * -0.3);   /* a little in front of the counter */
+  width: 24%;
+  z-index: 2;
+}
+.customer-art { position: relative; }
+.customer-svg { display: block; width: 100%; overflow: visible; }
+
+/* only show the face that matches data-mood */
+.face { display: none; }
+.customer[data-mood="waiting"] .face-waiting,
+.customer[data-mood="happy"]   .face-happy,
+.customer[data-mood="sad"]     .face-sad { display: inline; }
+
+/* idle: a gentle sway while they wait */
+.customer-body { transform-origin: 100px 330px; animation: customer-idle 3s ease-in-out infinite; }
+@keyframes customer-idle { 50% { transform: rotate(0.8deg) scaleY(1.012); } }
+
+/* walking in from the right, and back out again */
+.customer.walk-in  { animation: walk-in 1.6s ease-out; }
+.customer.walk-out { animation: walk-out 1.4s ease-in forwards; }
+@keyframes walk-in  { from { transform: translateX(70vw); } }
+@keyframes walk-out { to   { transform: translateX(70vw); } }
+.customer.walk-in .customer-body,
+.customer.walk-out .customer-body { animation: customer-bob 0.3s ease-in-out infinite alternate; }
+@keyframes customer-bob { to { transform: translateY(-6px) rotate(-2deg); } }
+
+/* a happy little hop when they like their drink (reuses Bloom's "hop") */
+.customer.happy-hop .customer-art { animation: hop 0.6s ease-out 2; }
+
+/* the thought cloud: floats gently and asks to be clicked */
+.order-cloud {
+  position: absolute;
+  left: -38%;
+  top: -14%;
+  width: 70%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 3;
+  filter: drop-shadow(0 4px 0 rgba(65, 44, 44, 0.12));
+  animation: cloud-float 2.4s ease-in-out infinite;
+}
+.order-cloud.pop { animation: pop 0.35s ease-out, cloud-float 2.4s ease-in-out 0.35s infinite; }
+.order-cloud:hover { filter: drop-shadow(0 4px 0 rgba(65, 44, 44, 0.12)) brightness(1.04); }
+.order-cloud:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; border-radius: 40%; }
+.order-cloud svg { display: block; width: 100%; }
+.cloud-drink { position: absolute; left: 37%; top: 16%; width: 25%; }
+@keyframes cloud-float { 50% { transform: translateY(-6px); } }
+@keyframes pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  70%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.35s ease-out; }
+
+/* what the customer says after tasting, and the coins they pay */
+.customer-says {
+  position: absolute;
+  left: -40%;
+  top: -4%;
+  max-width: 220px;
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--paper);
+  border: 3px solid var(--cat-line);
+  border-radius: 16px;
+  font-weight: 800;
+  z-index: 3;
+}
+.coin-pop {
+  position: absolute;
+  right: 8%;
+  top: 8%;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: #c98a1c;
+  text-shadow: 2px 2px 0 var(--paper);
+  z-index: 3;
+}
+.rise { animation: rise 1.4s ease-out forwards; }
+@keyframes rise {
+  0%   { transform: translateY(10px) scale(0.6); opacity: 0; }
+  20%  { transform: translateY(0) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* --- the recipe card (a pop-up over the counter) --- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(65, 44, 44, 0.35);
+}
+.recipe-card {
+  width: min(400px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: var(--paper);
+  border: 3px solid var(--cat-line);
+  border-radius: 24px;
+  box-shadow: 0 10px 0 rgba(65, 44, 44, 0.15);
+  animation: pop 0.3s ease-out;
+}
+.recipe-for, .note-label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--blossom-deep);
+}
+.recipe-card h2, .recipe-note h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--matcha-deep);
+}
+.recipe-cup { width: 84px; }
+.recipe-price { margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.1rem; }
+
+/* numbered ingredient lists, on the recipe card and on the note */
+.recipe-steps, .note-steps {
   list-style: none;
   counter-reset: step;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 8px;
+  width: 100%;
   margin: 0;
   padding: 0;
 }
-.steps li {
+.recipe-steps li, .note-steps li {
   counter-increment: step;
-  padding: 6px 12px;
-  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px;
+  border-radius: 14px;
   background: var(--petal-bg);
-  font-weight: 600;
-  font-size: 0.9rem;
-  opacity: 0.6;
+  font-weight: 700;
+  text-align: left;
 }
-.steps li::before { content: counter(step) ". "; }
-.steps li.current { background: var(--matcha); color: #23361a; opacity: 1; }
+.recipe-steps li::before, .note-steps li::before {
+  content: counter(step);
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blossom-deep);
+  color: var(--paper);
+  font-size: 0.8rem;
+}
+.recipe-steps .icon-svg, .note-steps .icon-svg { flex: none; width: 34px; height: 34px; }
+.note-steps li.done { background: #dcebc8; }
+.note-steps li.done::after { content: "✓"; margin-left: auto; color: var(--matcha-deep); font-weight: 900; }
+.note-steps li.next { background: var(--paper); outline: 3px dashed var(--blossom-deep); outline-offset: -3px; }
 
-.panel {
+/* --- the kitchen table screen --- */
+.scene-inside { transition: opacity 0.8s ease, filter 0.4s; }
+.scene.blurred .scene-inside { filter: blur(5px); }
+
+.prep {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 18px;
+  align-items: end;
+  min-height: calc(100vh - 120px);
+}
+/* the wooden table top, seen up close */
+.prep-table {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 20px;
+  align-items: end;
+  padding: 24px 22px 28px;
+  border: 3px solid var(--cat-line);
+  border-radius: 22px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 38px, rgba(65, 44, 44, 0.1) 38px 40px),
+    linear-gradient(#efcfa8, #ddb184);
+  box-shadow: 0 10px 0 #c9976a;
+}
+.cup-spot { display: grid; justify-items: center; }
+.prep-cup { position: relative; z-index: 1; width: 150px; }
+.coaster {
+  width: 170px;
+  height: 18px;
+  margin-top: -12px;
+  border-radius: 50%;
+  background: var(--blossom);
+  border: 3px solid var(--cat-line);
+}
+/* the newest pour slides up from the bottom */
+.layer-new { transform-box: fill-box; transform-origin: 50% 100%; animation: pour-in 0.35s ease-out; }
+@keyframes pour-in { from { transform: scaleY(0); } }
+
+/* the ingredient jars: big friendly buttons */
+.ingredients { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ingredient {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  font: 800 0.85rem var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--cat-line);
+  border-radius: 18px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(65, 44, 44, 0.25);
+  transition: transform 0.1s;
+}
+.ingredient:hover { transform: translateY(-3px); }
+.ingredient:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(65, 44, 44, 0.25); }
+.ingredient:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 3px; }
+.ingredient .icon-svg { width: 100%; max-width: 64px; }
+.ingredient.tapped { animation: tapped 0.25s; }
+@keyframes tapped { 50% { transform: scale(0.92); } }
+
+/* the recipe note, taped up beside the table */
+.recipe-note {
+  position: relative;
   display: grid;
   gap: 10px;
-  justify-items: start;
-  padding: 18px;
-  background: var(--paper-glass);
-  backdrop-filter: blur(6px);
-  border: 3px solid var(--blossom);
-  border-radius: 22px;
+  padding: 22px 18px 18px;
+  background: #fffdf7;
+  border: 3px solid var(--cat-line);
+  border-radius: 6px 6px 18px 18px;
+  box-shadow: 0 8px 0 rgba(65, 44, 44, 0.12);
+  transform: rotate(-1.5deg);
 }
-.panel h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--matcha-deep); }
-.panel p { margin: 0; line-height: 1.5; }
-.readout { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-.row { display: flex; flex-wrap: wrap; gap: 10px; }
-
-/* A little bounce we add to the bowl from game.js */
-.bounce { animation: bounce 0.3s ease-out; }
-@keyframes bounce {
-  40% { transform: scale(1.04, 0.96); }
+.recipe-note::before {          /* a strip of pink tape */
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 84px;
+  height: 22px;
+  margin-left: -42px;
+  background: rgba(246, 184, 203, 0.8);
+  transform: rotate(3deg);
 }
+.prep-hint { margin: 0; min-height: 2.8em; font-weight: 700; color: var(--blossom-deep); }
 
 /* ---------- 8. Phones ---------- */
 @media (max-width: 720px) {
   .title-screen { justify-items: center; }
-  .kitchen-main { grid-template-columns: 1fr; }
-  .kitchen-main .panel { order: -1; }   /* on phones the recipe card goes above the counter */
+  .kitchen-main { padding-right: 0; }
+  .customer { width: 34%; }
+  .order-cloud { left: -20%; }
+  .customer-says { left: -60%; }
+  .prep, .prep-table { grid-template-columns: 1fr; }
+  .prep { align-items: start; }
   .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }
 }
 
@@ -540,6 +760,7 @@ h1 {
   .scene.entering .scene-outside { transform: none; }
   .petals { display: none; }
   .walker, .bob, .leg { animation: none; }
+  .customer-body, .order-cloud { animation: none; }
   .mochi-tail, .mochi-body, .z, .bounce, .petal,
   .bloom-body, .bloom-hair-L, .bloom-hair-R, .bloom-eye, .bloom-ribbon-L, .bloom-ribbon-R { animation: none; }
 }
