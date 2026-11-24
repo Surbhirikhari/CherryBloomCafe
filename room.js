@@ -2,7 +2,7 @@
 // Cherry Blossom Cafe — room.js
 // Paints the inside of the cafe in the same watercolour style as the street:
 // wallpaper, windows with pink curtains, shelves behind the counter,
-// hanging lamps, a wooden floor, and seats with customers.
+// hanging lamps, a wooden floor, a window bench and plants.
 // Uses the brushes from paint.js.
 // =========================================================
 
@@ -22,11 +22,6 @@
         <stop offset="0" stop-color="#fbe9ee"/>
         <stop offset="1" stop-color="#fdf6ef"/>
       </linearGradient>
-      <pattern id="r-gingham" width="20" height="20" patternUnits="userSpaceOnUse">
-        <rect width="20" height="20" fill="#fbecef"/>
-        <rect width="10" height="20" fill="#f4bfcb" opacity="0.55"/>
-        <rect width="20" height="10" fill="#f4bfcb" opacity="0.55"/>
-      </pattern>
     </defs>`;
 
   const walls = el("g", { filter: "url(#r-wc)" });
@@ -176,7 +171,7 @@
   }
   wash(box(-20, 612, 1640, 12, 1), "#d8ad86", floor);              // skirting board
 
-  // ---------- 6. Seats ----------
+  // ---------- 6. Window bench and plants ----------
   const seats = el("g", { filter: "url(#r-wc)" });
   const seatInk = el("g", { filter: "url(#r-ink)", opacity: 0.9 });
 
@@ -185,80 +180,6 @@
   wash(`M1206 436 Q1210 420 1240 418 L1500 418 Q1532 420 1534 436 Z`, "#f4a9bb", seats);
   for (const px of [1250, 1330, 1410, 1490]) wash(`M${px - 26} 420 Q${px - 30} 392 ${px} 388 Q${px + 30} 392 ${px + 26} 420 Z`, pick(["#fbecef", "#f7d0d8", "#cfe3b8"]), seats);
   ink(box(1200, 436, 340, 30, 1), seatInk, 1.4);
-
-  // a round table with a gingham cloth
-  function table(cx, y, scale) {
-    const s = scale;
-    el("ellipse", { cx, cy: y + 112 * s, rx: 80 * s, ry: 12 * s, fill: "#b89a85", opacity: 0.35 }, seats);    // shadow
-    ink(`M${cx} ${y + 40 * s} L${cx} ${y + 108 * s} M${cx - 30 * s} ${y + 110 * s} L${cx + 30 * s} ${y + 110 * s}`, seatInk, 3);
-    const cloth = `M${cx - 72 * s} ${y} Q${cx} ${y - 22 * s} ${cx + 72 * s} ${y} L${cx + 80 * s} ${y + 46 * s} Q${cx + 40 * s} ${y + 58 * s} ${cx} ${y + 50 * s} Q${cx - 40 * s} ${y + 58 * s} ${cx - 80 * s} ${y + 46 * s} Z`;
-    wash(cloth, "url(#r-gingham)", seats, 1);
-    ink(cloth, seatInk, 1.6);
-  }
-  // a chunky wooden chair with a pink cushion.
-  // x = the side with the backrest, y = seat height, dir 1 = faces right, -1 = faces left
-  function chair(x, y, dir, scale) {
-    const s = scale;
-    const wood = (d, width) => {
-      el("path", { d, stroke: "#5f463d", "stroke-width": (width + 3) * s, "stroke-linecap": "round", fill: "none", opacity: 0.8 }, seats);
-      el("path", { d, stroke: "#c48d5c", "stroke-width": width * s, "stroke-linecap": "round", fill: "none" }, seats);
-    };
-    const far = x + 46 * s * dir;
-    wood(`M${x} ${y} L${x} ${y + 70 * s}`, 7);                         // back leg
-    wood(`M${far} ${y} L${far} ${y + 70 * s}`, 7);                     // front leg
-    wood(`M${x} ${y + 40 * s} L${far} ${y + 40 * s}`, 4);             // rung
-    wood(`M${x} ${y} L${x - 6 * s * dir} ${y - 80 * s}`, 7);            // backrest post
-    wood(`M${x - 8 * s * dir} ${y - 76 * s} L${x + 2 * s * dir} ${y - 76 * s}`, 9);   // top rail
-    wood(`M${x - 3 * s * dir} ${y - 40 * s} L${x + 1 * s * dir} ${y - 40 * s}`, 6);
-    wash(box(Math.min(x, far) - 4, y - 6 * s, 54 * s, 11 * s, 1), "#c48d5c", seats);   // seat
-    const cx = (x + far) / 2;
-    wash(`M${cx - 26 * s} ${y - 5 * s} Q${cx - 26 * s} ${y - 16 * s} ${cx} ${y - 16 * s} Q${cx + 26 * s} ${y - 16 * s} ${cx + 26 * s} ${y - 5 * s} Z`, "#f19fb3", seats);  // cushion
-  }
-  // a customer sitting on a chair, enjoying a drink
-  function customer(x, y, dir, s, c) {
-    const g = el("g", { transform: `translate(${x} ${y}) scale(${dir * s} ${s})`, filter: "url(#r-ink)" });
-    el("path", { d: "M2 -6 L28 -6 L28 40", stroke: c.legs, "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none" }, g);
-    el("path", { d: "M-14 -2 Q-18 -52 2 -60 Q22 -54 20 -4 Q4 2 -14 -2 Z", fill: c.coat, stroke: OUTLINE, "stroke-width": 1.8 }, g);
-    el("path", { d: "M8 -50 Q22 -40 30 -34", stroke: darker(c.coat, 0.15), "stroke-width": 7, "stroke-linecap": "round", fill: "none" }, g);
-    el("circle", { cx: 2, cy: -74, r: 14, fill: c.skin, stroke: OUTLINE, "stroke-width": 1.7 }, g);
-    const HAIR = {
-      bun:  "M-12 -72 Q-14 -90 2 -90 Q16 -90 16 -76 Q6 -82 -12 -72 Z M-14 -92 A7 7 0 1 0 0 -92 A7 7 0 1 0 -14 -92",
-      long: "M-12 -74 Q-16 -92 2 -91 Q18 -90 16 -75 Q8 -82 -2 -78 Q-4 -62 0 -54 L-16 -54 Q-18 -64 -12 -74 Z",
-      short:"M-12 -70 Q-16 -91 2 -90 Q17 -89 16 -76 Q6 -82 -4 -76 Q-8 -70 -12 -70 Z",
-    };
-    el("path", { d: HAIR[c.hair], fill: c.hairColor, stroke: OUTLINE, "stroke-width": 1.4 }, g);
-    el("path", { d: "M6 -76 Q9 -73 12 -76", stroke: OUTLINE, "stroke-width": 1.6, fill: "none" }, g);   // happy closed eye
-    el("circle", { cx: 9, cy: -68, r: 3, fill: "#f4a9b6", opacity: 0.7 }, g);
-  }
-  function drinkAndCake(cx, y) {
-    wash(`M${cx - 8} ${y - 26} L${cx + 8} ${y - 26} L${cx + 6} ${y} L${cx - 6} ${y} Z`, "#bcd99a", seats);  // matcha latte
-    el("rect", { x: cx - 6, y: y - 12, width: 12, height: 11, fill: "#fbf6ef", opacity: 0.8 }, seats);
-    ink(`M${cx - 8} ${y - 26} L${cx + 8} ${y - 26} L${cx + 6} ${y} L${cx - 6} ${y} Z M${cx + 3} ${y - 26} L${cx + 8} ${y - 40}`, seatInk, 1.4);
-    el("ellipse", { cx: cx + 34, cy: y, rx: 18, ry: 5, fill: "#fbf6ef" }, seats);
-    wash(`M${cx + 24} ${y - 2} L${cx + 44} ${y - 2} L${cx + 40} ${y - 18} Z`, "#f7d0d8", seats);       // cake slice
-    el("circle", { cx: cx + 40, cy: y - 20, r: 3.5, fill: "#d9475f" }, seats);
-  }
-
-  // left table: two friends chatting
-  chair(150, 742, 1, 1);
-  table(300, 700, 1);
-  chair(452, 742, -1, 1);
-  customer(176, 736, 1, 1.05, { coat: "#a9bccb", legs: "#5e6270", skin: "#f7ddcd", hair: "bun", hairColor: "#6b4335" });
-  customer(428, 736, -1, 1.05, { coat: "#f2c6cf", legs: "#7a6f80", skin: "#e9c4a8", hair: "long", hairColor: "#3f2f2b" });
-  drinkAndCake(280, 698);
-
-  // right table: one person with a book, and an empty chair waiting for you
-  chair(1160, 750, 1, 1);
-  table(1310, 708, 1);
-  chair(1462, 750, -1, 1);
-  customer(1186, 744, 1, 1.05, { coat: "#9db391", legs: "#6a5a55", skin: "#d9ad8c", hair: "short", hairColor: "#4b342c" });
-  drinkAndCake(1300, 706);
-  wash(box(1336, 690, 30, 14, 1), "#c7aed3", seats);                    // a book
-
-  // small table in the middle, nearest to us
-  chair(640, 830, 1, 1.15);
-  table(800, 790, 1.15);
-  chair(958, 830, -1, 1.15);
 
   // potted plants in the corners
   function bigPlant(x, y) {
