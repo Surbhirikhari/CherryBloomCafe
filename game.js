@@ -153,6 +153,10 @@ async function customerArrives() {
   customerEl.hidden = false;
   restartAnimation(customerEl, "walk-in");
   await wait(1600);
+  // They've arrived: take the walk-in animation off. Otherwise, when we come
+  // back from the kitchen, the counter screen is shown again, the browser
+  // replays the animation, and they walk in all over again.
+  customerEl.classList.remove("walk-in");
 
   // the thought cloud pops up
   orderCloud.hidden = false;
