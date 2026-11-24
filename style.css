@@ -177,6 +177,7 @@ main {
 
 /* ---------- 3. Top bar ---------- */
 .topbar {
+  position: relative;            /* so the sound buttons can sit in its corner */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -189,6 +190,48 @@ main {
   color: var(--paper);
   font-size: 1.05rem;
   letter-spacing: 0.02em;
+}
+
+/* the music and sound buttons, in the top bar's right corner */
+.sound-buttons {
+  position: absolute;
+  top: 50%;
+  right: max(10px, env(safe-area-inset-right, 0px));
+  transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+}
+.sound-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--topbar-height) - 14px);
+  height: calc(var(--topbar-height) - 14px);
+  min-width: 24px;
+  min-height: 24px;
+  padding: 4px;
+  border: none;
+  border-radius: 50%;
+  color: var(--matcha-deep);
+  background: var(--paper);
+  cursor: var(--cursor-click);
+  transition: transform 0.15s, opacity 0.15s;
+}
+.sound-btn:hover { transform: scale(1.1); }
+.sound-btn:focus-visible { outline: 3px solid var(--blossom); outline-offset: 2px; }
+.sound-btn svg { width: 100%; height: 100%; }
+/* turned off: faded, with a pink line through it */
+.sound-btn[aria-pressed="false"] { opacity: 0.6; }
+.sound-btn[aria-pressed="false"]::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 50%;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--blossom-deep);
+  transform: rotate(-45deg);
 }
 
 /* ---------- 4. Buttons ---------- */

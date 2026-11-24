@@ -77,6 +77,7 @@ function openBakeStation(id, onDone) {
 
 function resetBake() {
   endCarry(null, true);
+  Sound.hush();
   bake.timer = { phase: "", t: 0 };
   bake.index = 0;
   bake.v = {};
@@ -102,8 +103,10 @@ function startStep() {
   if (s.type === "timer" && s.clickPlate) startTimer(s);      // the pan is already hot
 }
 
-function nextBakeStep(message) {
+function nextBakeStep(message, perfect = true) {
   endCarry(null, true);
+  Sound.hush();
+  Sound.stepDone(perfect);
   const s = bStep();
   bake.done.add(s.id);
   bake.busy = true;
@@ -149,7 +152,7 @@ function commitStep() {
     why = value > s.times ? "A few too many. " : "A few too few. ";
   }
   bake.scores.push({ label: s.text, pct });
-  nextBakeStep(pct === 100 ? "Perfect! 100%" : why + pct + "%");
+  nextBakeStep(pct === 100 ? "Perfect! 100%" : why + pct + "%", pct === 100);
 }
 
 
@@ -205,6 +208,7 @@ function drawSide(s) {
     bToolArt.innerHTML = TOOL_ART[s.tool]();
     bTool.dataset.tool = s.tool;
     restartAnimation(bTool, "arrive");
+    Sound.tok();
   }
   bToolLabel.textContent = toolLabel(s);
   bTool.disabled = bake.busy || (s.type === "swipe" && !s.carry) || s.type === "timer";
@@ -322,6 +326,7 @@ bTool.addEventListener("click", function (event) {
     if (bake.v[s.id] >= s.times + 3) { bHint.textContent = "That's plenty!"; return; }
     bake.v[s.id] = bake.v[s.id] + 1;
     restartAnimation(bTool, "tapped");
+    Sound.grind();
     bHint.textContent = bake.v[s.id] + (bake.v[s.id] === 1 ? " turn." : " turns.") + " Press Next step when you think it's right.";
     drawBake();
   }
@@ -362,6 +367,7 @@ function startCarry(event, look) {
   bCarry.style.setProperty("--tilt", (look.tilt || 0) + "deg");
   bCarry.hidden = false;
   bTool.classList.add("lifted");
+  Sound.tok(true);
   moveCarry(event);
   document.addEventListener("pointermove", moveCarry);
   document.addEventListener("pointerup", onCarryUp);
@@ -425,6 +431,7 @@ function onCarryUp() { endCarry(null, false); }
 // let go: the tool goes back on the table
 function endCarry(event, quiet) {
   if (!carry.on) return;
+  Sound.stopFlow();
   const s = carry.s;
   const wasOver = carry.over, intoAppliance = carry.overAppliance, ontoPlate = carry.overPlate;
   carry.on = false;
@@ -447,6 +454,7 @@ function endCarry(event, quiet) {
   }
   if (s.type === "timer" && bake.timer.phase === "load") {
     if (intoAppliance) {
+      Sound.load(s.appliance);
       bake.timer.phase = "ready";
       bArt.style.visibility = "hidden";                // it's in the oven now
       bHint.textContent = "It's in! Press " + (s.start || "Start ▶") + " on the " + s.appliance + ".";
@@ -457,7 +465,7 @@ function endCarry(event, quiet) {
     }
   }
   if (s.type === "timer" && bake.timer.phase === "popped") {
-    if (ontoPlate) { bArt.style.visibility = ""; nextBakeStep("Golden, crispy toast!"); }
+    if (ontoPlate) { bArt.style.visibility = ""; Sound.plate(); nextBakeStep("Golden, crispy toast!"); }
     else { bHint.textContent = "Put the toast on the plate!"; drawAppliance(s); }
   }
   if (FLOWS.includes(s.type)) drawBake();
@@ -468,6 +476,7 @@ function dropOne(s) {
   if (bake.v[s.id] >= s.times + 3) { bHint.textContent = "That's plenty!"; return; }
   bake.v[s.id] = bake.v[s.id] + 1;
   restartAnimation(bPlate, "yay");
+  Sound.drop(s.tool);
   bHint.textContent = "Plop! " + bake.v[s.id] + " in. The recipe says " + s.times + ". Press Next step when you're happy.";
   drawBake();
 }
@@ -480,6 +489,8 @@ function startFlow(s) {
     if (!carry.on || carry.s !== s) return;
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
+    // the sound: flowing while it's over the dessert, and higher as it fills up
+    Sound.flow(s.tool, carry.over && bake.v[s.id] < s.max, bake.v[s.id] / s.max);
     if (carry.over && bake.v[s.id] < s.max) {
       bake.v[s.id] = Math.min(s.max, bake.v[s.id] + s.speed * dt);
       const marks = bake.marks[s.id];
@@ -506,8 +517,12 @@ function startFlow(s) {
 
 
 // ---------- timer: the oven, the toaster, the pan, the espresso machine ----------
+// which machine sound goes with a timer step
+function machineOf(s) { return s.appliance || (s.clickPlate ? "pan" : "brew"); }
+
 function startTimer(s) {
   bake.timer = { phase: "running", t: 0 };
+  Sound.timerStart(machineOf(s));
   if (s.appliance) bArt.style.visibility = "hidden";     // it's inside the oven now
   bHint.textContent = s.clickPlate
     ? "It's cooking! Click the crêpe to flip it at " + s.seconds + " seconds."
@@ -535,6 +550,7 @@ function popUp(s) {
   bake.timer.phase = "popped";
   bake.timer.t = s.seconds;
   bake.v[s.id] = 0.55;                                  // perfectly golden
+  Sound.toasterPop();
   bHint.textContent = "Pop! The toast is ready. Drag it out onto the plate.";
   drawBake();
   restartAnimation(bAppliance, "pop");
@@ -552,6 +568,7 @@ bAppliance.addEventListener("pointerdown", function (event) {
 // flip! (a quick flip animation, then the timer is judged)
 function flipIt() {
   restartAnimation(bArt, "flip");
+  Sound.flip();
   stopTimer();
 }
 
@@ -559,13 +576,14 @@ function stopTimer() {
   const s = bStep();
   if (s.type !== "timer" || bake.timer.phase !== "running") return;
   bake.timer.phase = "done";
+  Sound.timerStop(machineOf(s));
   bArt.style.visibility = "";
   const t = bake.timer.t;
   const pct = closeness(t, s.seconds - 0.3, s.seconds + 0.3, 4);
   bake.scores.push({ label: s.text, pct });
   nextBakeStep(pct === 100
     ? "Perfect timing! " + t.toFixed(1) + "s · 100%"
-    : (t < s.seconds ? "A little early (" : "A little late (") + t.toFixed(1) + "s) · " + pct + "%");
+    : (t < s.seconds ? "A little early (" : "A little late (") + t.toFixed(1) + "s) · " + pct + "%", pct === 100);
 }
 
 bNext.addEventListener("click", commitStep);
@@ -595,6 +613,7 @@ function rubAt(s, x, y) {
   const lastMark = marks[marks.length - 1];
   if (lastMark && Math.hypot(lastMark.x - x, lastMark.y - y) < 6) return;
   marks.push({ x, y });
+  Sound.sift();
   drag2.cells.forEach(function (c, i) { if (Math.hypot(c.x - x, c.y - y) < 18) drag2.touched.add(i); });
   bake.v[s.id] = drag2.touched.size / drag2.cells.length;
   bNext.disabled = false;
@@ -608,6 +627,7 @@ function swipeTo(s, x, y) {
   const progress = Math.max(bake.v[s.id] || 0, Math.min(1, along / 110));
   if (progress === bake.v[s.id]) return;
   bake.v[s.id] = progress;
+  Sound.swipe(s.tool);
   drawDessert();
   drawMeter(s);
   if (progress >= 1) {
@@ -626,7 +646,7 @@ function stirTo(s, x) {
   if (Math.abs(dx) < 0.5) return;
   const dir = Math.sign(dx);
   if (stir.dir !== 0 && dir !== stir.dir) {
-    if (stir.travel > 18) addStir(s);
+    if (stir.travel > 18) { Sound.stir(s.tool); addStir(s); }
     stir.travel = 0;
   }
   stir.dir = dir;
@@ -683,10 +703,10 @@ bPlate.addEventListener("keydown", function (event) {
     event.preventDefault(); flipIt(); return;
   }
   if (s.type === "timer" && bake.timer.phase === "popped" && event.key === "Enter") {
-    bArt.style.visibility = ""; nextBakeStep("Golden, crispy toast!"); return;
+    bArt.style.visibility = ""; Sound.plate(); nextBakeStep("Golden, crispy toast!"); return;
   }
   if (s.type === "timer" && bake.timer.phase === "load" && event.key === "Enter") {
-    bake.timer.phase = "ready"; bArt.style.visibility = "hidden"; drawBake(); bCtlBtn.focus(); return;
+    Sound.load(s.appliance); bake.timer.phase = "ready"; bArt.style.visibility = "hidden"; drawBake(); bCtlBtn.focus(); return;
   }
   if (!event.key.startsWith("Arrow")) return;
   event.preventDefault();
@@ -696,7 +716,7 @@ bPlate.addEventListener("keydown", function (event) {
   }
   if (s.type === "stir") {
     const dir = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
-    if (dir !== stir.dir) addStir(s);
+    if (dir !== stir.dir) { Sound.stir(s.tool); addStir(s); }
     stir.dir = dir;
   }
   if (s.type === "swipe") {
@@ -708,7 +728,7 @@ bPlate.addEventListener("keydown", function (event) {
 
 
 // ---------- Start over, and Done ----------
-bRestart.addEventListener("click", resetBake);
+bRestart.addEventListener("click", function () { Sound.whoosh(); resetBake(); });
 
 bDone.addEventListener("click", function () {
   bake.onDone(bake.scores, Decor.art(bake.recipe.draw(artState())), Decor.count());

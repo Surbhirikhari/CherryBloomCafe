@@ -228,6 +228,7 @@ function chop(i, button) {
 
   decor.berries[i] = decor.berries[i] + 1;
   if (decor.berries[i] >= 3) decor.slices = decor.slices + 4;    // it falls into slices
+  Sound.chop(decor.berries[i] >= 3);
   setTimeout(drawBerries, 160);
 }
 
@@ -273,7 +274,7 @@ function onDragEnd(event) {
 
   // a tap (no real movement)
   if (!moved) {
-    if (item) { item.rot = item.rot + 35; positionTopping(item); }   // tap a placed topping: spin it
+    if (item) { item.rot = item.rot + 35; positionTopping(item); Sound.tok(true); }   // tap a placed topping: spin it
     else dropRandomly(kind);                                          // tap the tray: drop it on the drink
     return;
   }
@@ -308,10 +309,12 @@ function addTopping(kind, x, y) {
   decor.placed.push(item);
   positionTopping(item);
   restartAnimation(item.el, "plop");
+  Sound.topping(kind);
 }
 
 function removeTopping(item) {
   item.el.remove();
+  Sound.whoosh();
   decor.placed = decor.placed.filter((t) => t !== item);
   if (item.kind === "slice") { decor.slices = decor.slices + 1; drawBerries(); }
 }

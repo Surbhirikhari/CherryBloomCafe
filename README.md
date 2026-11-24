@@ -93,6 +93,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `menu.js` | Everything on the menu, and the prices |
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
 | `matcha.js` | The matcha latte drawings: tin, kettle, whisk, bowl, jar |
+| `sound.js` | Every sound, made from scratch with the Web Audio API (no sound files): bubbly pours, squishy cream, the whisk, sizzling pan, oven ding, plus a music-box lullaby and birdsong |
 | `sparkles.js` | The little sparkle trail behind the flower mouse |
 | `sw.js` | The service worker: saves the whole game on your phone so it works offline |
 | `manifest.webmanifest` | The app's name, icon and colours, for Add to Home Screen |
@@ -121,6 +122,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 - **Saving** progress in the browser with `localStorage`
 - **Making it an app**: a web app manifest, an app icon, and a service worker for offline play
 - **Splitting code into files** so each one does one thing
+- **Making sound from nothing** with the Web Audio API: a bubble is a tiny note sliding up, and filtered hiss becomes water, cream or steam
 - **Debugging!** Like the time only one customer ever came, because the last one's walk-out animation was never cleared 🙈
 
 ---
@@ -134,7 +136,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 - [ ] Several customers at once, with order tickets
 - [ ] Ranks that unlock new recipes, and a shop for decorations
 - [x] Play it on an iPhone, offline, with its own app icon
-- [ ] Sounds: the whisk, the pour, the coin *ding*
+- [x] Sounds: the whisk, the pour, the coin *ding*, and a soft music-box lullaby
 
 ---
 

@@ -11,14 +11,14 @@
 // next launch gets updates even if you forget.)
 // =========================================================
 
-const VERSION = "cherry-blossom-cafe-v1";
+const VERSION = "cherry-blossom-cafe-v2";
 
 const FILES = [
   "./",
   "index.html",
   "style.css",
   "manifest.webmanifest",
-  "paint.js", "street.js", "room.js", "menu.js", "customers.js", "decor.js",
+  "sound.js", "paint.js", "street.js", "room.js", "menu.js", "customers.js", "decor.js",
   "matcha.js", "desserts.js", "bakery.js", "drinks.js", "game.js", "sparkles.js",
   "assets/fonts/mochiy-pop-one-latin.woff2",
   "assets/fonts/nunito-latin.woff2",

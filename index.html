@@ -44,6 +44,15 @@
 
   <header class="topbar">
     <span class="logo">Cherry Blossom Cafe</span>
+    <!-- turn the music and the cooking sounds on or off (sound.js) -->
+    <div class="sound-buttons">
+      <button id="btn-music" class="sound-btn" aria-pressed="true" aria-label="Music" title="Music">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="17.5" cy="16" r="3" fill="currentColor"/></svg>
+      </button>
+      <button id="btn-sfx" class="sound-btn" aria-pressed="true" aria-label="Sound effects" title="Sound effects">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -353,6 +362,7 @@
   <!-- the maker's signature -->
   <p class="signature">game by Surbhi Rikhari</p>
 
+  <script src="sound.js"></script>
   <script src="paint.js"></script>
   <script src="street.js"></script>
   <script src="room.js"></script>

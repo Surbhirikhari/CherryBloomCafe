@@ -152,6 +152,7 @@ async function customerArrives() {
   customerEl.classList.remove("walk-out", "happy-hop");
   customerEl.hidden = false;
   restartAnimation(customerEl, "walk-in");
+  Sound.doorbell();
   await wait(1600);
   // They've arrived: take the walk-in animation off. Otherwise, when we come
   // back from the kitchen, the counter screen is shown again, the browser
@@ -161,6 +162,7 @@ async function customerArrives() {
   // the thought cloud pops up
   orderCloud.hidden = false;
   restartAnimation(orderCloud, "pop");
+  Sound.pop();
   mochiSays(customer.name + " is here! Click the cloud to see what they want.");
   chefDoes("nod");
 }
@@ -184,6 +186,7 @@ function showRecipe() {
   });
 
   recipeCard.hidden = false;
+  Sound.paper();
   continueBtn.focus({ preventScroll: true });
 }
 
@@ -191,6 +194,7 @@ function showRecipe() {
 // ---------- 6. Off to the right station to make it ----------
 function startMaking() {
   recipeCard.hidden = true;
+  Sound.pop();
 
   showScreen("bake");                    // show it first, so the plate has a size
   openBakeStation(customer.order.dessert, serve);
@@ -215,6 +219,8 @@ async function serve(scores, art, toppings = 0) {
 
   // back to the counter: the drink appears in their cloud
   showScreen("counter");
+  Sound.hush();
+  Sound.plate();
   cloudDrink.innerHTML = art;
   restartAnimation(orderCloud, "pop");
   await wait(600);
@@ -226,16 +232,19 @@ async function serve(scores, art, toppings = 0) {
     customerEl.dataset.mood = "happy";
     customerSays.textContent = toppings >= 3 ? "So pretty! And perfect!" : "Yummy! Perfect!";
     mochiSays(customer.name + " loved it! Big tip!", "happy");
+    Sound.happy(true);
     chefDoes("hop");
   } else if (total >= 60) {
     customerEl.dataset.mood = "happy";
     customerSays.textContent = toppings >= 3 ? "Ooh, so cute! Thank you!" : "Tasty, thank you!";
     mochiSays("Not quite perfect, but still tasty, nya.");
+    Sound.happy(false);
     chefDoes("nod");
   } else {
     customerEl.dataset.mood = "sad";
     customerSays.textContent = "Hmm… not quite right.";
     mochiSays("Look at the meter for the pink zone next time, nya.");
+    Sound.sad();
     chefDoes("shake");
   }
   restartAnimation(customerSays, "pop");
@@ -253,6 +262,7 @@ async function serve(scores, art, toppings = 0) {
   coinPop.textContent = "+" + pay;
   coinPop.hidden = false;
   restartAnimation(coinPop, "rise");
+  Sound.coins(Math.ceil(pay / 6));
 
   // they leave
   await wait(2600);
@@ -260,6 +270,7 @@ async function serve(scores, art, toppings = 0) {
   scoreCard.hidden = true;
   customerEl.classList.remove("walk-in", "happy-hop");
   restartAnimation(customerEl, "walk-out");
+  setTimeout(() => Sound.doorbell(true), 900);
   await wait(1400);
   customerEl.hidden = true;
 
@@ -313,6 +324,7 @@ function endOfDay() {
 
   mochiSays("Closing time! Let's count the coins.", "happy");
   chefDoes("hop");
+  Sound.fanfare();
   dayCard.hidden = false;
   nextDayBtn.focus({ preventScroll: true });
 }
@@ -323,6 +335,7 @@ function startNextDay() {
   today = { served: 0, coins: 0, dishes: [] };
   drawHud();
   saveGame();
+  Sound.morning();
   mochiSays("Good morning! Day " + day + ": " + customersToday() + " customers today, nya.");
   setTimeout(customerArrives, 1200);
 }
@@ -349,6 +362,7 @@ document.fonts.ready.then(placeOpenSign);
 // then we're inside and the first customer walks in.
 openButton.addEventListener("click", async function () {
   openButton.disabled = true;               // no double clicks while walking in
+  Sound.doorbell();
 
   // zoom towards the cafe door: find where it is on screen right now
   const door = document.getElementById("cafe-door").getBoundingClientRect();
@@ -396,9 +410,11 @@ const MOCHI_CLICK_LINES = [
 chef.addEventListener("click", function () {
   mochiSays(randomItem(CHEF_CLICK_LINES));
   chefDoes("hop");
+  Sound.boing();
 });
 mochi.addEventListener("click", function () {
   mochiSays(randomItem(MOCHI_CLICK_LINES));
+  Sound.meow();
 });
 
 
