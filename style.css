@@ -216,21 +216,79 @@ h1 {
 }
 .intro { max-width: 34ch; font-size: 1.1rem; line-height: 1.5; margin: 0 0 8px; }
 
-/* ---------- 6. Kitchen layout ---------- */
-/* Two columns: the crew on the left, the counter on the right */
-.kitchen {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 24px;
-  align-items: start;
+/* ---------- 6. Kitchen layout ----------
+   Top: the order (hud). Below: the stage on the left, the recipe card on the right. */
+.kitchen { display: grid; gap: 14px; }
+
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 10px 16px;
+  background: var(--paper-glass);
+  backdrop-filter: blur(6px);
+  border: 3px solid var(--blossom);
+  border-radius: 18px;
 }
 
-.crew {
+.kitchen-main {
   display: grid;
-  justify-items: center;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: center;
 }
-.chef  { width: 210px; cursor: pointer; overflow: visible; }
+
+/* The stage keeps the same shape (16 wide : 11 tall) at every size.
+   Everything inside is placed with % so it all grows and shrinks together. */
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  max-width: 100%;
+}
+.stage > * { position: absolute; }
+
+/* Bloom stands behind the counter. The counter top (60% down) hides her below the chest. */
+.chef {
+  left: 9%;
+  top: -5%;
+  width: 36%;
+  cursor: pointer;
+  overflow: visible;
+}
+
+/* The counter: a pink planked front with a cream top, like a cosy bakery counter */
+.counter-front {
+  left: -2%;
+  right: -2%;
+  bottom: 0;
+  height: 40%;
+  border: 3px solid var(--cat-line);
+  border-radius: 10px 10px 4px 4px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(65, 44, 44, 0.18) 46px 48px),
+    linear-gradient(#f6c2cd, #f0aebd);
+}
+.counter-top {
+  position: absolute;
+  left: -1%;
+  right: -1%;
+  top: -14px;
+  height: 26px;
+  background: #fbf3ea;
+  border: 3px solid var(--cat-line);
+  border-radius: 8px;
+  box-shadow: 0 6px 0 rgba(65, 44, 44, 0.12);
+}
+
+/* things standing on the counter */
+.counter-props { left: 2%; right: 2%; width: 96%; bottom: 36%; }
+.bowl { left: 31%; width: 22%; bottom: 36%; }   /* right in front of Bloom */
+.mochi { right: 2%; width: 19%; bottom: 37%; cursor: pointer; overflow: visible; }
+
+/* Mochi's speech bubble, up in the corner above him */
+.stage .bubble { right: 0; top: 4%; width: 38%; }
 
 /* ---------- Chef Bloom's animations ----------
    "Idle" animations loop forever (infinite).
@@ -315,8 +373,6 @@ h1 {
   70% { transform: rotate(-2deg); }
 }
 
-.mochi { width: 140px; margin-top: -60px; margin-left: 90px; cursor: pointer; overflow: visible; }
-.crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
 /* ---------- Mochi's animations ---------- */
 
@@ -366,7 +422,6 @@ h1 {
 
 /* Speech bubble */
 .bubble {
-  position: relative;
   background: var(--paper);
   border: 3px solid var(--blossom);
   border-radius: 18px;
@@ -374,7 +429,6 @@ h1 {
   font-weight: 600;
   line-height: 1.4;
   min-height: 3.2em;
-  width: 100%;
 }
 .bubble::after {                 /* the little tail of the bubble */
   content: "";
@@ -386,17 +440,7 @@ h1 {
   border-bottom: 0;
 }
 
-/* ---------- 7. Counter: ticket, steps, station ---------- */
-.counter {
-  display: grid;
-  gap: 16px;
-  background: var(--paper-glass);
-  backdrop-filter: blur(6px);
-  border: 3px solid var(--blossom);
-  border-radius: 24px;
-  padding: 20px;
-  min-width: 0;
-}
+/* ---------- 7. Order ticket, steps and recipe card ---------- */
 
 .ticket { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 1.1rem; }
 .ticket-label {
@@ -432,15 +476,16 @@ h1 {
 .steps li::before { content: counter(step) ". "; }
 .steps li.current { background: var(--matcha); color: #23361a; opacity: 1; }
 
-.station {
+.panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: center;
+  gap: 10px;
+  justify-items: start;
+  padding: 18px;
+  background: var(--paper-glass);
+  backdrop-filter: blur(6px);
+  border: 3px solid var(--blossom);
+  border-radius: 22px;
 }
-.bowl { width: 100%; max-width: 300px; justify-self: center; }
-
-.panel { display: grid; gap: 10px; justify-items: start; }
 .panel h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--matcha-deep); }
 .panel p { margin: 0; line-height: 1.5; }
 .readout { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -455,12 +500,8 @@ h1 {
 /* ---------- 8. Phones ---------- */
 @media (max-width: 720px) {
   .title-screen { justify-items: center; }
-  .kitchen, .station { grid-template-columns: 1fr; }
-  .crew { grid-template-columns: auto auto; align-items: end; }
-  .bubble { grid-column: 1 / -1; }
-  .chef { width: 120px; }
-  .mochi { width: 110px; margin: 0; }
-  .crew-names { display: none; }
+  .kitchen-main { grid-template-columns: 1fr; }
+  .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }
 }
 
 /* People who turn off animations in their computer settings */

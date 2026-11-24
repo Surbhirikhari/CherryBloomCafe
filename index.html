@@ -39,142 +39,17 @@
     </section>
 
     <!-- ============ SCREEN 2: KITCHEN ============ -->
-    <!-- "hidden" means: don't show this yet. game.js removes it later. -->
+    <!-- "hidden" means: don't show this yet. game.js removes it later.
+         Like most cooking games, the chef stands BEHIND the counter and
+         everything we cook with sits ON the counter in front of her. -->
     <section id="screen-kitchen" class="screen kitchen" hidden>
 
-      <!-- Left side: the chef, Mochi, and Mochi's speech bubble -->
-      <aside class="crew">
-        <div class="bubble" id="mochi-says">Hello!</div>
-
-        <!-- Chef Bloom, built from 17 separate picture layers (assets/bloom/).
-             Original art used with the artist's permission.
-             Layers are stacked in order, back to front, like sheets of paper.
-             Every layer is the same size (296 x 528), so they line up exactly.
-             Groups let parts move on their own:
-               .bloom-body   breathes and sways (everything)
-               .bloom-hair-* flows a little
-               .bloom-head   nods, shakes and tilts
-               .bloom-eye    blinks
-               .bloom-ribbon wiggles
-             Click her to make her hop! -->
-        <svg id="chef" class="chef" viewBox="0 -40 296 568" role="img" aria-label="Chef Bloom: long blonde hair, a pink headband, red ribbons and a pink dress">
-          <g class="bloom-body">
-            <image class="bloom-hair-L" href="assets/bloom/hair_back_L.png" width="296" height="528"/>
-            <image class="bloom-hair-R" href="assets/bloom/hair_back_R.png" width="296" height="528"/>
-            <image href="assets/bloom/neck.png"  width="296" height="528"/>
-            <image href="assets/bloom/body.png"  width="296" height="528"/>
-            <image href="assets/bloom/bow.png"   width="296" height="528"/>
-            <image href="assets/bloom/hands.png" width="296" height="528"/>
-            <image href="assets/bloom/arm_L.png" width="296" height="528"/>
-            <image href="assets/bloom/arm_R.png" width="296" height="528"/>
-
-            <g class="bloom-head">
-              <image href="assets/bloom/head.png"  width="296" height="528"/>
-              <image class="bloom-blush" href="assets/bloom/blush.png" width="296" height="528"/>
-              <image class="bloom-eye bloom-eye-L" href="assets/bloom/eye_L.png" width="296" height="528"/>
-              <image class="bloom-eye bloom-eye-R" href="assets/bloom/eye_R.png" width="296" height="528"/>
-              <image href="assets/bloom/nose.png" width="296" height="528"/>
-              <image href="assets/bloom/headband.png" width="296" height="528"/>
-              <image href="assets/bloom/hair_front.png" width="296" height="528"/>
-              <image class="bloom-ribbon bloom-ribbon-L" href="assets/bloom/ribbon_L.png" width="296" height="528"/>
-              <image class="bloom-ribbon bloom-ribbon-R" href="assets/bloom/ribbon_R.png" width="296" height="528"/>
-            </g>
-          </g>
-
-          <!-- a little heart that floats up when she's happy -->
-          <path class="chef-heart" d="M265 14 C253 -2 235 12 265 36 C295 12 277 -2 265 14 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
-        </svg>
-
-        <!-- Mochi the cat, drawn to match Chef Bloom: thick dark marker lines,
-             flat soft colours, blurry blush, little oval eyes, and a ribbon like hers.
-             data-mood decides which eyes show: "sleepy", "awake" or "happy".
-             game.js changes the mood. -->
-        <svg id="mochi" class="mochi" data-mood="sleepy" viewBox="0 0 220 200" role="img" aria-label="Mochi, a round white cat with a pink ribbon">
-          <defs>
-            <!-- "rough" makes random noise and uses it to nudge every line a little,
-                 so the smooth shapes look drawn by hand with a marker. -->
-            <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11"/>
-              <feDisplacementMap in="SourceGraphic" scale="3"/>
-            </filter>
-            <!-- "soft" blurs the blush so it looks like Bloom's rosy cheeks -->
-            <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3.5"/>
-            </filter>
-          </defs>
-
-          <g class="mochi-body">
-            <g filter="url(#rough)" stroke="var(--cat-line)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
-              <!-- tail, curling out to the side -->
-              <g class="mochi-tail">
-                <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke-width="18"/>
-                <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke="var(--cat)" stroke-width="8"/>
-              </g>
-
-              <!-- ears (drawn first so the body covers their base) -->
-              <path d="M46 60 L58 18 Q78 26 92 38" fill="var(--cat)"/>
-              <path d="M56 50 L62 30 Q72 34 80 40 Z" fill="var(--mochi-pink)" stroke="none"/>
-              <path d="M136 40 Q158 24 174 30 Q174 54 166 72" fill="var(--cat)"/>
-              <path d="M145 43 Q159 34 166 38 Q165 51 160 61 Z" fill="var(--mochi-pink)" stroke="none"/>
-
-              <!-- the big round loaf body (head and body in one), flat colour like Bloom -->
-              <path d="M40 72 Q40 34 92 32 Q142 30 170 74 Q192 110 188 150 Q186 186 150 186 L62 186 Q30 186 30 150 Q30 102 40 72 Z" fill="var(--cat)"/>
-
-              <!-- front paws tucked together -->
-              <path d="M84 186 Q84 166 98 164 Q108 168 108 186" fill="var(--cat)"/>
-              <path d="M108 186 Q110 168 122 164 Q134 168 132 186" fill="var(--cat)"/>
-
-              <!-- a ribbon by his ear, the same as Bloom's -->
-              <g class="mochi-ribbon" stroke-width="3.5" transform="translate(72 46) scale(1.35) translate(-72 -46)">
-                <path d="M72 46 L66 66 L72 63 L76 48 Z M72 46 L80 64 L84 59 L76 47 Z" fill="var(--mochi-ribbon)"/>
-                <path d="M72 46 Q58 34 56 46 Q58 56 72 46 Z M72 46 Q86 34 88 46 Q86 56 72 46 Z" fill="var(--mochi-ribbon)"/>
-                <circle cx="72" cy="46" r="4" fill="var(--mochi-ribbon)"/>
-              </g>
-
-              <!-- whiskers -->
-              <path d="M40 100 L22 96 M40 108 L22 110 M164 100 L184 95 M166 108 L186 108" fill="none" stroke-width="3.5"/>
-
-              <!-- tiny dot nose and a small "w" mouth -->
-              <circle cx="100" cy="106" r="2.6" fill="var(--cat-line)" stroke="none"/>
-              <path d="M93 114 Q96.5 118 100 113 Q103.5 118 107 114" fill="none" stroke-width="3"/>
-
-              <!-- three sets of eyes; CSS shows only the one for the current mood -->
-              <g class="mochi-eyes eyes-sleepy" fill="none" stroke-width="4.5">
-                <path d="M70 94 Q78 100 86 94"/><path d="M114 94 Q122 100 130 94"/>
-              </g>
-              <g class="mochi-eyes eyes-awake" stroke="none" fill="var(--cat-line)">
-                <ellipse cx="78" cy="94" rx="4.5" ry="8"/>
-                <ellipse cx="122" cy="94" rx="4.5" ry="8"/>
-              </g>
-              <g class="mochi-eyes eyes-happy" fill="none" stroke-width="4.5">
-                <path d="M70 98 Q78 86 86 98"/><path d="M114 98 Q122 86 130 98"/>
-              </g>
-            </g>
-
-            <!-- soft rosy cheeks (on top, blurred, no outline) -->
-            <g fill="var(--mochi-blush)" filter="url(#soft)" opacity="0.85">
-              <ellipse cx="64" cy="110" rx="12" ry="7"/>
-              <ellipse cx="136" cy="110" rx="12" ry="7"/>
-            </g>
-          </g>
-
-          <!-- floating Zzz, only while he's sleepy -->
-          <g class="mochi-zzz" fill="none" stroke="var(--cat-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
-            <path class="z z1" d="M178 40 L187 40 L178 49 L187 49"/>
-            <path class="z z2" d="M192 20 L204 20 L192 32 L204 32"/>
-            <path class="z z3" d="M208 -6 L223 -6 L208 9 L223 9"/>
-          </g>
-        </svg>
-        <p class="crew-names">Bloom &amp; Mochi</p>
-      </aside>
-
-      <!-- Right side: the order ticket and the work station -->
-      <div class="counter">
+      <!-- Top: the order ticket and the recipe steps -->
+      <div class="hud">
         <div class="ticket">
           <span class="ticket-label">Order</span>
           <strong>Iced Matcha Latte</strong>
         </div>
-
         <!-- The recipe. Only step 1 works for now; we'll build the rest in later lessons. -->
         <ol class="steps">
           <li class="current">Scoop</li>
@@ -182,27 +57,175 @@
           <li>Whisk</li>
           <li>Add milk</li>
         </ol>
+      </div>
 
-        <div class="station">
-          <!-- The tea bowl (chawan) -->
-          <svg class="bowl" viewBox="0 0 260 210" role="img" aria-label="Tea bowl">
-            <ellipse cx="130" cy="70" rx="112" ry="26" fill="var(--bowl-inside)"/>
-            <!-- The matcha powder pile. game.js makes it bigger with each scoop. -->
-            <ellipse id="powder" cx="130" cy="82" rx="0" ry="0" fill="var(--powder)"/>
-            <path d="M18 70 Q18 190 130 190 Q242 190 242 70 A112 26 0 0 1 18 70 Z" fill="var(--bowl)"/>
-            <path d="M40 120 Q60 160 110 170" fill="none" stroke="var(--paper)" stroke-width="6" stroke-linecap="round" opacity=".6"/>
-            <rect x="96" y="186" width="68" height="14" rx="5" fill="var(--bowl-foot)"/>
-            <ellipse cx="130" cy="70" rx="112" ry="26" fill="none" stroke="var(--bowl-foot)" stroke-width="3"/>
+      <div class="kitchen-main">
+        <!-- The stage: everything is placed with percentages so it scales
+             nicely on big and small screens. Order matters: later = in front. -->
+        <div class="stage">
+          <!-- Chef Bloom, built from 17 separate picture layers (assets/bloom/).
+               Original art used with the artist's permission.
+               Layers are stacked in order, back to front, like sheets of paper.
+               Every layer is the same size (296 x 528), so they line up exactly.
+               Groups let parts move on their own:
+                 .bloom-body   breathes and sways (everything)
+                 .bloom-hair-* flows a little
+                 .bloom-head   nods, shakes and tilts
+                 .bloom-eye    blinks
+                 .bloom-ribbon wiggles
+               Click her to make her hop! -->
+          <svg id="chef" class="chef" viewBox="0 -40 296 568" role="img" aria-label="Chef Bloom: long blonde hair, a pink headband, red ribbons and a pink dress">
+            <g class="bloom-body">
+              <image class="bloom-hair-L" href="assets/bloom/hair_back_L.png" width="296" height="528"/>
+              <image class="bloom-hair-R" href="assets/bloom/hair_back_R.png" width="296" height="528"/>
+              <image href="assets/bloom/neck.png"  width="296" height="528"/>
+              <image href="assets/bloom/body.png"  width="296" height="528"/>
+              <image href="assets/bloom/bow.png"   width="296" height="528"/>
+              <image href="assets/bloom/hands.png" width="296" height="528"/>
+              <image href="assets/bloom/arm_L.png" width="296" height="528"/>
+              <image href="assets/bloom/arm_R.png" width="296" height="528"/>
+
+              <g class="bloom-head">
+                <image href="assets/bloom/head.png"  width="296" height="528"/>
+                <image class="bloom-blush" href="assets/bloom/blush.png" width="296" height="528"/>
+                <image class="bloom-eye bloom-eye-L" href="assets/bloom/eye_L.png" width="296" height="528"/>
+                <image class="bloom-eye bloom-eye-R" href="assets/bloom/eye_R.png" width="296" height="528"/>
+                <image href="assets/bloom/nose.png" width="296" height="528"/>
+                <image href="assets/bloom/headband.png" width="296" height="528"/>
+                <image href="assets/bloom/hair_front.png" width="296" height="528"/>
+                <image class="bloom-ribbon bloom-ribbon-L" href="assets/bloom/ribbon_L.png" width="296" height="528"/>
+                <image class="bloom-ribbon bloom-ribbon-R" href="assets/bloom/ribbon_R.png" width="296" height="528"/>
+              </g>
+            </g>
+
+            <!-- a little heart that floats up when she's happy -->
+            <path class="chef-heart" d="M265 14 C253 -2 235 12 265 36 C295 12 277 -2 265 14 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
           </svg>
 
-          <div class="panel">
-            <h2>Scoop the matcha</h2>
-            <p>Use the chashaku (bamboo scoop). One scoop is about 1 gram.</p>
-            <p class="readout"><span id="scoop-count">0</span> scoops</p>
-            <div class="row">
-              <button id="btn-scoop" class="btn">Add a scoop</button>
-              <button id="btn-unscoop" class="btn btn-soft">Take one out</button>
-            </div>
+          <!-- The counter, in front of Bloom (it hides her below the waist) -->
+          <div class="counter-front" aria-hidden="true">
+            <div class="counter-top"></div>
+          </div>
+
+          <!-- Things on the counter: a matcha tin and a bottle of milk -->
+          <svg class="counter-props" viewBox="0 0 600 120" aria-hidden="true">
+            <g stroke="var(--cat-line)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" filter="url(#rough)">
+              <rect x="40" y="38" width="54" height="72" rx="6" fill="var(--matcha)"/>
+              <rect x="36" y="28" width="62" height="16" rx="5" fill="var(--matcha-deep)"/>
+              <rect x="50" y="60" width="34" height="28" rx="3" fill="var(--paper)"/>
+              <path d="M58 70 Q67 64 76 70 M58 78 L76 78" fill="none" stroke-width="2.5"/>
+              <path d="M96 106 L140 94" stroke="#d9b98a" stroke-width="7" fill="none"/>
+              <path d="M352 110 L352 54 Q352 40 364 34 L364 20 L384 20 L384 34 Q396 40 396 54 L396 110 Z" fill="var(--paper)"/>
+              <rect x="362" y="12" width="24" height="10" rx="3" fill="var(--blossom)"/>
+              <rect x="356" y="66" width="36" height="22" rx="3" fill="var(--blossom)"/>
+            </g>
+          </svg>
+
+          <!-- The tea bowl (chawan), sitting on the counter -->
+          <svg class="bowl" viewBox="0 0 260 210" role="img" aria-label="Tea bowl">
+            <g stroke="var(--cat-line)" stroke-width="4" stroke-linejoin="round">
+              <ellipse cx="130" cy="70" rx="112" ry="26" fill="var(--bowl-inside)" stroke="none"/>
+              <!-- The matcha powder pile. game.js makes it bigger with each scoop. -->
+              <ellipse id="powder" cx="130" cy="82" rx="0" ry="0" fill="var(--powder)" stroke="none"/>
+              <rect x="96" y="182" width="68" height="16" rx="5" fill="var(--bowl-foot)"/>
+              <path d="M18 70 Q18 190 130 190 Q242 190 242 70 A112 26 0 0 1 18 70 Z" fill="var(--bowl)"/>
+              <path d="M40 120 Q60 160 110 170" fill="none" stroke="var(--paper)" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+              <ellipse cx="130" cy="70" rx="112" ry="26" fill="none"/>
+            </g>
+          </svg>
+
+          <!-- Mochi the cat, drawn to match Chef Bloom: thick dark marker lines,
+               flat soft colours, blurry blush, little oval eyes, and a ribbon like hers.
+               data-mood decides which eyes show: "sleepy", "awake" or "happy".
+               game.js changes the mood. -->
+          <svg id="mochi" class="mochi" data-mood="sleepy" viewBox="0 0 220 200" role="img" aria-label="Mochi, a round white cat with a pink ribbon">
+            <defs>
+              <!-- "rough" makes random noise and uses it to nudge every line a little,
+                   so the smooth shapes look drawn by hand with a marker. -->
+              <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11"/>
+                <feDisplacementMap in="SourceGraphic" scale="3"/>
+              </filter>
+              <!-- "soft" blurs the blush so it looks like Bloom's rosy cheeks -->
+              <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3.5"/>
+              </filter>
+            </defs>
+
+            <g class="mochi-body">
+              <g filter="url(#rough)" stroke="var(--cat-line)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+                <!-- tail, curling out to the side -->
+                <g class="mochi-tail">
+                  <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke-width="18"/>
+                  <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke="var(--cat)" stroke-width="8"/>
+                </g>
+
+                <!-- ears (drawn first so the body covers their base) -->
+                <path d="M46 60 L58 18 Q78 26 92 38" fill="var(--cat)"/>
+                <path d="M56 50 L62 30 Q72 34 80 40 Z" fill="var(--mochi-pink)" stroke="none"/>
+                <path d="M136 40 Q158 24 174 30 Q174 54 166 72" fill="var(--cat)"/>
+                <path d="M145 43 Q159 34 166 38 Q165 51 160 61 Z" fill="var(--mochi-pink)" stroke="none"/>
+
+                <!-- the big round loaf body (head and body in one), flat colour like Bloom -->
+                <path d="M40 72 Q40 34 92 32 Q142 30 170 74 Q192 110 188 150 Q186 186 150 186 L62 186 Q30 186 30 150 Q30 102 40 72 Z" fill="var(--cat)"/>
+
+                <!-- front paws tucked together -->
+                <path d="M84 186 Q84 166 98 164 Q108 168 108 186" fill="var(--cat)"/>
+                <path d="M108 186 Q110 168 122 164 Q134 168 132 186" fill="var(--cat)"/>
+
+                <!-- a ribbon by his ear, the same as Bloom's -->
+                <g class="mochi-ribbon" stroke-width="3.5" transform="translate(72 46) scale(1.35) translate(-72 -46)">
+                  <path d="M72 46 L66 66 L72 63 L76 48 Z M72 46 L80 64 L84 59 L76 47 Z" fill="var(--mochi-ribbon)"/>
+                  <path d="M72 46 Q58 34 56 46 Q58 56 72 46 Z M72 46 Q86 34 88 46 Q86 56 72 46 Z" fill="var(--mochi-ribbon)"/>
+                  <circle cx="72" cy="46" r="4" fill="var(--mochi-ribbon)"/>
+                </g>
+
+                <!-- whiskers -->
+                <path d="M40 100 L22 96 M40 108 L22 110 M164 100 L184 95 M166 108 L186 108" fill="none" stroke-width="3.5"/>
+
+                <!-- tiny dot nose and a small "w" mouth -->
+                <circle cx="100" cy="106" r="2.6" fill="var(--cat-line)" stroke="none"/>
+                <path d="M93 114 Q96.5 118 100 113 Q103.5 118 107 114" fill="none" stroke-width="3"/>
+
+                <!-- three sets of eyes; CSS shows only the one for the current mood -->
+                <g class="mochi-eyes eyes-sleepy" fill="none" stroke-width="4.5">
+                  <path d="M70 94 Q78 100 86 94"/><path d="M114 94 Q122 100 130 94"/>
+                </g>
+                <g class="mochi-eyes eyes-awake" stroke="none" fill="var(--cat-line)">
+                  <ellipse cx="78" cy="94" rx="4.5" ry="8"/>
+                  <ellipse cx="122" cy="94" rx="4.5" ry="8"/>
+                </g>
+                <g class="mochi-eyes eyes-happy" fill="none" stroke-width="4.5">
+                  <path d="M70 98 Q78 86 86 98"/><path d="M114 98 Q122 86 130 98"/>
+                </g>
+              </g>
+
+              <!-- soft rosy cheeks (on top, blurred, no outline) -->
+              <g fill="var(--mochi-blush)" filter="url(#soft)" opacity="0.85">
+                <ellipse cx="64" cy="110" rx="12" ry="7"/>
+                <ellipse cx="136" cy="110" rx="12" ry="7"/>
+              </g>
+            </g>
+
+            <!-- floating Zzz, only while he's sleepy -->
+            <g class="mochi-zzz" fill="none" stroke="var(--cat-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+              <path class="z z1" d="M178 40 L187 40 L178 49 L187 49"/>
+              <path class="z z2" d="M192 20 L204 20 L192 32 L204 32"/>
+              <path class="z z3" d="M208 -6 L223 -6 L208 9 L223 9"/>
+            </g>
+          </svg>
+
+          <div class="bubble" id="mochi-says">Hello!</div>
+        </div>
+
+        <!-- The recipe card: what to do right now -->
+        <div class="panel">
+          <h2>Scoop the matcha</h2>
+          <p>Use the chashaku (bamboo scoop). One scoop is about 1 gram.</p>
+          <p class="readout"><span id="scoop-count">0</span> scoops</p>
+          <div class="row">
+            <button id="btn-scoop" class="btn">Add a scoop</button>
+            <button id="btn-unscoop" class="btn btn-soft">Take one out</button>
           </div>
         </div>
       </div>
