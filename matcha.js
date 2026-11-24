@@ -6,6 +6,7 @@
 //   3. whisk until frothy (drag side to side)  4. pour it into the jar
 //   5. hold to pour milk, stop between the lines
 //   6. top with strawberry cream
+//   7. cut strawberries and decorate however you like (decor.js)
 //
 // Drawings first, then the station's logic.
 // =========================================================
@@ -50,6 +51,9 @@ function matchaTinSVG() {
       <rect x="49" y="74" width="7" height="7" fill="#d9475f" stroke="none"/>
       <ellipse cx="40" cy="34" rx="30" ry="10" fill="#7fae4c" ${LINE}/>
       <ellipse cx="40" cy="35" rx="24" ry="7" fill="#8fbd57" stroke="none"/>
+      <path d="M58 44 L58 96" stroke="#e3d9c6" stroke-width="7" stroke-linecap="round"/>
+      <path d="M16 44 L16 92" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+      <g fill="#6f9a48"><circle cx="30" cy="33" r="1.5"/><circle cx="46" cy="36" r="1.5"/><circle cx="38" cy="31" r="1.2"/></g>
       <path d="M14 26 Q62 16 116 10" fill="none" stroke="${INK}" stroke-width="9" stroke-linecap="round"/>
       <path d="M14 26 Q62 16 116 10" fill="none" stroke="#dcb56d" stroke-width="5" stroke-linecap="round"/>
       <ellipse cx="16" cy="27" rx="8" ry="5" fill="#7fae4c" ${LINE} stroke-width="2.5"/>
@@ -64,6 +68,8 @@ function kettleSVG() {
       <path d="M34 52 Q60 14 86 52" fill="none" stroke="#dcb56d" stroke-width="3" stroke-linecap="round"/>
       <path d="M98 76 Q116 70 114 46 L106 50 Q106 64 94 68 Z" fill="#f6c2cd" ${LINE}/>
       <path d="M18 100 Q12 54 60 48 Q108 54 102 100 Z" fill="#f6c2cd" ${LINE}/>
+      <path d="M30 92 Q26 66 50 58" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+      <path d="M90 94 Q94 74 84 62" fill="none" stroke="#e7a3b3" stroke-width="6" stroke-linecap="round"/>
       <ellipse cx="60" cy="50" rx="18" ry="5" fill="#fbe0e6" ${LINE} stroke-width="2.5"/>
       <circle cx="60" cy="42" r="5" fill="#fbe0e6" ${LINE} stroke-width="2.5"/>
       <text x="60" y="84" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="15" fill="${INK}">80°</text>
@@ -122,6 +128,8 @@ function milkBottleSVG() {
     <svg viewBox="0 0 80 124" class="art">
       <path d="M22 118 L22 52 Q22 40 32 34 L32 14 L48 14 L48 34 Q58 40 58 52 L58 118 Z" fill="#fffdf7" ${LINE}/>
       <rect x="30" y="6" width="20" height="10" rx="3" fill="#f6b8cb" ${LINE}/>
+      <path d="M50 54 L50 112" stroke="#efe6d6" stroke-width="6" stroke-linecap="round"/>
+      <path d="M29 50 L29 110" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
       <rect x="26" y="66" width="28" height="26" rx="3" fill="#f6b8cb" ${LINE} stroke-width="2.5"/>
       <text x="40" y="84" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="10" fill="${INK}">MILK</text>
     </svg>`;
@@ -133,6 +141,8 @@ function strawberryCreamSVG() {
     <svg viewBox="0 0 92 104" class="art">
       <path d="M14 30 L78 30 L74 96 Q74 100 68 100 L24 100 Q18 100 18 96 Z" fill="#f7b6c2" ${LINE}/>
       <rect x="10" y="18" width="72" height="14" rx="4" fill="#fffdf7" ${LINE}/>
+      <path d="M24 40 L26 92" stroke="#fbd3db" stroke-width="5" stroke-linecap="round"/>
+      <path d="M68 40 L66 92" stroke="#e58a9c" stroke-width="6" stroke-linecap="round"/>
       <circle cx="46" cy="64" r="20" fill="#fffdf7" ${LINE} stroke-width="2.5"/>
       <path d="M46 78 Q32 68 34 58 Q38 50 46 54 Q54 50 58 58 Q60 68 46 78 Z" fill="#f2667f" ${LINE} stroke-width="2"/>
       <path d="M40 52 L44 46 L46 52 L50 46 L52 52 Z" fill="#8fb565" ${LINE} stroke-width="1.5"/>
@@ -233,7 +243,9 @@ const MATCHA_STEPS = [
   { id: "milk",  text: "Pour the milk", icon: milkBottleSVG,
     hint: "Press and HOLD the milk bottle. Let go between the pink lines!" },
   { id: "berry", text: "Top with strawberry cream", icon: strawberryCreamSVG,
-    hint: "Click the strawberry cream to finish." },
+    hint: "Click the strawberry cream to pour it on top." },
+  { id: "decorate", text: "Cut berries & decorate", icon: sliceSVG,
+    hint: "Click a strawberry 3 times to chop it, then drag slices and toppings anywhere on the drink. Press Done when it looks pretty!" },
 ];
 
 
@@ -260,6 +272,8 @@ const mFrothBar = document.getElementById("m-froth-bar");
 const mFroth   = document.getElementById("m-froth");
 const mHint    = document.getElementById("m-hint");
 const mRestart = document.getElementById("m-restart");
+const mToppings  = document.getElementById("m-toppings");
+const mDecorZone = document.getElementById("m-decor-zone");
 const mDone    = document.getElementById("m-done");
 
 // draw the tools that never change
@@ -277,6 +291,7 @@ function currentStep() {
 // ---------- Opening the station, and drawing it ----------
 function openMatchaStation(onDone) {
   station.onDone = onDone;
+  Decor.attach(mDecorZone, mToppings);     // the cutting board lives in this station now
   resetStation();
 }
 
@@ -286,6 +301,7 @@ function resetStation() {
   station.jar = { matcha: 0, milk: 0, berry: 0, sparkle: false };
   station.pouringMilk = false;
   mStream.hidden = true;
+  Decor.reset();
   drawStation();
 }
 
@@ -315,13 +331,14 @@ function drawStation() {
     mSteps.appendChild(li);
   });
 
-  if (step === "finished") {
-    mHint.textContent = "Beautiful! Press Done to serve it.";
-  } else if (!mHint.dataset.keep) {
+  if (MATCHA_STEPS[station.step] && !mHint.dataset.keep) {
     mHint.textContent = MATCHA_STEPS[station.step].hint;
   }
   delete mHint.dataset.keep;
-  mDone.disabled = step !== "finished";
+
+  // the last step: decorating is free, so Done is ready whenever you are
+  Decor.enable(step === "decorate");
+  mDone.disabled = step !== "decorate";
 }
 
 function drawJar() {
@@ -496,7 +513,7 @@ mBerry.addEventListener("click", async function () {
   restartAnimation(mBerry, "tapped");
   await animateNumber(0, 26, 700, function (v) { station.jar.berry = v; drawJar(); });
   station.jar.sparkle = true;
-  station.step = MATCHA_STEPS.length;      // all done
+  station.step = MATCHA_STEPS.findIndex((s) => s.id === "decorate");
   drawStation();
 });
 
@@ -512,5 +529,5 @@ function matchaStars() {
 }
 
 mDone.addEventListener("click", function () {
-  station.onDone(matchaStars(), jarSVG(station.jar));
+  station.onDone(matchaStars(), Decor.art(jarSVG(station.jar)), Decor.count());
 });

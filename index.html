@@ -239,16 +239,9 @@
     </section>
 
     <!-- ============ SCREEN 3: THE KITCHEN TABLE ============ -->
-    <!-- Here we make the drink: click ingredients to pour them into the glass. -->
-    <section id="screen-prep" class="screen prep" hidden>
-      <div class="prep-table">
-        <div class="cup-spot">
-          <div id="prep-cup" class="prep-cup"></div>
-          <div class="coaster"></div>
-        </div>
-        <div id="ingredients" class="ingredients"></div>
-      </div>
-
+    <!-- For simple drinks: click ingredients to fill the glass, then decorate.
+         Left: the recipe. Right: the work table, filling the screen. -->
+    <section id="screen-prep" class="screen workstation" hidden>
       <aside class="recipe-note">
         <p class="note-label">Making</p>
         <h2 id="note-title"></h2>
@@ -259,28 +252,23 @@
           <button id="btn-done" class="btn" disabled>Done</button>
         </div>
       </aside>
+
+      <div class="work-area work-simple">
+        <div id="ingredients" class="shelf"></div>
+        <div class="vessel-zone">
+          <div class="vessel glass-vessel">
+            <div id="prep-cup"></div>
+            <div id="prep-toppings" class="toppings-layer"></div>
+          </div>
+          <div class="coaster"></div>
+        </div>
+        <div id="prep-decor-zone" class="decor-zone"></div>
+      </div>
     </section>
 
     <!-- ============ SCREEN 4: THE MATCHA STATION ============ -->
     <!-- A hands-on mini-game for the Strawberry Matcha Latte (see matcha.js). -->
-    <section id="screen-matcha" class="screen station" hidden>
-      <div class="station-table">
-        <button id="m-tin" class="tool"><span id="m-tin-art"></span><span class="tool-label">Matcha</span></button>
-        <button id="m-kettle" class="tool"><span id="m-kettle-art"></span><span class="tool-label">Hot water</span></button>
-        <div id="m-bowl-area" class="bowl-area" tabindex="0" aria-label="Tea bowl. To whisk, drag side to side or press the left and right arrow keys.">
-          <div id="m-whisk" class="whisk" hidden></div>
-          <div id="m-bowl"></div>
-          <span class="tool-label">Bowl</span>
-        </div>
-        <div class="jar-area">
-          <span id="m-stream" class="stream" hidden></span>
-          <div id="m-jar"></div>
-          <span class="tool-label">Jar</span>
-        </div>
-        <button id="m-milk" class="tool"><span id="m-milk-art"></span><span class="tool-label">Milk (hold)</span></button>
-        <button id="m-berry" class="tool"><span id="m-berry-art"></span><span class="tool-label">Strawberry cream</span></button>
-      </div>
-
+    <section id="screen-matcha" class="screen workstation" hidden>
       <aside class="recipe-note">
         <p class="note-label">Making</p>
         <h2>Strawberry Matcha Latte</h2>
@@ -292,6 +280,33 @@
           <button id="m-done" class="btn" disabled>Done</button>
         </div>
       </aside>
+
+      <div class="work-area work-matcha">
+        <!-- the back shelf: things we use one at a time -->
+        <div class="shelf">
+          <button id="m-tin" class="tool"><span id="m-tin-art"></span><span class="tool-label">Matcha</span></button>
+          <button id="m-kettle" class="tool"><span id="m-kettle-art"></span><span class="tool-label">Hot water</span></button>
+          <button id="m-milk" class="tool"><span id="m-milk-art"></span><span class="tool-label">Milk (hold)</span></button>
+          <button id="m-berry" class="tool"><span id="m-berry-art"></span><span class="tool-label">Strawberry cream</span></button>
+        </div>
+
+        <!-- front of the table: the bowl, the jar, and the cutting board -->
+        <div id="m-bowl-area" class="bowl-area" tabindex="0" aria-label="Tea bowl. To whisk, drag side to side or press the left and right arrow keys.">
+          <div id="m-whisk" class="whisk" hidden></div>
+          <div id="m-bowl"></div>
+          <span class="tool-label">Bowl</span>
+        </div>
+        <div class="vessel-zone">
+          <span id="m-stream" class="stream" hidden></span>
+          <div class="vessel jar-vessel">
+            <div id="m-jar"></div>
+            <div id="m-toppings" class="toppings-layer"></div>
+          </div>
+        </div>
+        <div id="m-decor-zone" class="decor-zone">
+          <div id="decor" class="decor"></div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -300,6 +315,7 @@
   <script src="room.js"></script>
   <script src="menu.js"></script>
   <script src="customers.js"></script>
+  <script src="decor.js"></script>
   <script src="matcha.js"></script>
   <script src="game.js"></script>
 </body>

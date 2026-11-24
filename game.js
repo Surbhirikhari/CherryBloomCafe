@@ -9,7 +9,7 @@
 //   5. the next customer walks in
 //
 // The drinks live in menu.js, the customer drawings in customers.js,
-// and the matcha mini-game in matcha.js.
+// the matcha mini-game in matcha.js, and decorating in decor.js.
 // =========================================================
 
 
@@ -50,6 +50,8 @@ const noteTitle     = document.getElementById("note-title");
 const noteSteps     = document.getElementById("note-steps");
 const prepHint      = document.getElementById("prep-hint");
 const startOverBtn  = document.getElementById("btn-start-over");
+const prepToppings  = document.getElementById("prep-toppings");
+const prepDecorZone = document.getElementById("prep-decor-zone");
 const doneBtn       = document.getElementById("btn-done");
 
 
@@ -175,7 +177,10 @@ function startMaking() {
 
   glass = [];
   noteTitle.textContent = customer.order.name;
-  prepHint.textContent = "Click the ingredients in order.";
+  prepHint.textContent = "Click the ingredients in order. Then chop strawberries and decorate!";
+  Decor.attach(prepDecorZone, prepToppings);     // bring the cutting board to this table
+  Decor.reset();
+  Decor.enable(true);
   drawTable(false);
   showScreen("table");
 }
@@ -216,6 +221,7 @@ function pour(id) {
 
 function startOver() {
   glass = [];
+  Decor.reset();
   prepHint.textContent = "Fresh glass! Click the ingredients in order.";
   drawTable(false);
 }
@@ -244,13 +250,16 @@ function rateDrink(made, wanted) {
 }
 
 // stars: how good it was (3, 2 or 1). art: a drawing of the drink we made.
-async function serve(stars, art) {
+// toppings: how many decorations we added (customers love those).
+async function serve(stars, art, toppings = 0) {
   const drink = customer.order;
+  const decorBonus = stars > 1 ? Math.min(toppings, 5) : 0;   // +1 coin per topping, up to 5
 
   // what they pay: price + a tip for perfect, half price if it's wrong
   let pay = drink.price;
   if (stars === 3) pay = drink.price + 3;
   if (stars === 1) pay = Math.ceil(drink.price / 2);
+  pay = pay + decorBonus;
 
   // back to the counter: the drink appears in their cloud
   showScreen("counter");
@@ -263,12 +272,12 @@ async function serve(stars, art) {
   customerSays.hidden = false;
   if (stars === 3) {
     customerEl.dataset.mood = "happy";
-    customerSays.textContent = "Yummy! Perfect!";
+    customerSays.textContent = decorBonus > 0 ? "So pretty! And perfect!" : "Yummy! Perfect!";
     mochiSays(customer.name + " loved it! That's a tip!", "happy");
     chefDoes("hop");
   } else if (stars === 2) {
     customerEl.dataset.mood = "happy";
-    customerSays.textContent = "Tasty, thank you!";
+    customerSays.textContent = decorBonus > 0 ? "Ooh, so cute! Thank you!" : "Tasty, thank you!";
     mochiSays("Not quite perfect, but still tasty, nya.");
     chefDoes("nod");
   } else {
@@ -334,7 +343,7 @@ orderCloud.addEventListener("click", showRecipe);
 continueBtn.addEventListener("click", startMaking);
 startOverBtn.addEventListener("click", startOver);
 doneBtn.addEventListener("click", function () {
-  serve(rateDrink(glass, customer.order.steps), glassSVG(glass));
+  serve(rateDrink(glass, customer.order.steps), Decor.art(glassSVG(glass)), Decor.count());
 });
 
 // Things Mochi says when you click on Bloom, or on him.
