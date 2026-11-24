@@ -137,8 +137,6 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 ## 💐 Credits
 
 - Game by **Surbhi Rikhari**.
-- Chef Bloom's artwork is used with the original artist's permission.
-- The street, cafe, Mochi, customers, tools and desserts were drawn for this game, inspired by reference art shared with permission.
 - Fonts: [Mochiy Pop One](https://fonts.google.com/specimen/Mochiy+Pop+One), [Nunito](https://fonts.google.com/specimen/Nunito) and [Great Vibes](https://fonts.google.com/specimen/Great+Vibes) from Google Fonts (Open Font License), saved in `assets/fonts/`.
 
 <div align="center">
