@@ -77,10 +77,10 @@ function restartAnimation(element, className) {
   element.classList.add(className);
 }
 
-// Make Chef Bloom do a move: "hop", "nod", "shake" or "wave".
+// Make Chef Bloom do a move: "hop", "nod" or "shake".
 // The matching CSS lives in style.css under ".chef.do-hop" etc.
 function chefDoes(move) {
-  chef.classList.remove("do-hop", "do-nod", "do-shake", "do-wave");
+  chef.classList.remove("do-hop", "do-nod", "do-shake");
   restartAnimation(chef, "do-" + move);
 }
 
@@ -125,7 +125,7 @@ openButton.addEventListener("click", function () {
   titleScreen.hidden = true;        // hide the title screen
   kitchenScreen.hidden = false;     // show the kitchen
   mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
-  chefDoes("wave");                 // Bloom waves hello
+  chefDoes("hop");
 });
 
 mochi.addEventListener("click", function () {
@@ -137,13 +137,7 @@ chef.addEventListener("click", function () {
   // Pick a random line: Math.random() gives 0–0.999…, times the list length, rounded down.
   const index = Math.floor(Math.random() * CHEF_CLICK_LINES.length);
   mochiSays(CHEF_CLICK_LINES[index]);
-
-  // Half the time she hops, half the time she waves.
-  if (Math.random() < 0.5) {
-    chefDoes("hop");
-  } else {
-    chefDoes("wave");
-  }
+  chefDoes("hop");
 });
 
 scoopButton.addEventListener("click", function () {

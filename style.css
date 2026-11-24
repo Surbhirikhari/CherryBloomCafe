@@ -216,28 +216,6 @@ h1 {
   100% { opacity: 0; transform: translateY(-30px) scale(1); }
 }
 
-/* move: wave hello! Her left arm swings out from the shoulder (94px 240px)
-   and rocks back and forth. The little hand fades in while the arm is up. */
-.bloom-arm-L { transform-origin: 94px 240px; }
-.bloom-wave-hand { opacity: 0; }
-.chef.do-wave .bloom-arm-L { animation: wave 2s ease-in-out; }
-.chef.do-wave .bloom-wave-hand { animation: wave-hand 2s linear; }
-@keyframes wave {
-  0%   { transform: rotate(0deg); }
-  18%  { transform: rotate(45deg); }
-  28%  { transform: rotate(58deg); }
-  38%  { transform: rotate(35deg); }
-  48%  { transform: rotate(58deg); }
-  58%  { transform: rotate(35deg); }
-  68%  { transform: rotate(58deg); }
-  80%  { transform: rotate(45deg); }
-  100% { transform: rotate(0deg); }
-}
-@keyframes wave-hand {
-  0%, 8%, 92%, 100% { opacity: 0; }
-  15%, 85%          { opacity: 1; }
-}
-
 /* move: nod ("yes, good!") */
 .chef.do-nod .bloom-head { animation: nod 0.6s ease-in-out; }
 @keyframes nod {

@@ -46,7 +46,6 @@
                .bloom-head   nods, shakes and tilts
                .bloom-eye    blinks
                .bloom-ribbon wiggles
-               .bloom-arm-L  lifts out and waves
              Click her to make her hop! -->
         <svg id="chef" class="chef" viewBox="0 -40 296 568" role="img" aria-label="Chef Bloom: long blonde hair, a pink headband, red ribbons and a pink dress">
           <g class="bloom-body">
@@ -56,19 +55,7 @@
             <image href="assets/bloom/body.png"  width="296" height="528"/>
             <image href="assets/bloom/bow.png"   width="296" height="528"/>
             <image href="assets/bloom/hands.png" width="296" height="528"/>
-            <!-- The dress's side edge was never drawn, because the left sleeve
-                 always covered it. This line draws it, so it looks finished
-                 when she lifts her arm to wave. -->
-            <path d="M97 246 L95 264 L93 282 L91 300 L88 320 Q78 323 67 325" fill="none" stroke="#3b2b2d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-
-            <!-- left arm: its own group so it can lift and wave.
-                 The little hand only shows while she waves. -->
-            <g class="bloom-arm-L">
-              <ellipse class="bloom-wave-hand" cx="163" cy="352" rx="11" ry="14" fill="#fdefe8" stroke="#3b2b2d" stroke-width="3.5"/>
-              <image href="assets/bloom/arm_L.png" width="296" height="528"/>
-              <!-- the sleeve's cuff edge (normally hidden under her other arm) -->
-              <path d="M141 322 Q146 332 150 340 Q156 350 153 360 Q155 370 162 377" fill="none" stroke="#3b2b2d" stroke-width="3.5" stroke-linecap="round"/>
-            </g>
+            <image href="assets/bloom/arm_L.png" width="296" height="528"/>
             <image href="assets/bloom/arm_R.png" width="296" height="528"/>
 
             <g class="bloom-head">
