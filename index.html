@@ -1,0 +1,131 @@
+<!doctype html>
+<!--
+  Cherry Blossom Cafe — index.html
+  This file is the STRUCTURE of the game: every screen, button and drawing lives here.
+  style.css makes it pretty. game.js makes it move.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cherry Blossom Cafe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Nunito:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <span class="logo">Cherry Blossom Cafe</span>
+  </header>
+
+  <main>
+    <!-- ============ SCREEN 1: TITLE ============ -->
+    <section id="screen-title" class="screen title-screen">
+      <p class="eyebrow">open daily · matcha &amp; sweets</p>
+      <h1>Cherry Blossom<br>Cafe</h1>
+      <p class="intro">Our chef and her cat Mochi are ready for the morning rush.
+        Today's first drink: an iced matcha latte.</p>
+      <button id="btn-open" class="btn btn-big">Open the cafe</button>
+    </section>
+
+    <!-- ============ SCREEN 2: KITCHEN ============ -->
+    <!-- "hidden" means: don't show this yet. game.js removes it later. -->
+    <section id="screen-kitchen" class="screen kitchen" hidden>
+
+      <!-- Left side: the chef, Mochi, and Mochi's speech bubble -->
+      <aside class="crew">
+        <div class="bubble" id="mochi-says">Hello!</div>
+
+        <!-- The chef, drawn with SVG shapes (circles, ellipses, paths) -->
+        <svg class="chef" viewBox="0 0 200 250" role="img" aria-label="The chef, smiling, with her hair in a bun">
+          <path d="M50 95 Q48 40 100 38 Q152 40 150 95 L152 150 Q100 162 48 150 Z" fill="var(--hair)"/>
+          <path d="M42 250 Q42 172 100 166 Q158 172 158 250 Z" fill="var(--matcha)"/>
+          <path d="M70 250 L74 186 Q100 179 126 186 L130 250 Z" fill="var(--blossom)"/>
+          <path d="M100 222 C92 214 88 222 100 232 C112 222 108 214 100 222 Z" fill="var(--blossom-deep)"/>
+          <rect x="90" y="138" width="20" height="32" rx="8" fill="var(--skin)"/>
+          <ellipse cx="100" cy="100" rx="42" ry="44" fill="var(--skin)"/>
+          <path d="M58 94 Q60 54 100 52 Q140 54 142 94 Q124 74 100 78 Q78 72 58 94 Z" fill="var(--hair)"/>
+          <circle cx="100" cy="42" r="19" fill="var(--hair)"/>
+          <g fill="var(--blossom)">
+            <circle cx="118" cy="30" r="6"/><circle cx="127" cy="36" r="6"/><circle cx="124" cy="46" r="6"/>
+            <circle cx="113" cy="46" r="6"/><circle cx="110" cy="36" r="6"/>
+          </g>
+          <circle cx="118" cy="39" r="3.5" fill="var(--paper)"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
+            <path d="M78 104 Q85 97 92 104"/>
+            <path d="M108 104 Q115 97 122 104"/>
+            <path d="M94 121 Q100 127 106 121"/>
+          </g>
+          <ellipse cx="76" cy="116" rx="8" ry="5" fill="var(--blossom)" opacity=".8"/>
+          <ellipse cx="124" cy="116" rx="8" ry="5" fill="var(--blossom)" opacity=".8"/>
+        </svg>
+
+        <!-- Mochi the cat -->
+        <svg class="mochi" viewBox="0 0 140 110" role="img" aria-label="Mochi, a round white cat">
+          <g class="mochi-tail">
+            <path d="M110 86 Q142 72 126 44" fill="none" stroke="var(--cat-line)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M110 86 Q142 72 126 44" fill="none" stroke="var(--cat)" stroke-width="9" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="72" cy="82" rx="48" ry="25" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5"/>
+          <path d="M28 38 L30 12 L50 28 Z" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M56 28 L74 10 L78 38 Z" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M33 31 L34 20 L43 28 Z M62 28 L71 19 L73 32 Z" fill="var(--blossom)"/>
+          <circle cx="52" cy="54" r="29" fill="var(--cat)" stroke="var(--cat-line)" stroke-width="2.5"/>
+          <circle cx="42" cy="53" r="3.5" fill="var(--ink)"/>
+          <circle cx="63" cy="53" r="3.5" fill="var(--ink)"/>
+          <path d="M50 59 L55 59 L52.5 62 Z" fill="var(--blossom-deep)"/>
+          <path d="M48 64 Q52 68 52.5 63 Q53 68 57 64" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
+          <ellipse cx="35" cy="62" rx="5" ry="3" fill="var(--blossom)"/>
+          <ellipse cx="70" cy="62" rx="5" ry="3" fill="var(--blossom)"/>
+          <g stroke="var(--cat-line)" stroke-width="1.5" stroke-linecap="round">
+            <path d="M30 60 L16 57 M30 64 L17 66"/><path d="M75 60 L89 57 M75 64 L88 66"/>
+          </g>
+          <path d="M42 80 L52 85 L62 80 L56 90 L48 90 Z" fill="var(--matcha)"/>
+        </svg>
+        <p class="crew-names">Chef &amp; Mochi</p>
+      </aside>
+
+      <!-- Right side: the order ticket and the work station -->
+      <div class="counter">
+        <div class="ticket">
+          <span class="ticket-label">Order</span>
+          <strong>Iced Matcha Latte</strong>
+        </div>
+
+        <!-- The recipe. Only step 1 works for now; we'll build the rest in later lessons. -->
+        <ol class="steps">
+          <li class="current">Scoop</li>
+          <li>Pour water</li>
+          <li>Whisk</li>
+          <li>Add milk</li>
+        </ol>
+
+        <div class="station">
+          <!-- The tea bowl (chawan) -->
+          <svg class="bowl" viewBox="0 0 260 210" role="img" aria-label="Tea bowl">
+            <ellipse cx="130" cy="70" rx="112" ry="26" fill="var(--bowl-inside)"/>
+            <!-- The matcha powder pile. game.js makes it bigger with each scoop. -->
+            <ellipse id="powder" cx="130" cy="82" rx="0" ry="0" fill="var(--powder)"/>
+            <path d="M18 70 Q18 190 130 190 Q242 190 242 70 A112 26 0 0 1 18 70 Z" fill="var(--bowl)"/>
+            <path d="M40 120 Q60 160 110 170" fill="none" stroke="var(--paper)" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+            <rect x="96" y="186" width="68" height="14" rx="5" fill="var(--bowl-foot)"/>
+            <ellipse cx="130" cy="70" rx="112" ry="26" fill="none" stroke="var(--bowl-foot)" stroke-width="3"/>
+          </svg>
+
+          <div class="panel">
+            <h2>Scoop the matcha</h2>
+            <p>Use the chashaku (bamboo scoop). One scoop is about 1 gram.</p>
+            <p class="readout"><span id="scoop-count">0</span> scoops</p>
+            <div class="row">
+              <button id="btn-scoop" class="btn">Add a scoop</button>
+              <button id="btn-unscoop" class="btn btn-soft">Take one out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+/* =========================================================
+   Cherry Blossom Cafe — style.css
+   This file is the LOOK of the game: colors, fonts, sizes, layout.
+   ========================================================= */
+
+/* ---------- 1. Colors and fonts ----------
+   We give every color a name here (a "CSS variable").
+   Change a color once here and it changes everywhere it's used.  */
+:root {
+  /* pinks */
+  --blossom: #f6b8cb;
+  --blossom-deep: #d8648b;
+  --petal-bg: #fdecf1;
+  --paper: #fffafc;
+
+  /* greens */
+  --matcha: #9cc56f;
+  --matcha-deep: #4f7d3a;
+  --powder: #7fae4c;
+
+  /* characters and objects */
+  --ink: #5a3a46;        /* our "black": a soft plum brown */
+  --hair: #6b4038;
+  --skin: #ffe1d3;
+  --cat: #ffffff;
+  --cat-line: #e7c4cf;
+  --bowl: #f9d7e1;
+  --bowl-inside: #fbeef2;
+  --bowl-foot: #e8a9bc;
+
+  --font-display: "Mochiy Pop One", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  color-scheme: light;
+}
+
+/* ---------- 2. The page ---------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--ink);
+  /* polka dots: two soft radial gradients on top of pink */
+  background:
+    radial-gradient(circle, #fff 2px, transparent 2.5px) 0 0 / 28px 28px,
+    radial-gradient(circle, #fff 2px, transparent 2.5px) 14px 14px / 28px 28px,
+    var(--petal-bg);
+}
+
+main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* An element with the "hidden" attribute is never shown */
+[hidden] { display: none !important; }
+
+/* ---------- 3. Top bar ---------- */
+.topbar {
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+  background: var(--matcha-deep);
+}
+.logo {
+  font-family: var(--font-display);
+  color: var(--paper);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 4. Buttons ---------- */
+.btn {
+  font: 800 1rem var(--font-body);
+  color: var(--paper);
+  background: var(--blossom-deep);
+  border: none;
+  border-radius: 999px;          /* fully rounded = pill shape */
+  padding: 12px 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b04a6e;   /* the darker "lip" under the button */
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn:active {                    /* pressed: move down, shrink the lip */
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b04a6e;
+}
+.btn:focus-visible { outline: 3px solid var(--matcha-deep); outline-offset: 3px; }
+
+.btn-soft {
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 4px 0 var(--cat-line);
+}
+.btn-big { font-size: 1.15rem; padding: 16px 32px; }
+
+/* ---------- 5. Title screen ---------- */
+.title-screen {
+  text-align: center;
+  padding-block: 48px;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--matcha-deep);
+}
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 8vw, 4.5rem);  /* grows with the screen, within limits */
+  line-height: 1.1;
+  color: var(--blossom-deep);
+  text-shadow: 4px 4px 0 var(--blossom);
+}
+.intro { max-width: 34ch; font-size: 1.1rem; line-height: 1.5; margin: 0 0 8px; }
+
+/* ---------- 6. Kitchen layout ---------- */
+/* Two columns: the crew on the left, the counter on the right */
+.kitchen {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.crew {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+.chef  { width: 180px; }
+.mochi { width: 120px; margin-top: -40px; margin-left: 110px; }
+.crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
+
+/* Mochi's tail wags forever */
+.mochi-tail {
+  transform-origin: 110px 86px;
+  animation: wag 1.6s ease-in-out infinite;
+}
+@keyframes wag {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-14deg); }
+}
+
+/* Speech bubble */
+.bubble {
+  position: relative;
+  background: var(--paper);
+  border: 3px solid var(--blossom);
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  min-height: 3.2em;
+  width: 100%;
+}
+.bubble::after {                 /* the little tail of the bubble */
+  content: "";
+  position: absolute;
+  bottom: -11px;
+  right: 34px;
+  border: 9px solid transparent;
+  border-top-color: var(--blossom);
+  border-bottom: 0;
+}
+
+/* ---------- 7. Counter: ticket, steps, station ---------- */
+.counter {
+  display: grid;
+  gap: 16px;
+  background: var(--paper);
+  border: 3px solid var(--blossom);
+  border-radius: 24px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.ticket { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 1.1rem; }
+.ticket-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--paper);
+  background: var(--matcha-deep);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+/* The recipe steps, shown as little numbered pills */
+.steps {
+  list-style: none;
+  counter-reset: step;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+.steps li {
+  counter-increment: step;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--petal-bg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 0.6;
+}
+.steps li::before { content: counter(step) ". "; }
+.steps li.current { background: var(--matcha); color: #23361a; opacity: 1; }
+
+.station {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+.bowl { width: 100%; max-width: 300px; justify-self: center; }
+
+.panel { display: grid; gap: 10px; justify-items: start; }
+.panel h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--matcha-deep); }
+.panel p { margin: 0; line-height: 1.5; }
+.readout { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* A little bounce we add to the bowl from game.js */
+.bounce { animation: bounce 0.3s ease-out; }
+@keyframes bounce {
+  40% { transform: scale(1.04, 0.96); }
+}
+
+/* ---------- 8. Phones ---------- */
+@media (max-width: 720px) {
+  .kitchen, .station { grid-template-columns: 1fr; }
+  .crew { grid-template-columns: auto auto; align-items: end; }
+  .bubble { grid-column: 1 / -1; }
+  .chef { width: 120px; }
+  .mochi { width: 90px; margin: 0; }
+  .crew-names { display: none; }
+}
+
+/* People who turn off animations in their computer settings */
+@media (prefers-reduced-motion: reduce) {
+  .mochi-tail, .bounce { animation: none; }
+}
