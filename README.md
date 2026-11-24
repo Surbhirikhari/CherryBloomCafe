@@ -5,8 +5,9 @@
 **A cosy pink-and-green cafe cooking game, made in the browser.**
 
 Chef Bloom and her sleepy cat Mochi run a little cafe under the cherry trees.
-Customers drop by with a drink in mind. You whisk, pour, chop and decorate,
-then send them off happy (and earn a few coins on the way).
+Customers drop by with a treat in mind. You pick up real tools and pour,
+pipe, bake, flip, stir and decorate, then send them off happy
+(and earn a few coins on the way).
 
 <img src="docs/screenshots/street.jpg" alt="A close-up of the Cherry Blossom Cafe on a watercolour street, with a wooden welcome board and a pink Open the cafe sign hanging from it" width="820">
 
@@ -30,29 +31,33 @@ then send them off happy (and earn a few coins on the way).
 
 | | |
 |---|---|
-| <img src="docs/screenshots/counter.jpg" alt="A customer with twin tails stands by the counter with a thought cloud showing a strawberry matcha latte" width="400"> | **1. A customer walks in.** Their thought cloud shows the drink they're dreaming of. Click the cloud. |
-| <img src="docs/screenshots/recipe.jpg" alt="The recipe card for a Strawberry Matcha Latte, listing seven steps and a price of 15 coins" width="400"> | **2. Read the recipe card.** It shows the drink, every step in order, and the price. Click **Continue**. |
-| <img src="docs/screenshots/whisk.jpg" alt="The matcha station: a bamboo whisk over a bowl of frothy green matcha, with the recipe checklist on the left" width="400"> | **3. Make it at the work station.** Scoop the matcha, add hot water, then *really whisk*: drag side to side until the foam meter fills. Pour it into the jar, then **hold** the milk bottle and let go between the pink lines. |
-| <img src="docs/screenshots/decorate.jpg" alt="A layered pink, cream and green jar decorated with whipped cream, strawberry slices, mint, a sakura flower and sugar hearts, next to a cutting board" width="400"> | **4. Decorate however you like.** Chop strawberries on the board (3 chops = 4 slices), then drag slices, cream, sakura flowers, mint and sugar hearts *anywhere* on the drink. |
-| <img src="docs/screenshots/served.jpg" alt="The happy customer says 'So pretty! And perfect!' while 23 coins float up and Mochi celebrates" width="400"> | **5. Serve it!** A little receipt shows your score for every step (how close you got to the pink and green zones, plus decorating). The better the score, the bigger the tip. |
-| | **6. Finish the day.** Each day has a few customers (one more every day). After the last one, Bloom's notebook shows your stars, coins, average score and best dish. Your day and coins are saved. |
+| <img src="docs/screenshots/counter.jpg" alt="A customer with twin tails and a pink bow stands by the counter with a thought cloud showing a strawberry crêpe cone" width="400"> | **1. A customer walks in.** Their thought cloud shows what they're dreaming of. Click the cloud. |
+| <img src="docs/screenshots/recipe.jpg" alt="The recipe card for a Strawberry Crêpe, listing seven steps and a price of 16 coins" width="400"> | **2. Read the recipe card.** It shows the dish, every step in order, and the price. Click **Continue**. |
+| <img src="docs/screenshots/pour.jpg" alt="Sakura Tea: a pink kettle tipped over a glass mug, hot water pouring in up to a dashed pink line with a heart, sakura flowers floating" width="400"> | **3. Pick up the big tool and use it.** Each step brings ONE big tool to the table: a kettle, a batter bowl, a piping bag, a knife, a spoon… Drag it over and it pours, pipes or slices wherever you hold it. Stop at the line, then press **Next step**. Pour too much and it overflows! |
+| <img src="docs/screenshots/cream.jpg" alt="Strawberry Cream Toast: a piping bag moving over golden toast, leaving a trail of pink cream" width="400"> | **4. Cream flows where you move.** Hold the piping bag over the dessert and draw with it. The meter shows the perfect amount (the pink zone). |
+| <img src="docs/screenshots/oven.jpg" alt="A big pink oven with a croissant glowing inside the window, a timer reading 3.3 seconds and a Take out button on the door" width="400"> | **5. Bake it for real.** Drag the tray into the oven, press **Turn on**, and watch it through the window. Press **Take out!** at **5 seconds**. The toaster pops the bread up by itself, and on the pan you click the crêpe to flip it. |
+| <img src="docs/screenshots/decorate.jpg" alt="A strawberry crêpe cone with a bunny cookie, pocky sticks, chocolate drizzle and strawberry slices, next to a cutting board and topping tray" width="400"> | **6. Decorate however you like.** Chop strawberries on the board (3 chops = 4 slices), then drag slices, cream, bunny cookies, pocky, daisies and more *anywhere* on it. |
+| <img src="docs/screenshots/served.jpg" alt="The happy customer says 'So pretty! And perfect!' and pays 24 coins, while a receipt shows a score for each step and a total of 98%" width="400"> | **7. Serve it!** A receipt shows your score for every step. Mistakes are allowed: too much batter, 6 strawberries instead of 4, or a late flip all cost points. The better the score, the bigger the tip. |
+| <img src="docs/screenshots/notebook.jpg" alt="Bloom's notebook: Day 1 is done, with 3 gold stars, 5 customers served, 102 coins, a 92% average and Sakura Tea as the best dish" width="400"> | **8. Finish the day.** Each day has a few customers (one more every day). After the last one, Bloom's notebook shows your stars, coins, average score and best dish. Your day and coins are saved. |
 
 ---
 
 ## 🧁 The menu
 
-| Drink | How it's made | Price |
-|---|---|---|
-| 🍵 **Strawberry Matcha Latte** | Hands-on matcha station: scoop, whisk, pour, layer, decorate | 15 coins |
-| 🍓 **Strawberry Milk** | Mash strawberries with the masher, drop in ice, carry the milk over to pour, stir until it's all pink | 10 coins |
-| 🌸 **Sakura Tea** | Pick up each tool: drop in 3 flowers, pour hot water to the heart line (don't overflow!), stir it pink with a spoon, drip honey anywhere | 9 coins |
-| 🍯 **Honey Coffee** | Grind beans, brew a shot, drip honey with the dipper, pour your own latte art | 11 coins |
-| 🍦 **Strawberry Crêpe** | Carry the batter bowl to the pan, click the crêpe to flip it at 5 seconds, pipe cream, drop in strawberries, fold into a cone, add a bunny cookie | 16 coins |
-| 🍥 **Strawberry Roll Cake** | Pour batter in the tray, bake, pipe pink cream, roll it up, slice through with the knife | 18 coins |
-| 🍞 **Strawberry Cream Toast** | Push the bread down, lift it out when the toaster pops, pipe pink cream, drip honey anywhere, add heart strawberries and daisies | 12 coins |
-| 🥐 **Strawberry Croissant** | Bake, slice it open with the knife, pipe cream, drop in strawberries, dust with the sifter | 14 coins |
+Everything is hands-on: one big tool at a time, and **you** decide when each step is done.
 
-Every drink can be decorated. Customers love toppings! 💕
+| | Dish | How it's made | Price |
+|---|---|---|---|
+| 🍵 | **Strawberry Matcha Latte** | Drag 2 scoops of matcha into the bowl, pour hot water, whisk it frothy, pour the bowl into the jar, milk to the pink lines, strawberry cream on top | 15 coins |
+| 🍓 | **Strawberry Milk** | Mash strawberries in the glass with the masher, drop in 3 ice cubes, pour the milk, stir until it's all pink | 10 coins |
+| 🌸 | **Sakura Tea** | Drop in 3 sakura flowers, pour hot water to the heart line (don't overflow!), stir it pink with a spoon, drip honey anywhere | 9 coins |
+| ☕ | **Honey Coffee** | Turn the grinder 4 times, brew a 5-second shot, drip honey with the dipper, pour your own latte art | 11 coins |
+| 🍦 | **Strawberry Crêpe** | Pour batter in the pan, click the crêpe to flip it at 5 seconds, pipe cream, add 4 strawberries, fold it in half, then into a cone | 16 coins |
+| 🍥 | **Strawberry Roll Cake** | Pour batter in the tray, bake it in the oven for 5 seconds, pipe pink cream, roll it up, slice through with the knife | 18 coins |
+| 🍞 | **Strawberry Cream Toast** | Put the bread in the toaster, lift it out when it pops, pipe pink cream, drip honey anywhere | 12 coins |
+| 🥐 | **Strawberry Croissant** | Bake it in the oven for 5 seconds, slice it open, pipe cream inside, add 4 strawberries, dust with the sugar sifter | 14 coins |
+
+Everything ends with decorating. Customers love toppings! 💕
 
 ---
 
@@ -62,7 +67,7 @@ Every drink can be decorated. Customers love toppings! 💕
 2. Open **`index.html`** in your browser.
 3. Click the pink **Open the cafe** sign hanging from the wooden board, and walk inside.
 
-That's it: no installs, no build step. Works with a mouse, a touchscreen, or a keyboard (← → to whisk, Space to pour).
+That's it: no installs, no build step. Works with a mouse, a touchscreen, or a keyboard (Space to pour, arrow keys to stir, Enter to flip).
 
 ---
 
@@ -95,7 +100,9 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 - **CSS animations** with `@keyframes`, triggered by adding a class
 - **SVG drawing**, plus filters that make smooth shapes look hand-painted
 - **`async` / `await`** to script a scene step by step (react → pay → walk out)
-- **Pointer events** for whisking, hold-to-pour and drag-and-drop
+- **Pointer events** for picking tools up, pouring, piping and drag-and-drop
+- **Data-driven design**: every recipe is just a list of steps, and one station (`bakery.js`) runs them all
+- **Saving** progress in the browser with `localStorage`
 - **Splitting code into files** so each one does one thing
 - **Debugging!** Like the time only one customer ever came, because the last one's walk-out animation was never cleared 🙈
 
@@ -105,18 +112,18 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 
 - [x] Desserts! Crêpe, roll cake, cream toast and croissant
 - [ ] More drinks and desserts (strawberry shortcake, anyone?)
-- [x] Cafe days with an end-of-day notebook, and a % score for every step
+- [x] Cafe days with an end-of-day notebook, a % score for every step, and saving
+- [x] Real tools, a real oven timer, and room for mistakes
 - [ ] Several customers at once, with order tickets
 - [ ] Ranks that unlock new recipes, and a shop for decorations
 - [ ] Sounds: the whisk, the pour, the coin *ding*
-- [ ] Saving your coins between visits
 
 ---
 
 ## 💐 Credits
 
 - Chef Bloom's artwork is used with the original artist's permission.
-- The street, cafe, Mochi, customers and tools were drawn for this game, inspired by reference art shared with permission.
+- The street, cafe, Mochi, customers, tools and desserts were drawn for this game, inspired by reference art shared with permission.
 - Fonts: [Mochiy Pop One](https://fonts.google.com/specimen/Mochiy+Pop+One) and [Nunito](https://fonts.google.com/specimen/Nunito) from Google Fonts.
 
 <div align="center">
