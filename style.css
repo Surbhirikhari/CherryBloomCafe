@@ -150,56 +150,45 @@ h1 {
    "Idle" animations loop forever (infinite).
    "Move" animations play once when game.js adds a class like .do-hop  */
 
-/* idle: gently sway from her feet */
+/* Numbers like "148px 525px" below are spots on her picture
+   (the picture is 297 wide and 532 tall). 148px 525px = the middle of her feet. */
+
+/* idle: breathe (stretch up a tiny bit) and sway, rocking from her feet */
 .chef-body {
-  transform-origin: 100px 280px;
-  animation: sway 4s ease-in-out infinite;
+  transform-origin: 148px 525px;
+  animation: breathe 3.6s ease-in-out infinite;
 }
-@keyframes sway {
-  0%, 100% { transform: rotate(-1.2deg); }
-  50%      { transform: rotate(1.2deg); }
+@keyframes breathe {
+  0%, 100% { transform: rotate(-1deg) scaleY(1); }
+  50%      { transform: rotate(1deg) scaleY(1.015); }
 }
 
-/* idle: blink every few seconds (squash the eyes flat for a moment) */
-.chef-eyes {
-  transform-origin: 100px 116px;
+/* idle: blink. The "lids" are skin-coloured shapes drawn over her eyes.
+   They're invisible (opacity 0) most of the time and flash on for a moment. */
+.chef-lids {
+  opacity: 0;
   animation: blink 4.5s infinite;
 }
 @keyframes blink {
-  0%, 93%, 100% { transform: scaleY(1); }
-  96%           { transform: scaleY(0.1); }
+  0%, 93%, 98%, 100% { opacity: 0; }
+  94%, 97%           { opacity: 1; }
 }
 
-/* idle: hair flows a little behind the sway */
-.chef-hair-back {
-  transform-origin: 100px 60px;
-  animation: hair-flow 4s ease-in-out infinite;
-  animation-delay: -0.6s;
-}
-@keyframes hair-flow {
-  0%, 100% { transform: skewX(1.5deg); }
-  50%      { transform: skewX(-1.5deg); }
-}
+/* her extra blush and the heart only show during a hop */
+.chef-blush { opacity: 0; }
+.chef-heart { opacity: 0; transform-origin: 270px 40px; }
 
-/* idle: ribbons wiggle */
-.chef-ribbon { animation: ribbon 1.8s ease-in-out infinite alternate; }
-.chef-ribbon-left  { transform-origin: 50px 104px; }
-.chef-ribbon-right { transform-origin: 150px 104px; animation-delay: -0.9s; }
-@keyframes ribbon {
-  from { transform: rotate(-6deg); }
-  to   { transform: rotate(6deg); }
-}
+/* hover: lean in curiously */
+.chef { transition: transform 0.3s; }
+.chef:hover { transform: rotate(-3deg); }
 
-/* the heart is invisible until she hops */
-.chef-heart { opacity: 0; transform-origin: 160px 44px; }
-
-/* hover: tilt her head curiously */
-.chef-head { transform-origin: 100px 150px; transition: transform 0.3s; }
-.chef:hover .chef-head { transform: rotate(-5deg); }
-
-/* move: happy hop (and the heart floats up) */
+/* move: happy hop (she blushes and a heart floats up) */
 .chef.do-hop { animation: hop 0.6s ease-out; }
 .chef.do-hop .chef-heart { animation: heart-up 1s ease-out; }
+.chef.do-hop .chef-blush { animation: blush 1.2s ease-out; }
+@keyframes blush {
+  30%, 70% { opacity: 0.55; }
+}
 @keyframes hop {
   0%   { transform: translateY(0); }
   35%  { transform: translateY(-18px); }
@@ -212,18 +201,18 @@ h1 {
   100% { opacity: 0; transform: translateY(-30px) scale(1); }
 }
 
-/* move: nod ("yes, good!") */
-.chef.do-nod .chef-head { animation: nod 0.6s ease-in-out; }
+/* move: a little bow, like a nod ("yes, good!") */
+.chef.do-nod .chef-body { animation: nod 0.6s ease-in-out; }
 @keyframes nod {
-  40% { transform: rotate(4deg) translateY(3px); }
+  40% { transform: rotate(3deg) scaleY(0.97); }
 }
 
-/* move: worried head shake ("oh no!") */
-.chef.do-shake .chef-head { animation: shake 0.6s ease-in-out; }
+/* move: worried wiggle ("oh no!") */
+.chef.do-shake .chef-body { animation: shake 0.6s ease-in-out; }
 @keyframes shake {
-  20% { transform: rotate(-7deg); }
-  45% { transform: rotate(7deg); }
-  70% { transform: rotate(-4deg); }
+  20% { transform: rotate(-4deg); }
+  45% { transform: rotate(4deg); }
+  70% { transform: rotate(-2deg); }
 }
 .mochi { width: 120px; margin-top: -40px; margin-left: 110px; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
@@ -338,5 +327,5 @@ h1 {
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .mochi-tail, .bounce,
-  .chef-body, .chef-eyes, .chef-hair-back, .chef-ribbon { animation: none; }
+  .chef-body, .chef-lids { animation: none; }
 }
