@@ -260,6 +260,39 @@
         </div>
       </aside>
     </section>
+
+    <!-- ============ SCREEN 4: THE MATCHA STATION ============ -->
+    <!-- A hands-on mini-game for the Strawberry Matcha Latte (see matcha.js). -->
+    <section id="screen-matcha" class="screen station" hidden>
+      <div class="station-table">
+        <button id="m-tin" class="tool"><span id="m-tin-art"></span><span class="tool-label">Matcha</span></button>
+        <button id="m-kettle" class="tool"><span id="m-kettle-art"></span><span class="tool-label">Hot water</span></button>
+        <div id="m-bowl-area" class="bowl-area" tabindex="0" aria-label="Tea bowl. To whisk, drag side to side or press the left and right arrow keys.">
+          <div id="m-whisk" class="whisk" hidden></div>
+          <div id="m-bowl"></div>
+          <span class="tool-label">Bowl</span>
+        </div>
+        <div class="jar-area">
+          <span id="m-stream" class="stream" hidden></span>
+          <div id="m-jar"></div>
+          <span class="tool-label">Jar</span>
+        </div>
+        <button id="m-milk" class="tool"><span id="m-milk-art"></span><span class="tool-label">Milk (hold)</span></button>
+        <button id="m-berry" class="tool"><span id="m-berry-art"></span><span class="tool-label">Strawberry cream</span></button>
+      </div>
+
+      <aside class="recipe-note">
+        <p class="note-label">Making</p>
+        <h2>Strawberry Matcha Latte</h2>
+        <ol id="m-steps" class="note-steps"></ol>
+        <div id="m-froth-bar" class="froth-bar" hidden><div id="m-froth" class="froth-fill"></div></div>
+        <p id="m-hint" class="prep-hint" aria-live="polite"></p>
+        <div class="row">
+          <button id="m-restart" class="btn btn-soft">Start over</button>
+          <button id="m-done" class="btn" disabled>Done</button>
+        </div>
+      </aside>
+    </section>
   </main>
 
   <script src="paint.js"></script>
@@ -267,6 +300,7 @@
   <script src="room.js"></script>
   <script src="menu.js"></script>
   <script src="customers.js"></script>
+  <script src="matcha.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

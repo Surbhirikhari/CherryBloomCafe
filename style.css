@@ -61,7 +61,7 @@ body {
 }
 
 main {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px 48px;
 }
@@ -616,6 +616,7 @@ h1 {
   color: var(--matcha-deep);
 }
 .recipe-cup { width: 84px; }
+.cloud-drink .jar-svg, .recipe-cup .jar-svg { display: block; width: 100%; }
 .recipe-price { margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.1rem; }
 
 /* numbered ingredient lists, on the recipe card and on the note */
@@ -651,7 +652,7 @@ h1 {
   color: var(--paper);
   font-size: 0.8rem;
 }
-.recipe-steps .icon-svg, .note-steps .icon-svg { flex: none; width: 34px; height: 34px; }
+.recipe-steps li svg, .note-steps li svg { flex: none; width: 34px; height: 34px; }
 .note-steps li.done { background: #dcebc8; }
 .note-steps li.done::after { content: "✓"; margin-left: auto; color: var(--matcha-deep); font-weight: 900; }
 .note-steps li.next { background: var(--paper); outline: 3px dashed var(--blossom-deep); outline-offset: -3px; }
@@ -743,6 +744,87 @@ h1 {
 }
 .prep-hint { margin: 0; min-height: 2.8em; font-weight: 700; color: var(--blossom-deep); }
 
+/* --- the matcha station --- */
+.station {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 18px;
+  align-items: end;
+  min-height: calc(100vh - 120px);
+}
+.station-table {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 1.7fr 1.1fr 0.6fr 0.75fr;
+  gap: 12px;
+  align-items: end;
+  padding: 60px 20px 26px;
+  border: 3px solid var(--cat-line);
+  border-radius: 22px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 38px, rgba(65, 44, 44, 0.1) 38px 40px),
+    linear-gradient(#efcfa8, #ddb184);
+  box-shadow: 0 10px 0 #c9976a;
+}
+.art { display: block; width: 100%; height: auto; overflow: visible; }
+.tool-label { display: block; margin-top: 4px; font: 800 0.8rem var(--font-body); color: var(--ink); text-align: center; }
+
+/* tools you can't use yet are faded; the one for this step glows and bobs */
+.tool {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0.45;
+  filter: grayscale(0.4);
+  transition: opacity 0.2s, filter 0.2s;
+}
+.tool:disabled { cursor: default; }
+.tool.active { opacity: 1; filter: drop-shadow(0 0 10px #fff6c8); animation: tool-bob 1.4s ease-in-out infinite; }
+.tool:focus-visible, .bowl-area:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 4px; border-radius: 12px; }
+@keyframes tool-bob { 50% { transform: translateY(-6px); } }
+.tool.pouring { animation: none; transform: rotate(-28deg) translateY(-14px); }
+
+/* the bowl: you whisk on it by dragging */
+.bowl-area { position: relative; touch-action: none; user-select: none; transition: transform 0.4s; transform-origin: 80% 80%; }
+.bowl-area.active { cursor: grab; filter: drop-shadow(0 0 10px #fff6c8); }
+.bowl-area.active:active { cursor: grabbing; }
+.bowl-area.tilt { transform: rotate(16deg) translate(10px, -10px); }
+.whisk {
+  position: absolute;
+  left: 44%;
+  top: -56%;
+  width: 26%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* the jar and the pouring stream */
+.jar-area { position: relative; }
+.stream {
+  position: absolute;
+  left: 50%;
+  top: -40%;
+  width: 7%;
+  height: 72%;
+  margin-left: -3.5%;
+  border-radius: 6px;
+  border: 2px solid var(--cat-line);
+  z-index: 1;
+}
+.stream-milk { background: #fbf3e3; }
+.stream-matcha { background: #8fb565; }
+
+/* the foam meter while whisking */
+.froth-bar {
+  height: 16px;
+  border: 3px solid var(--cat-line);
+  border-radius: 999px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.froth-fill { height: 100%; width: 0; background: linear-gradient(90deg, #6f9a48, #a9d16c); transition: width 0.15s; }
+
 /* ---------- 8. Phones ---------- */
 @media (max-width: 720px) {
   .title-screen { justify-items: center; }
@@ -750,7 +832,8 @@ h1 {
   .customer { width: 34%; }
   .order-cloud { left: -20%; }
   .customer-says { left: -60%; }
-  .prep, .prep-table { grid-template-columns: 1fr; }
+  .prep, .prep-table, .station { grid-template-columns: 1fr; }
+  .station-table { grid-template-columns: repeat(3, 1fr); padding-top: 70px; }
   .prep { align-items: start; }
   .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }
 }
@@ -760,7 +843,7 @@ h1 {
   .scene.entering .scene-outside { transform: none; }
   .petals { display: none; }
   .walker, .bob, .leg { animation: none; }
-  .customer-body, .order-cloud { animation: none; }
+  .customer-body, .order-cloud, .tool.active { animation: none; }
   .mochi-tail, .mochi-body, .z, .bounce, .petal,
   .bloom-body, .bloom-hair-L, .bloom-hair-R, .bloom-eye, .bloom-ribbon-L, .bloom-ribbon-R { animation: none; }
 }

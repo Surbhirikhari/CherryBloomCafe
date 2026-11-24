@@ -11,7 +11,6 @@ const INK = "#412c2c";   // Bloom's marker ink, used for every outline
 const INGREDIENTS = {
   ice:        { name: "Ice",        color: "#dcedf3" },
   milk:       { name: "Milk",       color: "#fbf0dc" },
-  matcha:     { name: "Matcha",     color: "#9cc56f" },
   strawberry: { name: "Strawberry", color: "#f590a8" },
   water:      { name: "Hot water",  color: "#f3e6cc" },
   sakura:     { name: "Sakura",     color: "#f9cdd8" },
@@ -21,8 +20,9 @@ const INGREDIENTS = {
 
 // ---------- The menu ----------
 // "steps" is the order to add things, from the bottom of the glass to the top.
+// A drink with a "station" is made in its own mini-game instead (see matcha.js).
 const MENU = [
-  { name: "Iced Matcha Latte", price: 12, steps: ["ice", "milk", "matcha"] },
+  { name: "Strawberry Matcha Latte", price: 15, station: "matcha" },
   { name: "Strawberry Milk",   price: 10, steps: ["strawberry", "ice", "milk"] },
   { name: "Sakura Tea",        price: 9,  steps: ["sakura", "water", "honey"] },
   { name: "Honey Coffee",      price: 11, steps: ["coffee", "honey", "milk"] },
@@ -32,7 +32,7 @@ const MAX_LAYERS = 4;   // the glass holds 4 pours at most
 
 
 // ---------- Drawing a glass with layers ----------
-// layers is a list like ["ice", "milk", "matcha"], bottom first.
+// layers is a list like ["strawberry", "ice", "milk"], bottom first.
 // Returns SVG code as a string, which we can put on the page with innerHTML.
 let glassNumber = 0;   // every glass needs its own clip-path id
 const GLASS = "M14 8 L86 8 L78 122 Q77 128 70 128 L30 128 Q23 128 22 122 Z";
@@ -93,11 +93,6 @@ function ingredientIconSVG(id) {
       <path d="M28 74 L28 36 Q28 28 34 24 L34 10 L46 10 L46 24 Q52 28 52 36 L52 74 Z" fill="#fffdf7" ${s}/>
       <rect x="33" y="6" width="14" height="7" rx="2" fill="#f6b8cb" ${s}/>
       <rect x="30" y="44" width="20" height="14" rx="2" fill="#f6b8cb" ${s}/>`,
-    matcha: `
-      <rect x="20" y="28" width="40" height="46" rx="5" fill="#9cc56f" ${s}/>
-      <rect x="16" y="20" width="48" height="12" rx="4" fill="#4f7d3a" ${s}/>
-      <rect x="28" y="42" width="24" height="20" rx="3" fill="#fffdf7" ${s}/>
-      <path d="M33 50 Q40 45 47 50" fill="none" ${s} stroke-width="2.5"/>`,
     strawberry: `
       <path d="M40 74 Q12 56 16 36 Q22 22 40 28 Q58 22 64 36 Q68 56 40 74 Z" fill="#f2667f" ${s}/>
       <path d="M28 26 L34 14 L40 24 L46 14 L52 26 Q40 32 28 26 Z" fill="#8fae7a" ${s}/>

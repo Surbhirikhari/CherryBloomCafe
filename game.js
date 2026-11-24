@@ -8,7 +8,8 @@
 //   4. the customer gets the drink, reacts, pays, and leaves
 //   5. the next customer walks in
 //
-// The drinks live in menu.js, the customer drawings in customers.js.
+// The drinks live in menu.js, the customer drawings in customers.js,
+// and the matcha mini-game in matcha.js.
 // =========================================================
 
 
@@ -17,6 +18,7 @@
 const titleScreen   = document.getElementById("screen-title");
 const kitchenScreen = document.getElementById("screen-kitchen");
 const prepScreen    = document.getElementById("screen-prep");
+const matchaScreen  = document.getElementById("screen-matcha");
 const openButton    = document.getElementById("btn-open");
 const scene         = document.getElementById("scene");
 const petalLayer    = document.getElementById("petals");
@@ -91,11 +93,17 @@ function chefDoes(move) {
   restartAnimation(chef, "do-" + move);
 }
 
-// Switch between the counter view and the kitchen-table view.
+// What a drink looks like: the matcha latte comes in a jar, the rest in a glass.
+function drinkArt(drink) {
+  return drink.station === "matcha" ? jarSVG(PERFECT_JAR) : glassSVG(drink.steps);
+}
+
+// Switch between the counter, the kitchen table, and the matcha station.
 function showScreen(name) {
   kitchenScreen.hidden = name !== "counter";
   prepScreen.hidden = name !== "table";
-  scene.classList.toggle("blurred", name === "table");   // soften the room behind the table
+  matchaScreen.hidden = name !== "matcha";
+  scene.classList.toggle("blurred", name !== "counter");   // soften the room behind the table
 }
 
 
@@ -105,7 +113,7 @@ async function customerArrives() {
 
   customerArt.innerHTML = customerSVG(customer.look);
   customerEl.dataset.mood = "waiting";
-  cloudDrink.innerHTML = glassSVG(customer.order.steps);
+  cloudDrink.innerHTML = drinkArt(customer.order);
   orderCloud.hidden = true;
   customerSays.hidden = true;
   coinPop.hidden = true;
@@ -128,16 +136,24 @@ function showRecipe() {
   const drink = customer.order;
   recipeFor.textContent = customer.name + "'s order";
   recipeTitle.textContent = drink.name;
-  recipeCup.innerHTML = glassSVG(drink.steps);
+  recipeCup.innerHTML = drinkArt(drink);
   recipePrice.textContent = drink.price;
 
-  // one line per step: icon + ingredient name
+  // one line per step: icon + what to do
   recipeSteps.innerHTML = "";
-  drink.steps.forEach(function (id) {
-    const li = document.createElement("li");
-    li.innerHTML = ingredientIconSVG(id) + "<span>" + INGREDIENTS[id].name + "</span>";
-    recipeSteps.appendChild(li);
-  });
+  if (drink.station === "matcha") {
+    MATCHA_STEPS.forEach(function (step) {
+      const li = document.createElement("li");
+      li.innerHTML = step.icon() + "<span>" + step.text + "</span>";
+      recipeSteps.appendChild(li);
+    });
+  } else {
+    drink.steps.forEach(function (id) {
+      const li = document.createElement("li");
+      li.innerHTML = ingredientIconSVG(id) + "<span>" + INGREDIENTS[id].name + "</span>";
+      recipeSteps.appendChild(li);
+    });
+  }
 
   recipeCard.hidden = false;
   continueBtn.focus();
@@ -147,6 +163,14 @@ function showRecipe() {
 // ---------- 6. The kitchen table: making the drink ----------
 function startMaking() {
   recipeCard.hidden = true;
+
+  // the matcha latte has its own hands-on station
+  if (customer.order.station === "matcha") {
+    openMatchaStation(serve);
+    showScreen("matcha");
+    return;
+  }
+
   glass = [];
   noteTitle.textContent = customer.order.name;
   prepHint.textContent = "Click the ingredients in order.";
@@ -217,9 +241,9 @@ function rateDrink(made, wanted) {
   return sameThings ? 2 : 1;
 }
 
-async function serve() {
+// stars: how good it was (3, 2 or 1). art: a drawing of the drink we made.
+async function serve(stars, art) {
   const drink = customer.order;
-  const stars = rateDrink(glass, drink.steps);
 
   // what they pay: price + a tip for perfect, half price if it's wrong
   let pay = drink.price;
@@ -228,7 +252,7 @@ async function serve() {
 
   // back to the counter: the drink appears in their cloud
   showScreen("counter");
-  cloudDrink.innerHTML = glassSVG(glass);
+  cloudDrink.innerHTML = art;
   restartAnimation(orderCloud, "pop");
   await wait(600);
 
@@ -243,7 +267,7 @@ async function serve() {
   } else if (stars === 2) {
     customerEl.dataset.mood = "happy";
     customerSays.textContent = "Tasty, thank you!";
-    mochiSays("Right things, slightly wrong order. Still good, nya.");
+    mochiSays("Not quite perfect, but still tasty, nya.");
     chefDoes("nod");
   } else {
     customerEl.dataset.mood = "sad";
@@ -306,7 +330,9 @@ openButton.addEventListener("click", async function () {
 orderCloud.addEventListener("click", showRecipe);
 continueBtn.addEventListener("click", startMaking);
 startOverBtn.addEventListener("click", startOver);
-doneBtn.addEventListener("click", serve);
+doneBtn.addEventListener("click", function () {
+  serve(rateDrink(glass, customer.order.steps), glassSVG(glass));
+});
 
 // Things Mochi says when you click on Bloom, or on him.
 const CHEF_CLICK_LINES = [
