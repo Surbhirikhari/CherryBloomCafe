@@ -17,7 +17,8 @@
   <!-- The background. Outside is the street (street.js), inside is the
        cafe room (room.js). game.js switches between them. -->
   <div id="scene" class="scene" aria-hidden="true">
-    <svg id="street" class="scene-img scene-outside" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice"></svg>
+    <!-- zoomed in on the cafe: we only show this part of the 1600 x 900 street painting -->
+    <svg id="street" class="scene-img scene-outside" viewBox="250 110 1190 670" preserveAspectRatio="xMinYMax slice"></svg>
     <svg id="room" class="scene-img scene-inside" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice"></svg>
     <div id="petals" class="petals"></div>
   </div>
@@ -29,13 +30,13 @@
   <main>
     <!-- ============ SCREEN 1: TITLE ============ -->
     <section id="screen-title" class="screen title-screen">
-      <div class="title-card">
-        <p class="eyebrow">open daily · matcha &amp; sweets</p>
-        <h1>Cherry Blossom<br>Cafe</h1>
-        <p class="intro">Chef Bloom and her cat Mochi are ready for the morning rush.
-          Serve drinks, make customers happy, earn coins.</p>
-        <button id="btn-open" class="btn btn-big">Open the cafe</button>
-      </div>
+      <!-- The name is painted on the wooden board outside (street.js),
+           so this heading is only for screen readers. -->
+      <h1 class="visually-hidden">Cherry Blossom Cafe</h1>
+      <p class="visually-hidden">Chef Bloom and her cat Mochi are ready for the morning rush.
+        Serve drinks, make customers happy, earn coins.</p>
+      <!-- this button hangs from the wooden board; game.js places it there -->
+      <button id="btn-open" class="open-sign">Open the cafe</button>
     </section>
 
     <!-- ============ SCREEN 2: KITCHEN ============ -->

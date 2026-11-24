@@ -189,6 +189,43 @@ main {
 }
 .title-screen.leaving { opacity: 0; }   /* fades away as we walk in */
 
+/* text that screen readers read out, but isn't shown */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the "Open the cafe" sign hanging under the wooden board.
+   game.js sets its left, top, width, height and font size to match the painting. */
+.open-sign {
+  position: fixed;
+  z-index: 2;
+  left: -999px;                    /* off screen until game.js places it */
+  padding: 0;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  color: #fff;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 9px, rgba(255, 255, 255, 0.12) 9px 11px),
+    var(--blossom-deep);
+  border: 3px solid var(--cat-line);
+  border-radius: 10px;
+  box-shadow: 0 5px 0 #b04a6e;
+  text-shadow: 0 2px 0 rgba(65, 44, 44, 0.3);
+  cursor: pointer;
+  transform-origin: 50% -40%;      /* swings from the strings */
+  animation: sign-swing 3s ease-in-out infinite;
+}
+.open-sign:hover { filter: brightness(1.08); animation-duration: 1.2s; }
+.open-sign:active { box-shadow: 0 2px 0 #b04a6e; translate: 0 3px; }
+.open-sign:focus-visible { outline: 3px solid var(--matcha-deep); outline-offset: 4px; }
+.open-sign:disabled { cursor: default; }
+@keyframes sign-swing { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+
 /* the frosted card that holds the title, over the painting */
 .title-card {
   display: grid;
@@ -977,6 +1014,7 @@ h1 {
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .scene.entering .scene-outside { transform: none; }
+  .open-sign { animation: none; }
   .petals { display: none; }
   .walker, .bob, .leg { animation: none; }
   .customer-body, .order-cloud, .tool.active { animation: none; }

@@ -8,7 +8,7 @@ Chef Bloom and her sleepy cat Mochi run a little cafe under the cherry trees.
 Customers drop by with a drink in mind. You whisk, pour, chop and decorate,
 then send them off happy (and earn a few coins on the way).
 
-<img src="docs/screenshots/street.jpg" alt="The Cherry Blossom Cafe on a watercolour street, with cherry trees, people walking by, and the title card" width="820">
+<img src="docs/screenshots/street.jpg" alt="A close-up of the Cherry Blossom Cafe on a watercolour street, with a wooden welcome board and a pink Open the cafe sign hanging from it" width="820">
 
 *Built step by step while learning HTML, CSS and JavaScript. No frameworks, no installs.*
 
@@ -55,7 +55,7 @@ Every drink can be decorated. Customers love toppings! 💕
 
 1. Download or clone this repo.
 2. Open **`index.html`** in your browser.
-3. Click **Open the cafe** and walk inside.
+3. Click the pink **Open the cafe** sign hanging from the wooden board, and walk inside.
 
 That's it: no installs, no build step. Works with a mouse, a touchscreen, or a keyboard (← → to whisk, Space to pour).
 

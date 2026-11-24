@@ -216,11 +216,6 @@
   const props = el("g", { filter: "url(#wc)" });
   const propsInk = el("g", { filter: "url(#ink)", opacity: 0.85 });
 
-  // A-frame chalkboard menu
-  ink("M560 708 L574 630 L600 630 L612 708", propsInk, 2);
-  wash(box(570, 638, 36, 50, 1), "#3f4a45", props);
-  for (let k = 0; k < 5; k++) ink(`M576 ${648 + k * 8} L${592 + between(-4, 8)} ${648 + k * 8}`, propsInk, 1.2).setAttribute("stroke", "#f3efe8");
-
   // bistro tables and chairs
   function table(cx) {
     el("ellipse", { cx, cy: 708, rx: 30, ry: 5, fill: "#b9b3c2", opacity: 0.35 }, props);
@@ -248,12 +243,6 @@
   el("path", { d: "M1250 466 L1280 466 L1284 444 L1246 444 Z", fill: "#fbe3a8", opacity: 0.9 }, props);
   ink("M1258 760 L1272 760", propsInk, 6).setAttribute("stroke", "#4a5650");
 
-  // a bicycle with a basket of flowers
-  function wheel(cx) { ink(`M${cx - 24} 752 A24 24 0 1 0 ${cx + 24} 752 A24 24 0 1 0 ${cx - 24} 752`, propsInk, 2); }
-  wheel(440); wheel(520);
-  ink("M440 752 L470 716 L506 716 L520 752 M470 716 L484 752 L506 716 M466 706 L476 706 M506 716 L510 700 L522 700", propsInk, 2.2).setAttribute("stroke", "#7f9c8a");
-  wash(box(512, 690, 26, 16, 1), "#d7b483", props);
-  for (let k = 0; k < 6; k++) el("circle", { cx: 518 + between(0, 16), cy: 686 + between(-4, 4), r: 4, fill: pick(["#f29cb2", "#f7c6d1", "#a3bf8c"]) }, props);
 
   // ---------- 6. Cherry trees ----------
   const trunks = el("g", { filter: "url(#wc)" });
@@ -308,6 +297,51 @@
     el("ellipse", { cx: px, cy: py, rx: between(2.5, 5), ry: between(1.5, 3),
       fill: pick(["#f4a9bd", "#f8c7d3"]), transform: `rotate(${between(0, 180)} ${px} ${py})` }, fallen);
   }
+
+  // ---------- 6b. The wooden welcome board ----------
+  // It stands on the sidewalk next to the cafe. The "Open the cafe" button
+  // hangs from it on two strings: game.js puts the real button over
+  // the empty spot marked "open-spot".
+  const board = el("g", { filter: "url(#wc)" });
+  const boardInk = el("g", { filter: "url(#ink)", opacity: 0.9 });
+  const BX = 318, BY = 430, BW = 256, BH = 168, FEET = 724;
+  el("ellipse", { cx: BX + BW / 2, cy: FEET, rx: 150, ry: 10, fill: "#b9b3c2", opacity: 0.45 }, board);
+  for (const px of [BX + 30, BX + BW - 30]) {               // two wooden posts
+    wash(box(px - 9, BY - 28, 18, FEET - BY + 28, 1), "#a9744e", board, 1);
+    ink(box(px - 9, BY - 28, 18, FEET - BY + 28, 1), boardInk, 1.6);
+    el("circle", { cx: px, cy: BY - 30, r: 9, fill: "#a9744e" }, board);  // round post tops
+  }
+  for (let i = 0; i < 3; i++) {                              // three planks
+    const y = BY + i * (BH / 3);
+    wash(box(BX, y, BW, BH / 3 - 4, 1.5), ["#dcab7b", "#d39f6f", "#e0b487"][i], board, 1);
+    ink(box(BX, y, BW, BH / 3 - 4, 1.5), boardInk, 1.6);
+    for (let k = 0; k < 2; k++) {                            // wood grain
+      const gy = y + between(10, BH / 3 - 14);
+      const gx = BX + between(10, 120);
+      ink(`M${gx} ${gy} Q${gx + 40} ${gy + between(-4, 4)} ${gx + between(60, 120)} ${gy}`, boardInk, 1).setAttribute("opacity", 0.35);
+    }
+  }
+  for (const [nx, ny] of [[BX + 12, BY + 12], [BX + BW - 12, BY + 12], [BX + 12, BY + BH - 16], [BX + BW - 12, BY + BH - 16]]) {
+    el("circle", { cx: nx, cy: ny, r: 3, fill: "#6f5045" }, board);  // nails
+  }
+  // little blossom sprigs on the top corners
+  for (const [cx, cy] of [[BX + 6, BY - 4], [BX + BW - 6, BY - 4]]) {
+    for (let k = 0; k < 14; k++) {
+      el("circle", { cx: cx + between(-20, 20), cy: cy + between(-12, 10), r: between(4, 7), fill: pick(PINKS) }, board);
+    }
+  }
+  // the painted words
+  const words = el("g", { "font-family": "Mochiy Pop One, Nunito, sans-serif", "text-anchor": "middle",
+    fill: "#e1658e", stroke: "#fff6ef", "stroke-width": 5, "paint-order": "stroke", "stroke-linejoin": "round" });
+  el("text", { x: BX + BW / 2, y: BY + 48, "font-size": 25 }, words).textContent = "Cherry Blossom";
+  el("text", { x: BX + BW / 2, y: BY + 100, "font-size": 40 }, words).textContent = "Cafe";
+  const sub = el("text", { x: BX + BW / 2, y: BY + 140, "font-family": "Nunito, sans-serif", "font-weight": 800,
+    "font-size": 15, "letter-spacing": 2, "text-anchor": "middle", fill: "#5a7d3c" });
+  sub.textContent = "MATCHA & SWEETS";
+  // two strings, and the spot the Open button hangs in
+  const SPOT = { x: BX + 48, y: BY + BH + 30, w: BW - 96, h: 58 };
+  ink(`M${SPOT.x + 22} ${BY + BH - 4} L${SPOT.x + 22} ${SPOT.y + 8} M${SPOT.x + SPOT.w - 22} ${BY + BH - 4} L${SPOT.x + SPOT.w - 22} ${SPOT.y + 8}`, boardInk, 2);
+  el("rect", { id: "open-spot", x: SPOT.x, y: SPOT.y, width: SPOT.w, height: SPOT.h, fill: "none" });
 
   // ---------- 7. People ----------
   // Each person is drawn facing right with their feet at (0, 0).

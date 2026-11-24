@@ -312,7 +312,22 @@ async function serve(stars, art, toppings = 0) {
 
 
 // ---------- 8. Opening the cafe ----------
-// The title card fades, the street zooms towards the door,
+// The "Open the cafe" sign hangs under the wooden board in the street
+// painting. The painting scales with the screen, so we measure where
+// the board's empty spot is and put the button exactly there.
+function placeOpenSign() {
+  const spot = document.getElementById("open-spot").getBoundingClientRect();
+  openButton.style.left = spot.left + "px";
+  openButton.style.top = spot.top + "px";
+  openButton.style.width = spot.width + "px";
+  openButton.style.height = spot.height + "px";
+  openButton.style.fontSize = Math.max(12, spot.height * 0.3) + "px";
+}
+placeOpenSign();
+window.addEventListener("resize", placeOpenSign);
+document.fonts.ready.then(placeOpenSign);
+
+// The sign fades, the street zooms towards the door,
 // then we're inside and the first customer walks in.
 openButton.addEventListener("click", async function () {
   openButton.disabled = true;               // no double clicks while walking in
