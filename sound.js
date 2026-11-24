@@ -29,7 +29,7 @@ const Sound = (function () {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(prefs)); } catch (e) {}
   }
 
-  const MUSIC_LEVEL = 0.5;      // the music sits quietly under everything else
+  const MUSIC_LEVEL = 0.6;      // the music sits quietly under everything else
   let ctx = null;               // the "audio kitchen": made on your first click
   let out, sfxBus, musicBus, echoIn, noiseBuf;
 
@@ -42,11 +42,13 @@ const Sound = (function () {
 
     // a "compressor" keeps loud moments from getting harsh
     const soften = ctx.createDynamicsCompressor();
-    soften.threshold.value = -16;
-    soften.ratio.value = 3;
+    soften.threshold.value = -12;
+    soften.ratio.value = 4;
+    soften.attack.value = 0.005;
+    soften.release.value = 0.2;
     soften.connect(ctx.destination);
     out = ctx.createGain();
-    out.gain.value = 0.9;
+    out.gain.value = 3.6;                            // the main volume knob
     out.connect(soften);
 
     // a soft "room echo" so everything sounds like it's in a cosy cafe
@@ -553,7 +555,7 @@ const Sound = (function () {
     stir(tool) {
       if (!on()) return;
       if (tool === "whisk") {                        // a bamboo whisk: a quick frothy "shk-shk"
-        hiss({ type: "bandpass", f: rand(2200, 2800), to: 4200, q: 0.9, a: 0.01, d: 0.12, vol: 0.08 });
+        hiss({ type: "bandpass", f: rand(2200, 2800), to: 4200, q: 0.9, a: 0.01, d: 0.12, vol: 0.14 });
         if (Math.random() < 0.5) bubble(rand(1200, 1800), 0.025, 0.03);
       } else if (tool === "masher") {                // squishing strawberries
         hiss({ type: "lowpass", f: 650, a: 0.01, d: 0.12, vol: 0.09 });
