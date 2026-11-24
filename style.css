@@ -916,7 +916,22 @@ h1 {
 .meter-label { margin: 0; text-align: center; font: 800 0.95rem var(--font-body); color: var(--ink); }
 .meter-and-button { display: flex; align-items: center; gap: 12px; }
 .meter-and-button .meter { flex: 1; }
-.stop-btn { flex: none; font-size: 1.05rem; padding: 10px 20px; animation: stop-pulse 0.9s ease-in-out infinite; }
+/* Start / Stop, on the oven or toaster, or under the tool */
+.controls { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.controls.on-appliance { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); z-index: 2; }
+.ctl-timer {
+  min-width: 4.2em;
+  padding: 6px 12px;
+  text-align: center;
+  font: 400 1.5rem var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: #ffe9a8;
+  background: #4b3a3a;
+  border: 3px solid var(--cat-line);
+  border-radius: 12px;
+}
+.ctl-btn { font-size: 1.15rem; padding: 12px 26px; white-space: nowrap; }
+.ctl-btn.stop { background: #e0457f; animation: stop-pulse 0.9s ease-in-out infinite; }
 @keyframes stop-pulse { 50% { transform: scale(1.07); } }
 .meter {
   position: relative;
@@ -1232,7 +1247,7 @@ h1 {
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .scene.entering .scene-outside { transform: none; }
-  .open-sign, .stop-btn, .hand-tool.flowing { animation: none; }
+  .open-sign, .ctl-btn.stop, .hand-tool.flowing { animation: none; }
   .petals { display: none; }
   .walker, .bob, .leg { animation: none; }
   .customer-body, .order-cloud, .tool.active { animation: none; }

@@ -17,8 +17,9 @@
 //   rub     - move the sifter over the dessert to dust it
 //   tap     - click the big tool (the coffee grinder)
 //   swipe   - drag on the dessert to fold, roll or slice it
-//   timer   - put it in the oven or toaster (or start the pan), a timer
-//             runs, and you stop it at the right time (5 seconds)
+//   timer   - put it in the oven or toaster, press Start ON the oven,
+//             and press Stop (in the same place) at the right time: 5 seconds.
+//             The pan and the espresso machine have Start/Stop under them.
 //   decorate - the cutting board and toppings (decor.js), then Done
 //
 // Like a real kitchen, YOU decide when a step is finished: press
@@ -32,7 +33,8 @@ const bTitle = $("b-title"), bSteps = $("b-steps"), bHint = $("b-hint");
 const bRestart = $("b-restart"), bDone = $("b-done");
 const bMeterRow = $("b-meter-row"), bMeterLabel = $("b-meter-label"), bMeter = $("b-meter");
 const bZone = $("b-zone"), bFill = $("b-fill"), bNeedle = $("b-needle");
-const bAction = $("b-action"), bNext = $("b-next");
+const bNext = $("b-next");
+const bControls = $("b-controls"), bCtlTimer = $("b-ctl-timer"), bCtlBtn = $("b-ctl-btn");
 const bPlate = $("b-plate"), bArt = $("b-art"), bToppings = $("b-toppings");
 const bTool = $("b-tool"), bToolArt = $("b-tool-art"), bToolLabel = $("b-tool-label");
 const bAppliance = $("b-appliance"), bApplianceArt = $("b-appliance-art"), bInside = $("b-inside"), bTimer = $("b-timer");
@@ -100,6 +102,7 @@ function nextBakeStep(message) {
   const s = bStep();
   bake.done.add(s.id);
   bake.busy = true;
+  bControls.hidden = true;
   bHint.textContent = message;
   drawBake();
   restartAnimation(bPlate, "yay");
@@ -187,6 +190,7 @@ function drawSide(s) {
   bAppliance.hidden = !appliance;
   bTool.hidden = decorating || !!appliance;
   if (appliance) drawAppliance(s);
+  drawControls(s);
   if (bTool.hidden) return;
 
   if (bTool.dataset.tool !== s.tool) {                 // a new tool arrives on the table
@@ -195,7 +199,7 @@ function drawSide(s) {
     restartAnimation(bTool, "arrive");
   }
   bToolLabel.textContent = toolLabel(s);
-  bTool.disabled = bake.busy || (s.type === "swipe" && !s.carry) || (s.type === "timer" && bake.timer.phase !== "ready");
+  bTool.disabled = bake.busy || (s.type === "swipe" && !s.carry) || s.type === "timer";
   bTool.classList.toggle("lifted", carry.on);
   bTool.classList.toggle("picture", s.type === "swipe" && !s.carry);
 }
@@ -209,13 +213,38 @@ function toolLabel(s) {
   if (s.carry) return name + " · drag it over";
   if (s.type === "swipe") return "Drag on the dessert";
   if (s.type === "tap") return name + " · click it";
-  if (s.type === "timer") return bake.timer.phase === "running" ? "Cooking…" : name + " · click to " + (s.start || "start").toLowerCase();
+  if (s.type === "timer") return name;
   return name;
 }
 
+// Start / Stop: right on the oven or toaster, or just under the pan or espresso machine
+function drawControls(s) {
+  const phase = bake.timer.phase;
+  const show = s.type === "timer" && (phase === "ready" || phase === "running") && !bake.busy;
+  bControls.hidden = !show;
+  if (!show) return;
+  const home = s.appliance ? bAppliance : bTool.parentElement;
+  if (bControls.parentElement !== home) {
+    if (s.appliance) home.appendChild(bControls);
+    else bTool.after(bControls);
+  }
+  bControls.classList.toggle("on-appliance", !!s.appliance);
+  bCtlTimer.hidden = !!s.appliance;                // the oven and toaster show their own timer
+  bCtlTimer.textContent = bake.timer.t.toFixed(1) + "s";
+  bCtlBtn.textContent = phase === "running" ? s.stop : (s.start || "Start ▶");
+  bCtlBtn.classList.toggle("stop", phase === "running");
+}
+
+bCtlBtn.addEventListener("click", function () {
+  const s = bStep();
+  if (bake.busy || s.type !== "timer") return;
+  if (bake.timer.phase === "ready") startTimer(s);
+  else if (bake.timer.phase === "running") stopTimer();
+});
+
 // the oven or toaster, with the dessert inside and the timer on the front
 function drawAppliance(s) {
-  const loaded = bake.timer.phase === "running" || bake.timer.phase === "done";
+  const loaded = bake.timer.phase !== "load";
   const on = bake.timer.phase === "running";
   bAppliance.className = "appliance " + s.appliance + (on ? " on" : "");
   bApplianceArt.innerHTML = APPLIANCE_ART[s.appliance]({ loaded, on, shade: bake.v[s.id] || 0 });
@@ -229,8 +258,6 @@ function drawMeter(s) {
   bMeterRow.hidden = s.type === "decorate";
   bNext.hidden = !COMMIT.includes(s.type);
   bNext.disabled = bake.busy || value <= 0;
-  bAction.hidden = !(s.type === "timer" && bake.timer.phase === "running");
-  bAction.textContent = s.stop || "Stop!";
   bMeter.className = "meter" + (s.type === "timer" ? " timing" : "");
   bNeedle.hidden = s.type !== "timer";
   bZone.hidden = s.type === "swipe";
@@ -244,7 +271,7 @@ function drawMeter(s) {
     const t = bake.timer.t;
     bMeterLabel.textContent =
       bake.timer.phase === "load" ? "Drag it into the " + s.appliance + " →" :
-      bake.timer.phase === "ready" ? "Click the " + (TOOL_NAMES[s.tool] || s.tool).toLowerCase() + " to start" :
+      bake.timer.phase === "ready" ? "Press " + (s.start || "Start ▶") + (s.appliance ? " on the " + s.appliance : "") :
       "⏱ " + t.toFixed(1) + "s · stop at " + s.seconds.toFixed(1) + "s";
     zone((s.seconds - 0.3) / 10, (s.seconds + 0.3) / 10);
     bNeedle.style.left = Math.min(100, t * 10) + "%";
@@ -286,7 +313,6 @@ bTool.addEventListener("click", function (event) {
     bHint.textContent = bake.v[s.id] + (bake.v[s.id] === 1 ? " turn." : " turns.") + " Press Next step when you think it's right.";
     drawBake();
   }
-  if (s.type === "timer" && bake.timer.phase === "ready") startTimer(s);
   if (s.type === "drop" && event.detail === 0) dropOne(s);          // keyboard: Enter drops one
 });
 
@@ -393,7 +419,7 @@ function endCarry(event, quiet) {
   bTool.classList.remove("lifted");
   document.removeEventListener("pointermove", moveCarry);
   document.removeEventListener("pointerup", onCarryUp);
-  if (s.type === "timer" && bake.timer.phase === "load") bArt.style.visibility = "";
+  if (s.type === "timer" && bake.timer.phase === "load" && !intoAppliance) bArt.style.visibility = "";
   if (quiet || bake.busy || bStep() !== s) return;
 
   if (s.type === "drop") {
@@ -401,8 +427,15 @@ function endCarry(event, quiet) {
     else bHint.textContent = "Drop it in!";
   }
   if (s.type === "timer" && bake.timer.phase === "load") {
-    if (intoAppliance) startTimer(s);
-    else bHint.textContent = "Drop it into the " + s.appliance + "!";
+    if (intoAppliance) {
+      bake.timer.phase = "ready";
+      bArt.style.visibility = "hidden";                // it's in the oven now
+      bHint.textContent = "It's in! Press " + (s.start || "Start ▶") + " on the " + s.appliance + ".";
+      drawBake();
+      bCtlBtn.focus();
+    } else {
+      bHint.textContent = "Drop it into the " + s.appliance + "!";
+    }
   }
   if (FLOWS.includes(s.type)) drawBake();
 }
@@ -455,7 +488,7 @@ function startTimer(s) {
   if (s.appliance) bArt.style.visibility = "hidden";     // it's inside the oven now
   bHint.textContent = "The timer is running! Press " + s.stop + " at " + s.seconds + " seconds.";
   drawBake();
-  bAction.focus();
+  bCtlBtn.focus();
   let last = performance.now();
   function tick(now) {
     if (bake.timer.phase !== "running" || bStep() !== s) return;
@@ -463,6 +496,7 @@ function startTimer(s) {
     last = now;
     bake.v[s.id] = Math.min(1, bake.timer.t * 0.11);      // golden at 5 seconds, burnt at 9
     if (s.appliance) drawAppliance(s); else drawDessert();
+    bCtlTimer.textContent = bake.timer.t.toFixed(1) + "s";
     drawMeter(s);
     if (bake.timer.t >= 10) { stopTimer(); return; }      // left it far too long!
     requestAnimationFrame(tick);
@@ -483,7 +517,6 @@ function stopTimer() {
     : (t < s.seconds ? "A little early (" : "A little late (") + t.toFixed(1) + "s) · " + pct + "%");
 }
 
-bAction.addEventListener("click", stopTimer);
 bNext.addEventListener("click", commitStep);
 
 
@@ -593,7 +626,9 @@ bPlate.addEventListener("pointermove", function (event) {
 bPlate.addEventListener("keydown", function (event) {
   const s = bStep();
   if (bake.busy) return;
-  if (s.type === "timer" && bake.timer.phase === "load" && event.key === "Enter") { startTimer(s); return; }
+  if (s.type === "timer" && bake.timer.phase === "load" && event.key === "Enter") {
+    bake.timer.phase = "ready"; bArt.style.visibility = "hidden"; drawBake(); bCtlBtn.focus(); return;
+  }
   if (!event.key.startsWith("Arrow")) return;
   event.preventDefault();
   if (s.type === "rub") {

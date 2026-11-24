@@ -293,7 +293,6 @@
                 <div id="b-zone" class="meter-zone"></div>
                 <div id="b-needle" class="meter-needle"></div>
               </div>
-              <button id="b-action" class="btn stop-btn" hidden></button>
               <button id="b-next" class="btn next-btn" hidden>Next step ✓</button>
             </div>
           </div>
@@ -309,6 +308,12 @@
             <span id="b-tool-art" class="big-tool-art"></span>
             <span id="b-tool-label" class="big-tool-label"></span>
           </button>
+          <!-- Start / Stop for timer steps. It sits right on the oven or toaster,
+               or under the pan's spatula and the espresso machine. -->
+          <div id="b-controls" class="controls" hidden>
+            <span id="b-ctl-timer" class="ctl-timer">0.0s</span>
+            <button id="b-ctl-btn" class="btn ctl-btn"></button>
+          </div>
           <!-- the oven or toaster, for timer steps -->
           <div id="b-appliance" class="appliance" hidden>
             <div id="b-appliance-art"></div>
