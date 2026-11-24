@@ -14,6 +14,15 @@
 </head>
 <body>
 
+  <!-- The painted background. Outside is the cherry blossom shop,
+       inside is the cafe. game.js switches between them. -->
+  <div id="scene" class="scene" aria-hidden="true">
+    <img class="scene-img scene-outside-blur" src="assets/scenes/outside.jpg" alt="">
+    <img class="scene-img scene-outside" src="assets/scenes/outside.jpg" alt="">
+    <img class="scene-img scene-inside" src="assets/scenes/inside.jpg" alt="">
+    <div id="petals" class="petals"></div>
+  </div>
+
   <header class="topbar">
     <span class="logo">Cherry Blossom Cafe</span>
   </header>
@@ -21,11 +30,13 @@
   <main>
     <!-- ============ SCREEN 1: TITLE ============ -->
     <section id="screen-title" class="screen title-screen">
-      <p class="eyebrow">open daily · matcha &amp; sweets</p>
-      <h1>Cherry Blossom<br>Cafe</h1>
-      <p class="intro">Chef Bloom and her cat Mochi are ready for the morning rush.
-        Today's first drink: an iced matcha latte.</p>
-      <button id="btn-open" class="btn btn-big">Open the cafe</button>
+      <div class="title-card">
+        <p class="eyebrow">open daily · matcha &amp; sweets</p>
+        <h1>Cherry Blossom<br>Cafe</h1>
+        <p class="intro">Chef Bloom and her cat Mochi are ready for the morning rush.
+          Today's first drink: an iced matcha latte.</p>
+        <button id="btn-open" class="btn btn-big">Open the cafe</button>
+      </div>
     </section>
 
     <!-- ============ SCREEN 2: KITCHEN ============ -->

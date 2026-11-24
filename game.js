@@ -16,6 +16,8 @@ const unscoopButton = document.getElementById("btn-unscoop");
 const scoopCount    = document.getElementById("scoop-count");
 const powder        = document.getElementById("powder");
 const chef          = document.getElementById("chef");
+const scene         = document.getElementById("scene");
+const petalLayer    = document.getElementById("petals");
 const mochi         = document.getElementById("mochi");
 
 
@@ -121,11 +123,22 @@ const MOCHI_CLICK_LINES = [
 // ---------- 4. What happens when you click things ----------
 // addEventListener("click", fn) means: "when this is clicked, run fn".
 
+// Opening the cafe = walking inside.
+// 1. the title card fades and the painting zooms towards the door,
+// 2. 1.3 seconds later (setTimeout) we swap to the inside painting and the kitchen.
 openButton.addEventListener("click", function () {
-  titleScreen.hidden = true;        // hide the title screen
-  kitchenScreen.hidden = false;     // show the kitchen
-  mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
-  chefDoes("hop");
+  openButton.disabled = true;               // no double clicks while walking in
+  titleScreen.classList.add("leaving");
+  scene.classList.add("entering");
+
+  setTimeout(function () {
+    scene.classList.remove("entering");
+    scene.classList.add("inside");
+    titleScreen.hidden = true;              // hide the title screen
+    kitchenScreen.hidden = false;           // show the kitchen
+    mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
+    chefDoes("hop");
+  }, 1300);
 });
 
 mochi.addEventListener("click", function () {
@@ -156,3 +169,16 @@ unscoopButton.addEventListener("click", function () {
   drawPowder();
   mochiReactsToScoops();
 });
+
+
+// ---------- 5. Falling petals outside ----------
+// A "for" loop repeats code: here it makes 16 petals, each a little different.
+for (let i = 0; i < 16; i++) {
+  const petal = document.createElement("span");          // make a new element
+  petal.className = "petal";
+  petal.style.left = Math.random() * 100 + "%";           // somewhere across the screen
+  petal.style.animationDuration = 6 + Math.random() * 6 + "s";   // 6–12 seconds to fall
+  petal.style.animationDelay = -Math.random() * 12 + "s";        // start mid-fall
+  petal.style.setProperty("--drift", Math.random() * 160 - 80 + "px");  // drift left or right
+  petalLayer.appendChild(petal);                          // put it on the page
+}
