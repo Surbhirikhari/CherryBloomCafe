@@ -118,7 +118,9 @@ async function customerArrives() {
   customerSays.hidden = true;
   coinPop.hidden = true;
 
-  // walk in from the right
+  // walk in from the right. First clear the last customer's animations,
+  // or their "walk-out" (which ends off-screen) would win and hide this one.
+  customerEl.classList.remove("walk-out", "happy-hop");
   customerEl.hidden = false;
   restartAnimation(customerEl, "walk-in");
   await wait(1600);
@@ -291,6 +293,7 @@ async function serve(stars, art) {
   // they leave, and after a moment the next customer comes in
   await wait(1600);
   customerSays.hidden = true;
+  customerEl.classList.remove("walk-in", "happy-hop");
   restartAnimation(customerEl, "walk-out");
   await wait(1400);
   customerEl.hidden = true;
