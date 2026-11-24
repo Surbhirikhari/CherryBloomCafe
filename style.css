@@ -27,9 +27,12 @@
   --dress-shade: #d9798f;
   --ribbon: #c4566b;
   --sleeve: #ffffff;
-  --cat: #ffffff;
-  --cat-line: #6e3a30;   /* Mochi's brown ink outline */
-  --cat-shade: #e6edf2;  /* soft blue-grey shadow on his white fur */
+  /* Mochi: colours picked from Chef Bloom's drawing so they match */
+  --cat: #fcfcfa;          /* his white fur (same as Bloom's sleeves) */
+  --cat-line: #412c2c;     /* Bloom's dark marker ink */
+  --mochi-pink: #f4a4ac;   /* inside his ears (Bloom's dress pink) */
+  --mochi-ribbon: #c47484; /* his ribbon (Bloom's ribbon red) */
+  --mochi-blush: #f3b4b4;  /* rosy cheeks (Bloom's blush) */
   --bowl: #f9d7e1;
   --bowl-inside: #fbeef2;
   --bowl-foot: #e8a9bc;
