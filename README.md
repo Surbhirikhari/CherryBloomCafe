@@ -71,6 +71,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `menu.js` | The drinks, the ingredients, and how to draw a glass |
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
 | `matcha.js` | The Matcha Station mini-game (scoop, whisk, pour, layer) |
+| `sparkles.js` | The little sparkle trail behind the flower mouse |
 | `decor.js` | The cutting board and drag-anywhere toppings |
 | `paint.js` | Shared watercolour "brushes" for drawing scenes |
 | `street.js` | Paints the street outside, with walking people |
