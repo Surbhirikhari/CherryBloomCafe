@@ -6,12 +6,12 @@
 // of every file listed below on your phone. After that, the game loads
 // from that copy, so it works with no internet at all.
 //
-// When you change the game: bump VERSION (v1 -> v2) so phones fetch the
-// new files. (Each visit also quietly refreshes the saved copy, so the
-// next launch gets updates even if you forget.)
+// When you're online the game always loads the newest files (and saves
+// them); the saved copy is only used offline. Bump VERSION (v3 -> v4)
+// when you add or remove files in the list below.
 // =========================================================
 
-const VERSION = "cherry-blossom-cafe-v2";
+const VERSION = "cherry-blossom-cafe-v3";
 
 const FILES = [
   "./",
@@ -45,20 +45,19 @@ self.addEventListener("activate", function (event) {
   self.clients.claim();
 });
 
-// 3. Every time the game asks for a file: answer from the saved copy
-//    right away, and refresh that copy in the background when online.
+// 3. Every time the game asks for a file: get the newest one from the
+//    internet (and save it), so updates show up straight away.
+//    No internet? Use the saved copy instead.
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    caches.open(VERSION).then(async function (cache) {
-      const saved = await cache.match(event.request, { ignoreSearch: true });
-      const fresh = fetch(event.request)
+    caches.open(VERSION).then(function (cache) {
+      return fetch(event.request)
         .then(function (response) {
           if (response.ok) cache.put(event.request, response.clone());
           return response;
         })
-        .catch(() => saved);                // offline: the saved copy will do
-      return saved || fresh;
+        .catch(() => cache.match(event.request, { ignoreSearch: true }));   // offline
     })
   );
 });
