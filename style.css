@@ -223,8 +223,8 @@ h1 {
    room.js paints the floor in the bottom 280 of its 900-tall picture, and the
    picture is scaled to cover the screen. So the floor's height on screen is
    the bigger of 280/1600 of the screen width (17.5vw) and 280/900 of the
-   screen height (31.1vh). We put the counter's base 45% of the way down
-   into the floor, so it looks like it stands on the boards. */
+   screen height (31.1vh). We put the counter's base 18% of the way down
+   into the floor: standing on the boards, near the back wall. */
 :root { --floor-height: max(17.5vw, 31.1vh); }
 
 .kitchen {
@@ -253,7 +253,7 @@ h1 {
   gap: 16px;
   align-items: center;
   align-self: end;                     /* sit at the bottom of the screen... */
-  margin-bottom: calc(var(--floor-height) * 0.55 - 48px);   /* ...with the counter's base on the floor */
+  margin-bottom: calc(var(--floor-height) * 0.82 - 48px);   /* ...with the counter's base on the floor */
 }
 
 /* The stage keeps the same shape (16 wide : 11 tall) at every size.
@@ -262,6 +262,8 @@ h1 {
   position: relative;
   aspect-ratio: 16 / 11;
   max-width: 100%;
+  /* on short screens, shrink so the order bar, stage and floor all fit without scrolling */
+  width: min(100%, calc((100vh - 160px - var(--floor-height) * 0.82) * 16 / 11));
 }
 .stage > * { position: absolute; }
 
