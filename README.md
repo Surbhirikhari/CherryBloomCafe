@@ -43,9 +43,9 @@ then send them off happy (and earn a few coins on the way).
 | Drink | How it's made | Price |
 |---|---|---|
 | 🍵 **Strawberry Matcha Latte** | Hands-on matcha station: scoop, whisk, pour, layer, decorate | 15 coins |
-| 🍓 **Strawberry Milk** | Strawberry, ice, milk | 10 coins |
-| 🌸 **Sakura Tea** | Sakura, hot water, honey | 9 coins |
-| 🍯 **Honey Coffee** | Coffee, honey, milk | 11 coins |
+| 🍓 **Strawberry Milk** | Mash strawberries, drop in ice, pour the milk, stir until it's all pink | 10 coins |
+| 🌸 **Sakura Tea** | Add blossoms, pour hot water, steep until pink, swirl in honey | 9 coins |
+| 🍯 **Honey Coffee** | Grind beans, brew a shot, swirl in honey, draw your own latte art | 11 coins |
 | 🍦 **Strawberry Crêpe** | Pour batter, flip it when golden, pipe cream, add strawberries, fold into a cone, add a bunny cookie | 16 coins |
 | 🍥 **Strawberry Roll Cake** | Pour batter, bake, spread pink cream, roll it up, slice to see the swirl | 18 coins |
 | 🍞 **Strawberry Cream Toast** | Pop the toast when golden, spread pink cream, drizzle honey, add heart strawberries and daisies | 12 coins |
@@ -72,11 +72,12 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `index.html` | The structure: every screen, button and character |
 | `style.css` | The look: colours, layout, and all the little animations |
 | `game.js` | The customer loop: arrive → recipe → make → serve → pay → leave |
-| `menu.js` | The drinks, the ingredients, and how to draw a glass |
+| `menu.js` | Everything on the menu, and the prices |
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
 | `matcha.js` | The Matcha Station mini-game (scoop, whisk, pour, layer) |
 | `sparkles.js` | The little sparkle trail behind the flower mouse |
 | `desserts.js` | The dessert drawings, tools and recipes (each step changes the drawing) |
+| `drinks.js` | The drink recipes: strawberry milk, sakura tea, honey coffee |
 | `bakery.js` | The Bakery Station: runs any dessert recipe (hold, tap, timing, rub, swipe) |
 | `decor.js` | The cutting board and drag-anywhere toppings |
 | `paint.js` | Shared watercolour "brushes" for drawing scenes |

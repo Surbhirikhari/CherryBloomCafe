@@ -8,9 +8,11 @@
 //   tap    - click the tool a few times          (add strawberries)
 //   hold   - press and hold the tool, let go     (pour batter, pipe cream)
 //            when it reaches the pink zone
-//   timing - a needle swings; click the tool     (flip, take out of the oven)
-//            when it's in the golden zone
-//   rub    - drag over the dessert to spread     (cream, sugar)
+//   timing - turn the tool on, watch the needle   (bake, toast, cook)
+//            rise, press "Turn off!" in the golden zone
+//   pipe   - hold the mouse down on the dessert:  (all the creams)
+//            cream flows out where you are; let go in the pink zone
+//   rub    - drag over the dessert to cover it     (sugar)
 //   swipe  - drag in one direction              (fold, roll, slice)
 // The last step is always "decorate" (decor.js).
 //
@@ -68,8 +70,14 @@ function spiralPath(cx, cy, rMax, turns) {
 }
 
 // the spots you rubbed: a soft blob at each one
+// (a mark can have its own size "r": flowing cream grows while you hold still)
 function marksSVG(marks, color, r) {
-  return marks.map((m) => `<circle cx="${m.x.toFixed(1)}" cy="${m.y.toFixed(1)}" r="${r}" fill="${color}"/>`).join("");
+  return marks.map((m) => `<circle cx="${m.x.toFixed(1)}" cy="${m.y.toFixed(1)}" r="${(m.r || r).toFixed(1)}" fill="${color}"/>`).join("");
+}
+// the same, with a soft outline so the cream looks thick
+function creamMarksSVG(marks, color, r) {
+  return `<g>${marks.map((m) => `<circle cx="${m.x.toFixed(1)}" cy="${m.y.toFixed(1)}" r="${((m.r || r) + 1.5).toFixed(1)}" fill="${mixColor(color, INK, 0.25)}"/>`).join("")}
+          ${marksSVG(marks, color, r)}</g>`;
 }
 
 // a warm oven glow behind things that are baking
@@ -147,7 +155,7 @@ function crepeArt(st) {
     cream = [[50, 80], [74, 72], [100, 68], [126, 72], [150, 80], [88, 84], [114, 84]]
       .map(([x, y]) => puff(x, y + lift, 1.1)).join("");
   } else {
-    cream = `<g clip-path="url(#${clip})">${marksSVG(st.marks.cream || [], "#fffaf1", 14)}</g>`;
+    cream = `<g clip-path="url(#${clip})">${creamMarksSVG(st.marks.cream || [], "#fffaf1", 10)}</g>`;
   }
 
   const folded = p >= 1;
@@ -207,7 +215,10 @@ function rollArt(st) {
   if (!st.done("roll")) {
     const p = v.roll || 0;
     const x0 = 30 + 140 * p;
-    const creamEnd = 30 + 140 * (st.done("cream") ? 1 : (v.cream || 0));
+    const creamEnd = st.done("cream") ? 170 : x0;
+    // flowing cream: the plate is zoomed by 1.2 here, so turn mouse spots into drawing spots
+    const creamClip = uid("rollcream");
+    const flowing = (st.marks.cream || []).map((m) => ({ x: 100 + (m.x - 100) / 1.2, y: 124, r: (m.r || 8) / 1.2 }));
     const r = p > 0 ? 10 + 30 * Math.sqrt(p) : 0;
     return dessertSVG(`<g transform="translate(100 150) scale(1.2) translate(-100 -150)">
       ${board}
@@ -215,6 +226,8 @@ function rollArt(st) {
         <path d="M${x0} 132 L170 132" stroke="${crust}" stroke-width="4"/>` : ""}
       ${creamEnd > x0 ? `<path d="M${x0} 131 L${x0} 122 Q${(x0 + creamEnd) / 2} 116 ${creamEnd} 122 L${creamEnd} 131 Z" fill="#f7b7c8" ${DL} stroke-width="2.5"/>
         ${[0.2, 0.45, 0.7].map((k) => `<circle cx="${x0 + (creamEnd - x0) * k}" cy="126" r="2" fill="#ec5574"/>`).join("")}` : ""}
+      ${!st.done("cream") && flowing.length ? `<defs><clipPath id="${creamClip}"><rect x="30" y="96" width="140" height="35"/></clipPath></defs>
+        <g clip-path="url(#${creamClip})">${creamMarksSVG(flowing, "#f7b7c8", 7)}</g>` : ""}
       ${r > 0 ? `<circle cx="${x0 - r + 6}" cy="${150 - r}" r="${r}" fill="${sponge}" ${DL}/>
         <path d="${spiralPath(x0 - r + 6, 150 - r, r - 4, 1 + 2 * p)}" fill="none" stroke="#f7a8c0" stroke-width="${3 + 3 * p}" stroke-linecap="round"/>
         <circle cx="${x0 - r + 6}" cy="${150 - r}" r="${r}" fill="none" stroke="${crust}" stroke-width="3"/>
@@ -288,7 +301,7 @@ function toastArt(st) {
     ${bread}
     <defs><clipPath id="${clip}"><path d="${CRUMB}"/></clipPath></defs>
     <g clip-path="url(#${clip})">
-      ${st.done("spread") ? `<path d="${CRUMB}" fill="#fbd3de"/>` : marksSVG(st.marks.spread || [], "#fbd3de", 16)}
+      ${st.done("spread") ? `<path d="${CRUMB}" fill="#fbd3de"/>` : creamMarksSVG(st.marks.spread || [], "#fbd3de", 12)}
     </g>
     ${st.done("spread") ? `<path d="M66 60 Q90 52 110 60" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>` : ""}
     ${(v.honey || 0) > 0 ? `<path d="M62 70 L138 82 L64 98 L138 112 L66 128 L136 142 L72 156" fill="none" stroke="#e8a83a" stroke-width="5"
@@ -316,8 +329,8 @@ function croissantArt(st) {
                seg(64, 118, 28, 34, -25) + seg(136, 118, 28, 34, 25) + seg(100, 112, 36, 44, 0);
 
   const opened = st.done("slice");
-  const cream = st.done("cream") ? 1 : Math.min(1.15, v.cream || 0);
-  const cw = 64 * Math.min(cream, 1);
+  const cream = Math.min(1.15, v.cream || 0);
+  const cw = 64;
   const berries = [[66, 90, -14], [90, 82, 4], [114, 82, -6], [138, 90, 12]]
     .slice(0, Math.min(4, v.berries || 0))
     .map(([x, y, r]) => berryHalf(x, y, 0.9, 180 + r)).join("");
@@ -335,7 +348,9 @@ function croissantArt(st) {
     <path d="M58 92 Q70 100 82 94 M118 94 Q130 100 142 92" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
     ${!opened && (v.slice || 0) > 0 ? `<path d="M40 100 L${40 + 120 * v.slice} 100" stroke="${INK}" stroke-width="3" stroke-dasharray="6 4"/>` : ""}
     ${opened ? `<path d="M36 100 Q100 116 164 100 Q100 86 36 100 Z" fill="#f8e3b0" ${DL}/>` : ""}
-    ${cream > 0 ? `<path d="M${100 - cw} 100 Q${100 - cw} 84 ${100 - cw / 2} 88 Q${100 - cw / 4} 76 100 82 Q${100 + cw / 4} 76 ${100 + cw / 2} 88 Q${100 + cw} 84 ${100 + cw} 100 Q100 110 ${100 - cw} 100 Z" fill="#fffaf1" ${DL} stroke-width="2.5"/>` : ""}
+    ${opened && !st.done("cream") ? (st.marks.cream || []).map((m) =>
+        puff(Math.max(46, Math.min(154, m.x)), Math.max(86, Math.min(100, m.y)), Math.min(1.3, (m.r || 8) / 10))).join("") : ""}
+    ${st.done("cream") ? `<path d="M${100 - cw} 100 Q${100 - cw} 84 ${100 - cw / 2} 88 Q${100 - cw / 4} 76 100 82 Q${100 + cw / 4} 76 ${100 + cw / 2} 88 Q${100 + cw} 84 ${100 + cw} 100 Q100 110 ${100 - cw} 100 Z" fill="#fffaf1" ${DL} stroke-width="2.5"/>` : ""}
     ${cream > 1.02 ? `<path d="M50 104 Q44 122 54 126 Q62 120 58 106 Z M150 104 Q156 122 146 126 Q138 120 142 106 Z" fill="#fffaf1" ${DL} stroke-width="2"/>` : ""}
     ${berries}
     ${sugarDots}`);
@@ -405,8 +420,9 @@ const TOOL_ART = {
 
 // ---------- The recipes ----------
 // For "hold" steps, the amount goes up while you hold: let go inside "target".
-// For "timing" steps, click while the needle is inside "zone".
-// For "rub" steps, "area" is where on the drawing to rub (0–200 across and down).
+// For "timing" steps, press the stop button while the needle is inside "zone".
+// For "pipe" steps, the cream amount goes up while you hold: let go inside "target".
+// For "pipe" and "rub" steps, "area" is where on the drawing it goes (0–200 across and down).
 const DECORATE = (hint) => ({ id: "decorate", type: "decorate", tool: "decorate", text: "Decorate!", hint });
 
 const DESSERTS = {
@@ -418,9 +434,11 @@ const DESSERTS = {
       { id: "batter", type: "hold", tool: "batter", text: "Pour the batter (hold)", target: [0.72, 0.95], max: 1.15, speed: 0.42,
         hint: "Hold the batter bowl to pour. Let go when the batter almost fills the pan, inside the pink zone." },
       { id: "cook", type: "timing", tool: "spatula", text: "Flip when golden", zone: [0.42, 0.68],
-        hint: "Watch it turn golden… click the spatula when the needle is in the green zone!" },
-      { id: "cream", type: "rub", tool: "piping", text: "Pipe the cream", area: { cx: 100, cy: 80, rx: 56, ry: 24 },
-        hint: "Rub over the top half of the crêpe to pipe the cream." },
+        start: "Cook it", stop: "Flip!",
+        hint: "Click the spatula to start cooking. Press Flip! when the needle reaches the green zone." },
+      { id: "cream", type: "pipe", tool: "piping", text: "Pipe the cream", area: { cx: 100, cy: 80, rx: 62, ry: 30 },
+        target: [0.55, 0.85], max: 1.1, speed: 0.3,
+        hint: "Hold the mouse down on the top of the crêpe and the cream flows out. Move it around! Let go in the pink zone." },
       { id: "berries", type: "tap", tool: "berries", times: 4, text: "Add 4 strawberries",
         hint: "Click the strawberry bowl 4 times." },
       { id: "fold", type: "swipe", tool: "fold", dir: [0, -1], text: "Fold into a cone",
@@ -437,9 +455,11 @@ const DESSERTS = {
       { id: "batter", type: "hold", tool: "batter", text: "Pour the batter (hold)", target: [0.75, 0.95], max: 1.15, speed: 0.42,
         hint: "Hold the batter bowl. Let go when the tray is nearly full, inside the pink zone." },
       { id: "bake", type: "timing", tool: "oven", text: "Bake until golden", zone: [0.42, 0.66],
-        hint: "It's baking! Click the oven when the needle is in the green zone." },
-      { id: "cream", type: "swipe", tool: "piping", dir: [1, 0], text: "Spread strawberry cream",
-        hint: "Drag from left to right across the sponge to spread the pink cream." },
+        start: "Turn on", stop: "Turn off!",
+        hint: "Click the oven to turn it on. Press Turn off! when the needle reaches the green zone." },
+      { id: "cream", type: "pipe", tool: "piping", text: "Pipe strawberry cream", area: { x: 16, y: 96, w: 168, h: 44 },
+        target: [0.55, 0.85], max: 1.1, speed: 0.3,
+        hint: "Hold the mouse down on the sponge and drag along it. The pink cream flows out! Let go in the pink zone." },
       { id: "roll", type: "swipe", tool: "roll", dir: [1, 0], text: "Roll it up",
         hint: "Drag to the right to roll the cake up, nice and tight." },
       { id: "slice", type: "swipe", tool: "knife", dir: [0, 1], text: "Cut a slice",
@@ -454,9 +474,11 @@ const DESSERTS = {
     tray: ["daisy", "heart", "mint", "cream"],
     steps: [
       { id: "toast", type: "timing", tool: "toaster", text: "Toast until golden", zone: [0.4, 0.66],
-        hint: "Click the toaster to pop the bread when the needle is in the green zone." },
-      { id: "spread", type: "rub", tool: "piping", text: "Spread pink cream", area: { x: 58, y: 44, w: 86, h: 120 },
-        hint: "Rub all over the toast to spread the strawberry cream." },
+        start: "Push down", stop: "Pop up!",
+        hint: "Click the toaster to start. Press Pop up! when the needle reaches the green zone." },
+      { id: "spread", type: "pipe", tool: "piping", text: "Pipe pink cream", area: { x: 56, y: 40, w: 90, h: 126 },
+        target: [0.6, 0.9], max: 1.15, speed: 0.28,
+        hint: "Hold the mouse down on the toast and move around: the pink cream flows out. Let go in the pink zone." },
       { id: "honey", type: "hold", tool: "honey", text: "Drizzle honey (hold)", target: [0.6, 0.9], max: 1.1, speed: 0.4,
         hint: "Hold the honey jar to drizzle. Let go inside the pink zone." },
       DECORATE("Chop strawberries (they're heart-shaped!) and add little daisies. Press Done when it's cute."),
@@ -469,11 +491,13 @@ const DESSERTS = {
     tray: ["cream", "mint", "heart", "choco"],
     steps: [
       { id: "bake", type: "timing", tool: "oven", text: "Bake until golden", zone: [0.45, 0.7],
-        hint: "Click the oven when the croissant is golden: needle in the green zone!" },
+        start: "Turn on", stop: "Turn off!",
+        hint: "Click the oven to turn it on. Press Turn off! when the needle reaches the green zone." },
       { id: "slice", type: "swipe", tool: "knife", dir: [1, 0], text: "Slice it open",
         hint: "Drag from left to right along the croissant to slice it open." },
-      { id: "cream", type: "hold", tool: "piping", text: "Pipe the cream (hold)", target: [0.7, 0.95], max: 1.15, speed: 0.42,
-        hint: "Hold the piping bag. Let go when the cream fills the croissant, inside the pink zone." },
+      { id: "cream", type: "pipe", tool: "piping", text: "Pipe the cream", area: { cx: 100, cy: 94, rx: 66, ry: 22 },
+        target: [0.6, 0.9], max: 1.15, speed: 0.32,
+        hint: "Hold the mouse down inside the croissant and drag along: the cream flows out. Let go in the pink zone." },
       { id: "berries", type: "tap", tool: "berries", times: 4, text: "Add 4 strawberries",
         hint: "Click the strawberry bowl 4 times." },
       { id: "sugar", type: "rub", tool: "sifter", text: "Dust with sugar", area: { cx: 100, cy: 120, rx: 70, ry: 36 },
@@ -488,7 +512,7 @@ function perfectDessertArt(id) {
   const recipe = DESSERTS[id];
   const v = {};
   recipe.steps.forEach(function (s) {
-    if (s.type === "hold") v[s.id] = (s.target[0] + s.target[1]) / 2;
+    if (s.type === "hold" || s.type === "pipe") v[s.id] = (s.target[0] + s.target[1]) / 2;
     else if (s.type === "timing") v[s.id] = (s.zone[0] + s.zone[1]) / 2;
     else if (s.type === "tap") v[s.id] = s.times;
     else v[s.id] = 1;

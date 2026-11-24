@@ -724,7 +724,7 @@ h1 {
 .note-steps li.done::after { content: "✓"; margin-left: auto; color: var(--matcha-deep); font-weight: 900; }
 .note-steps li.next { background: var(--paper); outline: 3px dashed var(--blossom-deep); outline-offset: -3px; }
 
-/* --- the work stations (kitchen table and matcha station) ---
+/* --- the work stations (Matcha Station and Bakery Station) ---
    They fill the whole screen under the top bar:
    the recipe note on the left, the work table on the right. */
 .workstation {
@@ -787,20 +787,22 @@ h1 {
   box-shadow: 0 10px 0 #c9976a;
 }
 .work-matcha { grid-template-columns: 1.1fr 0.9fr 1.3fr; grid-template-areas: "shelf shelf shelf" "bowl jar decor"; }
-.work-simple { grid-template-columns: 1fr 1.3fr;       grid-template-areas: "shelf shelf" "jar decor"; }
 .work-bake   { grid-template-columns: 1.3fr 1fr;       grid-template-areas: "shelf shelf" "plate decor"; }
 
 /* --- the Bakery Station: the dessert on its plate --- */
 .plate-zone {
   grid-area: plate;
   min-height: 0;
-  display: flex;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-items: center;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
 }
 .plate {
   position: relative;
   height: 100%;
+  min-height: 0;
   max-height: 560px;
   max-width: 100%;
   aspect-ratio: 1;
@@ -824,11 +826,19 @@ h1 {
   transition: transform 0.1s;
 }
 .hand-tool.pressed { transform: translate(-30%, -62%) rotate(-4deg) scale(0.94); }
+.hand-tool.flowing { transform: translate(-50%, -96%) rotate(0deg); animation: squeeze 0.4s ease-in-out infinite; }
+@keyframes squeeze { 50% { scale: 0.92 1.04; } }
 
-/* the meter: how much you've poured, or the cooking needle */
+/* the meter on the table: how much you've poured, or the cooking needle */
+.meter-row { width: min(100%, 560px); display: grid; gap: 4px; }
+.meter-label { margin: 0; text-align: center; font: 800 0.95rem var(--font-body); color: var(--ink); }
+.meter-and-button { display: flex; align-items: center; gap: 12px; }
+.meter-and-button .meter { flex: 1; }
+.stop-btn { flex: none; font-size: 1.05rem; padding: 10px 20px; animation: stop-pulse 0.9s ease-in-out infinite; }
+@keyframes stop-pulse { 50% { transform: scale(1.07); } }
 .meter {
   position: relative;
-  height: 22px;
+  height: 30px;
   border: 3px solid var(--cat-line);
   border-radius: 999px;
   background: var(--paper);
@@ -859,7 +869,7 @@ h1 {
 .recipe-cup.is-dessert { width: 120px; }
 .cloud-drink .dessert-svg, .recipe-cup .dessert-svg { display: block; width: 100%; height: auto; }
 
-/* the back shelf with the ingredients and tools */
+/* the back shelf with the tools */
 .shelf {
   grid-area: shelf;
   display: flex;
@@ -873,7 +883,6 @@ h1 {
   border-radius: 18px;
 }
 .shelf .tool { width: clamp(84px, 9vw, 140px); }
-.shelf .ingredient { width: clamp(78px, 8.5vw, 118px); }
 
 .art { display: block; width: 100%; height: auto; overflow: visible; }
 .tool-label { display: block; margin-top: 4px; font: 800 0.85rem var(--font-body); color: var(--ink); text-align: center; }
@@ -894,26 +903,7 @@ h1 {
 @keyframes tool-bob { 50% { transform: translateY(-6px); } }
 .tool.pouring { animation: none; transform: rotate(-28deg) translateY(-14px); }
 
-/* the ingredient jars on the kitchen table */
-.ingredient {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: 10px 6px 8px;
-  font: 800 0.85rem var(--font-body);
-  color: var(--ink);
-  background: var(--paper);
-  border: 3px solid var(--cat-line);
-  border-radius: 18px;
-  cursor: var(--cursor-click);
-  box-shadow: 0 5px 0 rgba(65, 44, 44, 0.25);
-  transition: transform 0.1s;
-}
-.ingredient:hover { transform: translateY(-3px); }
-.ingredient:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(65, 44, 44, 0.25); }
-.ingredient:focus-visible { outline: 3px solid var(--blossom-deep); outline-offset: 3px; }
-.ingredient .icon-svg { width: 100%; }
-.ingredient.tapped, .tool.tapped { animation: tapped 0.25s; }
+.tool.tapped { animation: tapped 0.25s; }
 @keyframes tapped { 50% { transform: scale(0.92); } }
 
 /* the glass or jar we're making, as big as the table allows */
@@ -929,16 +919,7 @@ h1 {
 }
 .vessel { position: relative; height: 92%; max-width: 100%; }
 .jar-vessel   { aspect-ratio: 120 / 170; }
-.glass-vessel { aspect-ratio: 100 / 134; height: 86%; }
 .vessel > div:first-child, .vessel svg { width: 100%; height: 100%; }
-.coaster {
-  width: min(70%, 220px);
-  height: 18px;
-  margin-top: -12px;
-  border-radius: 50%;
-  background: var(--blossom);
-  border: 3px solid var(--cat-line);
-}
 /* the newest pour slides up from the bottom */
 .layer-new { transform-box: fill-box; transform-origin: 50% 100%; animation: pour-in 0.35s ease-out; }
 @keyframes pour-in { from { transform: scaleY(0); } }
@@ -1102,7 +1083,6 @@ h1 {
   .workstation { position: static; grid-template-columns: 1fr; }
   .recipe-note { transform: none; }
   .work-matcha { grid-template-columns: 1fr 1fr; grid-template-areas: "shelf shelf" "bowl jar" "decor decor"; }
-  .work-simple { grid-template-columns: 1fr; grid-template-areas: "shelf" "jar" "decor"; }
   .work-bake   { grid-template-columns: 1fr; grid-template-areas: "shelf" "plate" "decor"; }
   .plate { height: auto; width: min(100%, 340px); }
   .vessel-zone { height: 300px; }
@@ -1112,7 +1092,7 @@ h1 {
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .scene.entering .scene-outside { transform: none; }
-  .open-sign { animation: none; }
+  .open-sign, .stop-btn, .hand-tool.flowing { animation: none; }
   .petals { display: none; }
   .walker, .bob, .leg { animation: none; }
   .customer-body, .order-cloud, .tool.active { animation: none; }

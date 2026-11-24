@@ -4,12 +4,13 @@
 //
 //   1. a customer walks in with a drink in their thought cloud
 //   2. click the cloud  -> see the recipe -> Continue
-//   3. at the kitchen table, click ingredients to fill the glass -> Done
+//   3. make it at a hands-on station (matcha, or the Bakery Station) -> Done
 //   4. the customer gets the drink, reacts, pays, and leaves
 //   5. the next customer walks in
 //
 // The menu lives in menu.js, the customer drawings in customers.js,
-// the matcha mini-game in matcha.js, desserts in desserts.js + bakery.js,
+// the matcha mini-game in matcha.js, desserts and drinks in desserts.js +
+// drinks.js (run by bakery.js),
 // and decorating in decor.js.
 // =========================================================
 
@@ -18,7 +19,6 @@
 // document.getElementById finds the element in index.html with that id="..."
 const titleScreen   = document.getElementById("screen-title");
 const kitchenScreen = document.getElementById("screen-kitchen");
-const prepScreen    = document.getElementById("screen-prep");
 const matchaScreen  = document.getElementById("screen-matcha");
 const bakeScreen    = document.getElementById("screen-bake");
 const openButton    = document.getElementById("btn-open");
@@ -46,22 +46,12 @@ const recipeSteps   = document.getElementById("recipe-steps");
 const recipePrice   = document.getElementById("recipe-price");
 const continueBtn   = document.getElementById("btn-continue");
 
-const prepCup       = document.getElementById("prep-cup");
-const ingredientBox = document.getElementById("ingredients");
-const noteTitle     = document.getElementById("note-title");
-const noteSteps     = document.getElementById("note-steps");
-const prepHint      = document.getElementById("prep-hint");
-const startOverBtn  = document.getElementById("btn-start-over");
-const prepToppings  = document.getElementById("prep-toppings");
-const prepDecorZone = document.getElementById("prep-decor-zone");
-const doneBtn       = document.getElementById("btn-done");
 
 
 // ---------- 2. The game's memory ("state") ----------
 let coins = 0;
 let served = 0;
 let customer = null;   // the customer at the counter right now (from makeCustomer)
-let glass = [];        // what we've poured so far, bottom first, e.g. ["ice", "milk"]
 
 
 // ---------- 3. Small helpers ----------
@@ -98,17 +88,15 @@ function chefDoes(move) {
 }
 
 // What an order looks like: the matcha latte comes in a jar,
-// desserts are drawn by desserts.js, and the other drinks come in a glass.
+// everything else is drawn by its recipe (desserts.js and drinks.js).
 function drinkArt(drink) {
   if (drink.station === "matcha") return jarSVG(PERFECT_JAR);
-  if (drink.station === "bake") return perfectDessertArt(drink.dessert);
-  return glassSVG(drink.steps);
+  return perfectDessertArt(drink.dessert);
 }
 
-// Switch between the counter, the kitchen table, the matcha station and the bakery.
+// Switch between the counter, the matcha station and the Bakery Station.
 function showScreen(name) {
   kitchenScreen.hidden = name !== "counter";
-  prepScreen.hidden = name !== "table";
   matchaScreen.hidden = name !== "matcha";
   bakeScreen.hidden = name !== "bake";
   scene.classList.toggle("blurred", name !== "counter");   // soften the room behind the table
@@ -165,12 +153,6 @@ function showRecipe() {
       li.innerHTML = TOOL_ART[step.tool]() + "<span>" + step.text + "</span>";
       recipeSteps.appendChild(li);
     });
-  } else {
-    drink.steps.forEach(function (id) {
-      const li = document.createElement("li");
-      li.innerHTML = ingredientIconSVG(id) + "<span>" + INGREDIENTS[id].name + "</span>";
-      recipeSteps.appendChild(li);
-    });
   }
 
   recipeCard.hidden = false;
@@ -178,7 +160,7 @@ function showRecipe() {
 }
 
 
-// ---------- 6. The kitchen table: making the drink ----------
+// ---------- 6. Off to the right station to make it ----------
 function startMaking() {
   recipeCard.hidden = true;
 
@@ -188,86 +170,13 @@ function startMaking() {
     showScreen("matcha");
     return;
   }
-  // desserts are made at the Bakery Station
-  if (customer.order.station === "bake") {
-    showScreen("bake");                  // show it first, so the plate has a size
-    openBakeStation(customer.order.dessert, serve);
-    return;
-  }
-
-  glass = [];
-  noteTitle.textContent = customer.order.name;
-  prepHint.textContent = "Click the ingredients in order. Then chop strawberries and decorate!";
-  Decor.attach(prepDecorZone, prepToppings);     // bring the cutting board to this table
-  Decor.reset();
-  Decor.enable(true);
-  drawTable(false);
-  showScreen("table");
+  // everything else is made at the Bakery Station
+  showScreen("bake");                    // show it first, so the plate has a size
+  openBakeStation(customer.order.dessert, serve);
 }
-
-// Redraw the glass and the checklist so they match what's in the glass.
-function drawTable(justPoured) {
-  prepCup.innerHTML = glassSVG(glass, justPoured);
-  doneBtn.disabled = glass.length === 0;
-
-  const steps = customer.order.steps;
-  noteSteps.innerHTML = "";
-  steps.forEach(function (id, i) {
-    const li = document.createElement("li");
-    li.innerHTML = ingredientIconSVG(id) + "<span>" + INGREDIENTS[id].name + "</span>";
-    if (glass[i] === id) li.className = "done";           // poured, in the right spot
-    else if (i === glass.length) li.className = "next";    // this is the one to pour now
-    noteSteps.appendChild(li);
-  });
-}
-
-function pour(id) {
-  if (glass.length >= MAX_LAYERS) {
-    prepHint.textContent = "The glass is full! Press Done, or Start over.";
-    return;
-  }
-  glass.push(id);                                  // add to the end of the list
-  drawTable(true);
-
-  const wanted = customer.order.steps[glass.length - 1];
-  if (id === wanted) {
-    prepHint.textContent = glass.length === customer.order.steps.length
-      ? "Looks perfect! Press Done to serve it."
-      : "Nice! " + INGREDIENTS[id].name + " is in.";
-  } else {
-    prepHint.textContent = "Hmm, that's not on the recipe here. Start over?";
-  }
-}
-
-function startOver() {
-  glass = [];
-  Decor.reset();
-  prepHint.textContent = "Fresh glass! Click the ingredients in order.";
-  drawTable(false);
-}
-
-// Build one button per ingredient on the table (this runs once, at the start).
-Object.keys(INGREDIENTS).forEach(function (id) {
-  const button = document.createElement("button");
-  button.className = "ingredient";
-  button.innerHTML = ingredientIconSVG(id) + "<span>" + INGREDIENTS[id].name + "</span>";
-  button.addEventListener("click", function () {
-    restartAnimation(button, "tapped");
-    pour(id);
-  });
-  ingredientBox.appendChild(button);
-});
 
 
 // ---------- 7. Serving, paying and leaving ----------
-
-// How good is the drink? 3 = perfect, 2 = right things but wrong order, 1 = wrong.
-function rateDrink(made, wanted) {
-  if (made.join() === wanted.join()) return 3;
-  const sameThings = made.length === wanted.length &&
-    [...made].sort().join() === [...wanted].sort().join();
-  return sameThings ? 2 : 1;
-}
 
 // stars: how good it was (3, 2 or 1). art: a drawing of the drink we made.
 // toppings: how many decorations we added (customers love those).
@@ -376,10 +285,6 @@ openButton.addEventListener("click", async function () {
 // ---------- 9. All the other clicks ----------
 orderCloud.addEventListener("click", showRecipe);
 continueBtn.addEventListener("click", startMaking);
-startOverBtn.addEventListener("click", startOver);
-doneBtn.addEventListener("click", function () {
-  serve(rateDrink(glass, customer.order.steps), Decor.art(glassSVG(glass)), Decor.count());
-});
 
 // Things Mochi says when you click on Bloom, or on him.
 const CHEF_CLICK_LINES = [

@@ -1,0 +1,291 @@
+// =========================================================
+// Cherry Blossom Cafe — drinks.js
+// Hands-on recipes for the drinks: Strawberry Milk, Sakura Tea
+// and Honey Coffee. They work exactly like the desserts (see
+// desserts.js), so the Bakery Station runs them too.
+//
+// One new kind of step here:
+//   stir - drag side to side on the drink, like stirring with a spoon
+// =========================================================
+
+
+// ---------- A tall glass (Strawberry Milk) and a glass mug (Sakura Tea) ----------
+const TALL_GLASS = "M50 40 L150 40 L140 184 Q139 192 130 192 L70 192 Q61 192 60 184 Z";
+
+function glassFront(clip) {
+  return `
+    <path d="M62 52 L70 178" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.6"/>
+    <path d="${TALL_GLASS}" fill="none" ${DL} stroke-width="3.5"/>
+    <ellipse cx="100" cy="40" rx="50" ry="6" fill="none" ${DL} stroke-width="2.5"/>`;
+}
+
+function iceCube(x, y, rot) {
+  return `<rect x="${x - 11}" y="${y - 11}" width="22" height="22" rx="5" fill="#f4fbfd" stroke="${INK}" stroke-width="2"
+            opacity="0.92" transform="rotate(${rot} ${x} ${y})"/>
+          <path d="M${x - 6} ${y - 5} L${x - 1} ${y - 7}" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" transform="rotate(${rot} ${x} ${y})"/>`;
+}
+
+
+// ================= Strawberry Milk =================
+// Mash strawberries, add ice, pour milk, stir until it's all pink.
+function strawberryMilkArt(st) {
+  const v = st.v;
+  const clip = uid("smilk");
+  const mash = Math.min(4, v.mash || 0) / 4;
+  const pureeTop = 190 - 36 * mash;
+  const milk = Math.min(v.milk || 0, 1.12);
+  const milkTop = pureeTop - (pureeTop - 46) * Math.min(milk, 1);
+  const mix = st.done("stir") ? 1 : (v.stir || 0);
+
+  const pink = "#f7b5c6";
+  const milkColor = mixColor("#fbf0dc", pink, mix);
+  const pureeColor = mixColor("#ec5574", pink, mix);
+
+  const ices = [[82, 0, -12], [116, 6, 14], [98, 16, 4]].slice(0, Math.min(3, v.ice || 0)).map(([x, dy, r], k) =>
+    iceCube(x, milk > 0 ? milkTop + 12 + dy : pureeTop - 12 - k * 20, r)).join("");
+
+  const stirring = st.step === "stir" && !st.done("stir");
+  const tilt = Math.floor((v.stir || 0) * 10) % 2 ? -10 : 10;
+
+  return dessertSVG(`
+    <defs><clipPath id="${clip}"><path d="${TALL_GLASS}"/></clipPath></defs>
+    <ellipse cx="100" cy="194" rx="62" ry="7" fill="#e9d6cf" opacity="0.7"/>
+    ${st.done("stir") || st.step === "finished" ? `
+      <path d="M118 60 L146 6" stroke="${INK}" stroke-width="11" stroke-linecap="round"/>
+      <path d="M118 60 L146 6" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+      <path d="M121 54 L124 48 M128 40 L131 34 M135 26 L138 20" stroke="#f08caa" stroke-width="6"/>` : ""}
+    <path d="${TALL_GLASS}" fill="#eef6f7" opacity="0.7"/>
+    <g clip-path="url(#${clip})">
+      ${milk > 0 ? `<rect x="0" y="${milkTop}" width="200" height="${pureeTop - milkTop + 2}" fill="${milkColor}"/>
+        <path d="M40 ${milkTop + 1} Q70 ${milkTop + 5} 100 ${milkTop + 1} Q130 ${milkTop - 3} 160 ${milkTop + 1}" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.7"/>` : ""}
+      ${mash > 0 ? `<rect x="0" y="${pureeTop}" width="200" height="60" fill="${pureeColor}"/>
+        <path d="M40 ${pureeTop} Q60 ${pureeTop - 5} 80 ${pureeTop} Q100 ${pureeTop + 5} 120 ${pureeTop} Q140 ${pureeTop - 5} 160 ${pureeTop}"
+              fill="none" stroke="${mixColor(pureeColor, INK, 0.2)}" stroke-width="2" opacity="${1 - mix}"/>
+        <g fill="#fff3c4" opacity="${1 - mix * 0.6}"><circle cx="80" cy="${pureeTop + 12}" r="1.8"/><circle cx="104" cy="${pureeTop + 20}" r="1.8"/><circle cx="122" cy="${pureeTop + 10}" r="1.8"/></g>` : ""}
+      ${mix > 0 && mix < 1 ? `<path d="M60 ${(milkTop + pureeTop) / 2} Q100 ${pureeTop - 30} 140 ${(milkTop + pureeTop) / 2}" fill="none" stroke="${pureeColor}" stroke-width="6" opacity="0.5"/>` : ""}
+      ${ices}
+    </g>
+    ${milk > 1.02 ? `<path d="M50 42 Q42 70 48 84 Q56 74 54 46 Z M150 42 Q158 70 152 84 Q144 74 146 46 Z" fill="${milkColor}" ${DL} stroke-width="2"/>` : ""}
+    ${stirring ? `<g transform="rotate(${tilt} 100 120)">
+        <path d="M100 0 L100 120" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M100 0 L100 120" stroke="#d7d5de" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="100" cy="128" rx="9" ry="13" fill="#d7d5de" ${DL} stroke-width="2.5"/></g>` : ""}
+    ${glassFront(clip)}`);
+}
+
+
+// ================= Sakura Tea =================
+// Add blossoms, pour hot water, steep until pink, drizzle honey.
+const MUG = "M46 56 L154 56 L148 178 Q146 190 134 190 L66 190 Q54 190 52 178 Z";
+
+function teaColor(t) {
+  return t < 0.55 ? mixColor("#eef6f7", "#f6b3c4", t / 0.55) : mixColor("#f6b3c4", "#c9506f", (t - 0.55) / 0.45);
+}
+
+function blossom(x, y, s = 1) {
+  let petals = "";
+  for (let k = 0; k < 5; k++) petals += `<ellipse cx="0" cy="-8" rx="5.5" ry="8" fill="#f9c5d2" ${DL} stroke-width="2" transform="rotate(${k * 72})"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})">${petals}<circle r="3.5" fill="#f6d76b" ${DL} stroke-width="1.5"/></g>`;
+}
+
+function sakuraTeaArt(st) {
+  const v = st.v;
+  const clip = uid("tea");
+  const water = Math.min(v.water || 0, 1.12);
+  const top = 188 - 130 * Math.min(water, 1);
+  const color = teaColor(v.steep ?? 0);
+  const honey = Math.min(1, (v.honey || 0) / 0.8);
+
+  const flowers = [[78, 0], [104, 8], [128, -2]].slice(0, Math.min(3, v.blossoms || 0)).map(([x, dy]) =>
+    blossom(x, water > 0 ? top + 6 + dy * 0.4 : 176 - dy, 1.05)).join("");
+
+  return dessertSVG(`
+    <defs><clipPath id="${clip}"><path d="${MUG}"/></clipPath></defs>
+    <ellipse cx="100" cy="194" rx="66" ry="7" fill="#e9d6cf" opacity="0.7"/>
+    <path d="M152 80 Q186 80 184 112 Q182 144 148 144" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round"/>
+    <path d="M152 80 Q186 80 184 112 Q182 144 148 144" fill="none" stroke="#eef6f7" stroke-width="7" stroke-linecap="round"/>
+    <path d="${MUG}" fill="#eef6f7" opacity="0.7"/>
+    <g clip-path="url(#${clip})">
+      ${water > 0 ? `<rect x="0" y="${top}" width="200" height="200" fill="${color}"/>
+        <path d="M44 ${top + 1} Q72 ${top + 5} 100 ${top + 1} Q128 ${top - 3} 156 ${top + 1}" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.7"/>` : ""}
+      ${(v.honey || 0) > 0 ? `<path d="${spiralPath(100, top + 50, 34, 2)}" fill="none" stroke="#f2c157" stroke-width="5" stroke-linecap="round"
+          pathLength="100" stroke-dasharray="${(honey * 100).toFixed(1)} 200" opacity="0.85"/>` : ""}
+      ${flowers}
+    </g>
+    ${water > 1.02 ? `<path d="M46 58 Q38 84 44 98 Q52 88 50 60 Z" fill="${color}" ${DL} stroke-width="2"/>` : ""}
+    ${water > 0 ? `<g fill="none" stroke="#c9c6cf" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <path d="M80 44 Q74 34 80 24 Q86 14 80 4"/><path d="M118 44 Q112 34 118 24 Q124 14 118 4"/></g>` : ""}
+    <path d="M58 68 L66 176" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.6"/>
+    <path d="${MUG}" fill="none" ${DL} stroke-width="3.5"/>
+    <ellipse cx="100" cy="56" rx="54" ry="6" fill="none" ${DL} stroke-width="2.5"/>`);
+}
+
+
+// ================= Honey Coffee =================
+// Grind beans, brew a shot (stop at the right strength), swirl honey,
+// then pour milk foam on top and draw your own latte art.
+function coffeeColor(t) {
+  return t < 0.55 ? mixColor("#d9b48f", "#7a4a2e", t / 0.55) : mixColor("#7a4a2e", "#2e1a12", (t - 0.55) / 0.45);
+}
+
+// the coffee's surface, seen from a little above (latte art goes here)
+const SURFACE = { cx: 100, cy: 98, rx: 50, ry: 15 };
+
+function honeyCoffeeArt(st) {
+  const v = st.v;
+  const clip = uid("cup");
+  const brewing = st.step === "brew" && !st.done("brew") && (v.brew || 0) > 0;
+  const hasCoffee = st.done("brew") || brewing;
+  const surface = hasCoffee ? coffeeColor(v.brew ?? 0.55) : "#ead7cc";
+  const honey = Math.min(1, (v.honey || 0) / 0.8);
+
+  // honey swirl, squashed to lie flat on the coffee
+  let swirl = "";
+  for (let i = 0; i <= 70; i++) {
+    const t = i / 70, a = t * 2.2 * Math.PI * 2;
+    swirl += (i ? "L" : "M") + (100 + Math.cos(a) * 40 * t).toFixed(1) + " " + (98 + Math.sin(a) * 11 * t).toFixed(1) + " ";
+  }
+
+  const marks = st.marks.latte || [];
+  const latte = marks.length
+    ? creamMarksSVG(marks.map((m) => ({ x: m.x, y: SURFACE.cy + (m.y - SURFACE.cy) * 0.9, r: m.r })), "#fff6ea", 6)
+    : st.done("latte")
+      ? `<path d="M100 110 Q78 100 80 92 Q83 84 92 88 Q97 90 100 95 Q103 90 108 88 Q117 84 120 92 Q122 100 100 110 Z" fill="#fff6ea" stroke="${mixColor("#fff6ea", INK, 0.25)}" stroke-width="1.5"/>`
+      : "";
+
+  const machine = !st.done("brew") ? `
+    <rect x="52" y="0" width="96" height="26" rx="6" fill="#d7d5de" ${DL}/>
+    <path d="M64 26 L136 26 L130 40 L70 40 Z" fill="#6d6670" ${DL}/>
+    <rect x="130" y="28" width="46" height="9" rx="4.5" fill="#9b7766" ${DL} stroke-width="2.5"/>
+    ${(v.grind || 0) > 0 ? `<path d="M74 26 Q100 ${26 - 4 * Math.min(4, v.grind)} 126 26 Z" fill="#6b4632" ${DL} stroke-width="2"/>` : ""}
+    <circle cx="66" cy="13" r="4" fill="#f6b8cb" ${DL} stroke-width="1.5"/>
+    ${brewing ? `<path d="M100 40 L100 ${SURFACE.cy}" stroke="${coffeeColor(v.brew)}" stroke-width="6" stroke-linecap="round"/>` : ""}` : "";
+
+  return dessertSVG(`
+    <ellipse cx="100" cy="190" rx="78" ry="8" fill="#e9d6cf" opacity="0.7"/>
+    <ellipse cx="100" cy="178" rx="74" ry="14" fill="#fffaf4" ${DL}/>
+    <path d="M150 112 Q184 112 182 138 Q180 162 146 160" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round"/>
+    <path d="M150 112 Q184 112 182 138 Q180 162 146 160" fill="none" stroke="#f6b8cb" stroke-width="7" stroke-linecap="round"/>
+    <path d="M44 98 L156 98 L148 166 Q146 180 130 180 L70 180 Q54 180 52 166 Z" fill="#f6b8cb" ${DL}/>
+    <path d="M62 112 Q60 140 66 164" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <path d="M86 140 Q78 132 80 126 Q83 121 88 124 Q93 121 96 126 Q98 132 86 140 Z" fill="#fffaf4" ${DL} stroke-width="2"/>
+    <ellipse cx="100" cy="98" rx="56" ry="18" fill="#fffaf4" ${DL}/>
+    <defs><clipPath id="${clip}"><ellipse cx="${SURFACE.cx}" cy="${SURFACE.cy}" rx="${SURFACE.rx}" ry="${SURFACE.ry}"/></clipPath></defs>
+    <ellipse cx="${SURFACE.cx}" cy="${SURFACE.cy}" rx="${SURFACE.rx}" ry="${SURFACE.ry}" fill="${surface}" stroke="${INK}" stroke-width="2"/>
+    <g clip-path="url(#${clip})">
+      ${hasCoffee ? `<ellipse cx="100" cy="98" rx="40" ry="10" fill="none" stroke="${mixColor(surface, "#ffffff", 0.3)}" stroke-width="3" opacity="0.6"/>` : ""}
+      ${(v.honey || 0) > 0 ? `<path d="${swirl}" fill="none" stroke="#f2c157" stroke-width="3.5" stroke-linecap="round"
+          pathLength="100" stroke-dasharray="${(honey * 100).toFixed(1)} 200"/>` : ""}
+      ${latte}
+    </g>
+    ${hasCoffee ? `<g fill="none" stroke="#c9c6cf" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <path d="M84 76 Q78 66 84 56 Q90 46 84 38"/><path d="M116 76 Q110 66 116 56 Q122 46 116 38"/></g>` : ""}
+    ${machine}`);
+}
+
+
+// ---------- Tools for the drinks ----------
+Object.assign(TOOL_ART, {
+  masher: () => T(`
+    <path d="M40 8 L40 46" stroke="${INK}" stroke-width="10" stroke-linecap="round"/>
+    <path d="M40 8 L40 46" stroke="#e57c8f" stroke-width="6" stroke-linecap="round"/>
+    <path d="M18 48 L62 48 L58 60 L22 60 Z" fill="#d7d5de" ${DL}/>
+    <path d="M26 54 L54 54" stroke="#9e9aa8" stroke-width="2" stroke-dasharray="3 3"/>
+    ${berryHalf(40, 70, 0.4, 180)}`),
+  ice: () => T(`
+    <path d="M14 36 L66 36 L60 72 L20 72 Z" fill="#cfe3ea" ${DL}/>
+    ${iceCube(30, 26, -12)}${iceCube(50, 22, 10)}`),
+  milk: () => milkBottleSVG(),
+  spoon: () => T(`
+    <path d="M18 70 L50 20" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M18 70 L50 20" stroke="#d7d5de" stroke-width="4.5" stroke-linecap="round"/>
+    <ellipse cx="56" cy="13" rx="8" ry="11" fill="#d7d5de" ${DL} stroke-width="2.5" transform="rotate(33 56 13)"/>
+    <path d="M60 46 Q68 50 66 58 M64 36 Q74 40 74 50" fill="none" stroke="#f08caa" stroke-width="3" stroke-linecap="round"/>`),
+  sakura: () => T(`${blossom(28, 46, 1.2)}${blossom(52, 30, 1)}${blossom(56, 58, 0.8)}`),
+  kettle: () => kettleSVG(),
+  timer: () => T(`
+    <rect x="18" y="8" width="44" height="8" rx="3" fill="#c9967a" ${DL}/>
+    <rect x="18" y="64" width="44" height="8" rx="3" fill="#c9967a" ${DL}/>
+    <path d="M24 16 L56 16 Q56 34 40 40 Q56 46 56 64 L24 64 Q24 46 40 40 Q24 34 24 16 Z" fill="#eef6f7" ${DL}/>
+    <path d="M30 24 L50 24 Q46 34 40 36 Q34 34 30 24 Z" fill="#f6b3c4"/>
+    <path d="M40 44 L40 54 M30 62 Q40 52 50 62 Z" fill="#f6b3c4" stroke="#f6b3c4" stroke-width="2"/>`),
+  grinder: () => T(`
+    <path d="M20 32 L60 32 L56 72 L24 72 Z" fill="#c9967a" ${DL}/>
+    <path d="M16 22 L64 22 L60 32 L20 32 Z" fill="#9b7766" ${DL}/>
+    <path d="M40 22 L40 10 L62 10" fill="none" ${DL} stroke-width="3.5"/>
+    <circle cx="64" cy="10" r="5" fill="#f6b8cb" ${DL} stroke-width="2"/>
+    <rect x="34" y="46" width="12" height="8" rx="2" fill="#fffaf4" ${DL} stroke-width="2"/>`),
+  brew: () => T(`
+    <rect x="12" y="8" width="56" height="20" rx="5" fill="#d7d5de" ${DL}/>
+    <path d="M22 28 L58 28 L54 38 L26 38 Z" fill="#6d6670" ${DL}/>
+    <path d="M40 40 L40 52" stroke="#7a4a2e" stroke-width="4" stroke-linecap="round"/>
+    <path d="M26 54 L54 54 L52 72 L28 72 Z" fill="#f6b8cb" ${DL}/>`),
+  pitcher: () => T(`
+    <path d="M22 26 L54 26 L60 70 L18 70 Z" fill="#eef3f5" ${DL}/>
+    <path d="M22 26 L12 18" ${DL} stroke-width="4"/>
+    <path d="M56 34 Q70 36 68 50 Q66 60 58 60" fill="none" ${DL}/>
+    <path d="M26 36 L28 62" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M10 14 Q6 6 12 2" fill="none" stroke="#fff6ea" stroke-width="4" stroke-linecap="round"/>`),
+});
+Object.assign(TOOL_NAMES, {
+  masher: "Masher", ice: "Ice", milk: "Milk", spoon: "Spoon", sakura: "Sakura", kettle: "Hot water",
+  timer: "Steep", grinder: "Grinder", brew: "Espresso", pitcher: "Milk foam",
+});
+
+
+// ---------- The drink recipes ----------
+Object.assign(DESSERTS, {
+  milk: {
+    name: "Strawberry Milk",
+    draw: strawberryMilkArt,
+    tray: ["cream", "heart", "berry", "mint"],
+    steps: [
+      { id: "mash", type: "tap", tool: "masher", times: 4, text: "Mash 4 strawberries",
+        hint: "Click the masher 4 times to squish the strawberries." },
+      { id: "ice", type: "tap", tool: "ice", times: 3, text: "Add 3 ice cubes",
+        hint: "Click the ice 3 times. Clink, clink, clink!" },
+      { id: "milk", type: "hold", tool: "milk", text: "Pour the milk (hold)", target: [0.68, 0.92], max: 1.12, speed: 0.38,
+        hint: "Hold the milk bottle to pour. Let go in the pink zone, near the top." },
+      { id: "stir", type: "stir", tool: "spoon", times: 8, text: "Stir until pink",
+        hint: "Drag side to side on the glass to stir, until it's all pink!" },
+      DECORATE("Top it with cream, hearts and a strawberry. Press Done when it's cute."),
+    ],
+  },
+
+  sakura: {
+    name: "Sakura Tea",
+    draw: sakuraTeaArt,
+    tray: ["sakura", "heart", "mint", "daisy"],
+    steps: [
+      { id: "blossoms", type: "tap", tool: "sakura", times: 3, text: "Add 3 sakura flowers",
+        hint: "Click the sakura flowers 3 times to drop them in." },
+      { id: "water", type: "hold", tool: "kettle", text: "Pour hot water (hold)", target: [0.7, 0.92], max: 1.12, speed: 0.36,
+        hint: "Hold the kettle to pour. Watch the flowers float up! Let go in the pink zone." },
+      { id: "steep", type: "timing", tool: "timer", text: "Steep until pink", zone: [0.42, 0.68],
+        start: "Start steeping", stop: "Ready!",
+        hint: "Click the timer to start steeping. Press Ready! when the tea is a soft pink (green zone)." },
+      { id: "honey", type: "hold", tool: "honey", text: "Swirl in honey (hold)", target: [0.5, 0.82], max: 1.05, speed: 0.36,
+        hint: "Hold the honey jar. Let go in the pink zone." },
+      DECORATE("Float some petals on top. Press Done when it's cute."),
+    ],
+  },
+
+  coffee: {
+    name: "Honey Coffee",
+    draw: honeyCoffeeArt,
+    tray: ["heart", "choco", "cream", "sakura"],
+    steps: [
+      { id: "grind", type: "tap", tool: "grinder", times: 4, text: "Grind the beans",
+        hint: "Click the grinder 4 times. Smells so good!" },
+      { id: "brew", type: "timing", tool: "brew", text: "Brew a shot", zone: [0.42, 0.68],
+        start: "Brew", stop: "Stop shot!",
+        hint: "Click the espresso machine to brew. Press Stop shot! when it's in the green zone." },
+      { id: "honey", type: "hold", tool: "honey", text: "Swirl in honey (hold)", target: [0.5, 0.82], max: 1.05, speed: 0.36,
+        hint: "Hold the honey jar. Let go in the pink zone." },
+      { id: "latte", type: "pipe", tool: "pitcher", text: "Pour latte art", area: { cx: 100, cy: 98, rx: 50, ry: 16 },
+        target: [0.5, 0.85], max: 1.1, speed: 0.28,
+        hint: "Hold the mouse down on the coffee and move: the milk foam flows out. Draw a heart! Let go in the pink zone." },
+      DECORATE("Add a few sweet touches. Press Done when it's cute."),
+    ],
+  },
+});
