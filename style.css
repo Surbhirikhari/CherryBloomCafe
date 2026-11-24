@@ -1105,6 +1105,63 @@ h1 {
   .stage .bubble { width: 48%; font-size: 0.85rem; padding: 8px 10px; }
 }
 
+/* ---------- 8. Scores and days ---------- */
+
+/* the receipt that pops up when you serve */
+.score-card {
+  position: absolute;
+  left: 14%;
+  bottom: 2%;                      /* over the front of the counter, out of the way */
+  z-index: 6;
+  width: min(280px, 36%);
+  padding: 14px 16px 12px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 22px, rgba(246, 184, 203, 0.35) 22px 23px),
+    #fffdf7;
+  border: 3px solid var(--cat-line);
+  border-radius: 6px 6px 16px 16px;
+  box-shadow: 0 6px 0 rgba(65, 44, 44, 0.15);
+  transform: rotate(2deg);
+}
+.score-card.pop { animation: pop 0.35s ease-out; }
+.score-title { margin: 0 0 6px; font: 400 1rem var(--font-display); color: var(--blossom-deep); text-align: center; }
+.score-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.score-rows li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font: 700 0.78rem var(--font-body); }
+.score-rows .bar { grid-column: 1 / -1; height: 8px; border-radius: 999px; background: #f3e4e8; overflow: hidden; }
+.score-rows .bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #f9c5d2, #e1658e); }
+.score-rows .perfect .bar span { background: linear-gradient(90deg, #bcdc8f, #6f9a48); }
+.score-total { display: flex; justify-content: space-between; margin: 8px 0 2px; padding-top: 6px; border-top: 2px dashed var(--blossom);
+  font: 800 1rem var(--font-body); }
+.score-total strong { font: 400 1.3rem var(--font-display); color: var(--blossom-deep); }
+.score-pay { margin: 0; text-align: center; font: 800 0.85rem var(--font-body); color: var(--matcha-deep); }
+
+/* Bloom's notebook at the end of the day */
+.day-card {
+  position: relative;
+  width: min(400px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 26px 24px 22px;
+  text-align: center;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(169, 205, 226, 0.45) 27px 28px),
+    #fffdf7;
+  border: 3px solid var(--cat-line);
+  border-left: 14px solid var(--blossom);
+  border-radius: 10px 18px 18px 10px;
+  box-shadow: 0 10px 0 rgba(65, 44, 44, 0.18);
+  transform: rotate(-1deg);
+}
+.day-card h2 { margin: 0; font: 400 1.8rem var(--font-display); color: var(--matcha-deep); }
+.day-stars { margin: 0; font-size: 2rem; letter-spacing: 6px; color: #f2c157; text-shadow: 0 2px 0 var(--cat-line); }
+.day-stars .dim { color: #e9dfd5; }
+.day-stats { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 6px; }
+.day-stats li { display: flex; justify-content: space-between; gap: 10px; font: 700 1rem var(--font-body); }
+.day-stats strong { color: var(--blossom-deep); text-align: right; }
+.day-note { margin: 4px 0; font: 700 1rem var(--font-body); color: var(--ink); }
+.day-note::before { content: "🐱 "; }
+
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
   .scene.entering .scene-outside { transform: none; }

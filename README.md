@@ -34,7 +34,8 @@ then send them off happy (and earn a few coins on the way).
 | <img src="docs/screenshots/recipe.jpg" alt="The recipe card for a Strawberry Matcha Latte, listing seven steps and a price of 15 coins" width="400"> | **2. Read the recipe card.** It shows the drink, every step in order, and the price. Click **Continue**. |
 | <img src="docs/screenshots/whisk.jpg" alt="The matcha station: a bamboo whisk over a bowl of frothy green matcha, with the recipe checklist on the left" width="400"> | **3. Make it at the work station.** Scoop the matcha, add hot water, then *really whisk*: drag side to side until the foam meter fills. Pour it into the jar, then **hold** the milk bottle and let go between the pink lines. |
 | <img src="docs/screenshots/decorate.jpg" alt="A layered pink, cream and green jar decorated with whipped cream, strawberry slices, mint, a sakura flower and sugar hearts, next to a cutting board" width="400"> | **4. Decorate however you like.** Chop strawberries on the board (3 chops = 4 slices), then drag slices, cream, sakura flowers, mint and sugar hearts *anywhere* on the drink. |
-| <img src="docs/screenshots/served.jpg" alt="The happy customer says 'So pretty! And perfect!' while 23 coins float up and Mochi celebrates" width="400"> | **5. Serve it!** Your customer reacts, pays (with a tip for a perfect pour and a bonus for every topping), and the next one wanders in. |
+| <img src="docs/screenshots/served.jpg" alt="The happy customer says 'So pretty! And perfect!' while 23 coins float up and Mochi celebrates" width="400"> | **5. Serve it!** A little receipt shows your score for every step (how close you got to the pink and green zones, plus decorating). The better the score, the bigger the tip. |
+| | **6. Finish the day.** Each day has a few customers (one more every day). After the last one, Bloom's notebook shows your stars, coins, average score and best dish. Your day and coins are saved. |
 
 ---
 
@@ -104,7 +105,9 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 
 - [x] Desserts! Crêpe, roll cake, cream toast and croissant
 - [ ] More drinks and desserts (strawberry shortcake, anyone?)
-- [ ] Day and night, and a daily goal
+- [x] Cafe days with an end-of-day notebook, and a % score for every step
+- [ ] Several customers at once, with order tickets
+- [ ] Ranks that unlock new recipes, and a shop for decorations
 - [ ] Sounds: the whisk, the pour, the coin *ding*
 - [ ] Saving your coins between visits
 

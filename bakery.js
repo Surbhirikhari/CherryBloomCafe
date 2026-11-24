@@ -58,7 +58,7 @@ const bake = {
   v: {},                // how far each step got, e.g. { batter: 0.8, cook: 0.5 }
   marks: {},            // spots where cream flowed (or sugar was rubbed)
   done: new Set(),      // the steps that are finished
-  stars: 3,             // starts perfect, mistakes take stars away
+  scores: [],           // how well each judged step went: { label, pct }
   busy: false,          // true for a moment between steps
   holding: false,       // holding a "hold" tool
   heating: false,       // a "timing" step is running
@@ -115,7 +115,7 @@ function resetBake() {
   bake.v = {};
   bake.marks = {};
   bake.done = new Set();
-  bake.stars = 3;
+  bake.scores = [];
   bake.busy = false;
   Decor.reset();
   startStep();
@@ -242,12 +242,21 @@ function drawMeter() {
   }
 }
 
-// Is the amount right? Used when you let go of a "hold" tool or the piping bag.
+// How close is "value" to the zone from lo to hi? 100% inside it;
+// outside it, you lose points the further off you are ("range" = how quickly).
+function closeness(value, lo, hi, range) {
+  if (value >= lo && value <= hi) return 100;
+  const off = value < lo ? lo - value : value - hi;
+  return Math.max(30, Math.round(100 - (off / range) * 100));
+}
+
+// Is the amount right? Used when you stop pouring, piping or drizzling.
 function judgeAmount(s, value) {
-  if (value < s.target[0] * 0.6) { bHint.textContent = "A bit more… hold it again."; drawBake(); return; }
-  if (value >= s.target[0] && value <= s.target[1]) { nextBakeStep("Perfect amount!"); return; }
-  bake.stars = Math.max(1, bake.stars - 1);
-  nextBakeStep(value > s.target[1] ? "Oops, a little too much! Still yummy." : "A little less than the recipe, but okay!");
+  if (value < s.target[0] * 0.6) { bHint.textContent = "A bit more… keep going."; drawBake(); return; }
+  const pct = closeness(value, s.target[0], s.target[1], s.max * 0.5);
+  bake.scores.push({ label: s.text, pct });
+  if (pct === 100) nextBakeStep("Perfect amount! 100%");
+  else nextBakeStep((value > s.target[1] ? "A little too much! " : "A little less than the recipe. ") + pct + "%");
 }
 
 
@@ -326,9 +335,10 @@ function stopTiming() {
   if (!bake.heating || s.type !== "timing") return;
   bake.heating = false;
   const value = bake.v[s.id];
-  if (value >= s.zone[0] && value <= s.zone[1]) { nextBakeStep("Golden and perfect!"); return; }
-  bake.stars = Math.max(1, bake.stars - 1);
-  nextBakeStep(value < s.zone[0] ? "Hmm, a little pale. Still tasty!" : "Oops, a bit too dark! Still tasty.");
+  const pct = closeness(value, s.zone[0], s.zone[1], 0.5);
+  bake.scores.push({ label: s.text, pct });
+  if (pct === 100) nextBakeStep("Golden and perfect! 100%");
+  else nextBakeStep((value < s.zone[0] ? "A little pale. " : "A bit too dark! ") + pct + "%");
 }
 
 bAction.addEventListener("click", stopTiming);
@@ -691,5 +701,5 @@ bPlate.addEventListener("keyup", function (event) { if (event.key === " ") stopP
 bRestart.addEventListener("click", resetBake);
 
 bDone.addEventListener("click", function () {
-  bake.onDone(bake.stars, Decor.art(bake.recipe.draw(artState())), Decor.count());
+  bake.onDone(bake.scores, Decor.art(bake.recipe.draw(artState())), Decor.count());
 });

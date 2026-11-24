@@ -520,14 +520,15 @@ mBerry.addEventListener("click", async function () {
 // ---------- Start over, and Done ----------
 mRestart.addEventListener("click", resetStation);
 
-// 3 stars = milk between the lines, 2 = close, 1 = way off
-function matchaStars() {
+// The score for the milk: 100% between the lines, less the further off it is
+function matchaScores() {
   const milk = station.jar.milk;
-  if (milk >= MILK_TARGET[0] && milk <= MILK_TARGET[1]) return 3;
-  if (milk >= MILK_TARGET[0] - 10 && milk <= MILK_TARGET[1] + 10) return 2;
-  return 1;
+  let pct = 100;
+  if (milk < MILK_TARGET[0]) pct = Math.max(30, Math.round(100 - (MILK_TARGET[0] - milk) * 3));
+  if (milk > MILK_TARGET[1]) pct = Math.max(30, Math.round(100 - (milk - MILK_TARGET[1]) * 3));
+  return [{ label: "Whisk the matcha", pct: 100 }, { label: "Pour the milk", pct }];
 }
 
 mDone.addEventListener("click", function () {
-  station.onDone(matchaStars(), Decor.art(jarSVG(station.jar)), Decor.count());
+  station.onDone(matchaScores(), Decor.art(jarSVG(station.jar)), Decor.count());
 });

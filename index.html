@@ -47,8 +47,9 @@
 
       <!-- Top: how many coins we've earned and customers we've served -->
       <div class="hud">
+        <span class="hud-item hud-day">☀️ Day <strong id="day-count">1</strong></span>
+        <span class="hud-item">Customers <strong id="served-count">0</strong>/<strong id="day-goal">5</strong></span>
         <span class="hud-item"><span class="coin" aria-hidden="true"></span> <strong id="coin-count">0</strong> coins</span>
-        <span class="hud-item">Served <strong id="served-count">0</strong></span>
       </div>
 
       <div class="kitchen-main">
@@ -223,6 +224,31 @@
           <p id="customer-says" class="customer-says" hidden></p>
           <span id="coin-pop" class="coin-pop" hidden></span>
           <div id="customer-art" class="customer-art"></div>
+        </div>
+      </div>
+
+      <!-- The receipt: how well each step went, after you serve -->
+      <div id="score-card" class="score-card" hidden>
+        <p class="score-title" id="score-title"></p>
+        <ul id="score-rows" class="score-rows"></ul>
+        <p class="score-total"><span>Total</span> <strong id="score-total"></strong></p>
+        <p class="score-pay" id="score-pay"></p>
+      </div>
+
+      <!-- Bloom's notebook: the end-of-day summary -->
+      <div id="day-card" class="modal" hidden>
+        <div class="day-card" role="dialog" aria-labelledby="day-title">
+          <p class="recipe-for">Bloom's notebook</p>
+          <h2 id="day-title"></h2>
+          <p class="day-stars" id="day-stars" aria-label=""></p>
+          <ul class="day-stats">
+            <li><span>Customers served</span> <strong id="day-served"></strong></li>
+            <li><span>Coins earned</span> <strong id="day-coins"></strong></li>
+            <li><span>Average score</span> <strong id="day-average"></strong></li>
+            <li><span>Best dish</span> <strong id="day-best"></strong></li>
+          </ul>
+          <p class="day-note" id="day-note"></p>
+          <button id="btn-next-day" class="btn btn-big">Start the next day ☀️</button>
         </div>
       </div>
 

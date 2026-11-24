@@ -5,8 +5,10 @@
 //   1. a customer walks in with a drink in their thought cloud
 //   2. click the cloud  -> see the recipe -> Continue
 //   3. make it at a hands-on station (matcha, or the Bakery Station) -> Done
-//   4. the customer gets the drink, reacts, pays, and leaves
-//   5. the next customer walks in
+//   4. the customer gets it, a receipt shows the score for each step,
+//      they pay (a bigger tip for a better score), and leave
+//   5. the next customer walks in, until the day's customers are all served
+//   6. Bloom's notebook sums up the day, then the next day starts
 //
 // The menu lives in menu.js, the customer drawings in customers.js,
 // the matcha mini-game in matcha.js, desserts and drinks in desserts.js +
@@ -30,6 +32,17 @@ const mochiBubble   = document.getElementById("mochi-says");
 
 const coinCount     = document.getElementById("coin-count");
 const servedCount   = document.getElementById("served-count");
+const dayCount      = document.getElementById("day-count");
+const dayGoalEl     = document.getElementById("day-goal");
+
+const scoreCard     = document.getElementById("score-card");
+const scoreTitle    = document.getElementById("score-title");
+const scoreRows     = document.getElementById("score-rows");
+const scoreTotal    = document.getElementById("score-total");
+const scorePay      = document.getElementById("score-pay");
+
+const dayCard       = document.getElementById("day-card");
+const nextDayBtn    = document.getElementById("btn-next-day");
 
 const customerEl    = document.getElementById("customer");
 const customerArt   = document.getElementById("customer-art");
@@ -50,7 +63,31 @@ const continueBtn   = document.getElementById("btn-continue");
 
 // ---------- 2. The game's memory ("state") ----------
 let coins = 0;
-let served = 0;
+let day = 1;
+// what happened today, for Bloom's notebook at the end of the day
+let today = { served: 0, coins: 0, dishes: [] };   // dishes: { name, pct }
+
+// Day 1 has 5 customers, then one more each day (up to 8)
+function customersToday() { return Math.min(8, 4 + day); }
+
+// Remember the day and coins in this browser, so you can carry on later.
+// (try/catch: some browsers block saving, and the game still works without it)
+function saveGame() {
+  try { localStorage.setItem("cherry-blossom-cafe", JSON.stringify({ day, coins })); } catch (e) {}
+}
+function loadGame() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("cherry-blossom-cafe"));
+    if (saved) { day = saved.day || 1; coins = saved.coins || 0; }
+  } catch (e) {}
+}
+
+function drawHud() {
+  dayCount.textContent = day;
+  servedCount.textContent = today.served;
+  dayGoalEl.textContent = customersToday();
+  coinCount.textContent = coins;
+}
 let customer = null;   // the customer at the counter right now (from makeCustomer)
 
 
@@ -178,17 +215,19 @@ function startMaking() {
 
 // ---------- 7. Serving, paying and leaving ----------
 
-// stars: how good it was (3, 2 or 1). art: a drawing of the drink we made.
-// toppings: how many decorations we added (customers love those).
-async function serve(stars, art, toppings = 0) {
+// scores: how well each step went, e.g. [{ label: "Pour the milk", pct: 92 }]
+// art: a drawing of what we made. toppings: how many decorations we added.
+async function serve(scores, art, toppings = 0) {
   const drink = customer.order;
-  const decorBonus = stars > 1 ? Math.min(toppings, 5) : 0;   // +1 coin per topping, up to 5
 
-  // what they pay: price + a tip for perfect, half price if it's wrong
-  let pay = drink.price;
-  if (stars === 3) pay = drink.price + 3;
-  if (stars === 1) pay = Math.ceil(drink.price / 2);
-  pay = pay + decorBonus;
+  // decorating counts too: no toppings 40%, 4 or more 100%
+  const rows = scores.concat([{ label: "Decoration", pct: Math.min(100, 40 + toppings * 15) }]);
+  const total = Math.round(rows.reduce((sum, r) => sum + r.pct, 0) / rows.length);
+
+  // what they pay: the price, plus a tip that grows with the score
+  // (at 100% the tip is half the price; a poor score only pays half)
+  const tip = Math.round(drink.price * 0.5 * Math.max(0, total - 50) / 50);
+  const pay = total >= 60 ? drink.price + tip : Math.ceil(drink.price / 2);
 
   // back to the counter: the drink appears in their cloud
   showScreen("counter");
@@ -199,44 +238,109 @@ async function serve(stars, art, toppings = 0) {
   // they react
   orderCloud.hidden = true;
   customerSays.hidden = false;
-  if (stars === 3) {
+  if (total >= 90) {
     customerEl.dataset.mood = "happy";
-    customerSays.textContent = decorBonus > 0 ? "So pretty! And perfect!" : "Yummy! Perfect!";
-    mochiSays(customer.name + " loved it! That's a tip!", "happy");
+    customerSays.textContent = toppings >= 3 ? "So pretty! And perfect!" : "Yummy! Perfect!";
+    mochiSays(customer.name + " loved it! Big tip!", "happy");
     chefDoes("hop");
-  } else if (stars === 2) {
+  } else if (total >= 60) {
     customerEl.dataset.mood = "happy";
-    customerSays.textContent = decorBonus > 0 ? "Ooh, so cute! Thank you!" : "Tasty, thank you!";
+    customerSays.textContent = toppings >= 3 ? "Ooh, so cute! Thank you!" : "Tasty, thank you!";
     mochiSays("Not quite perfect, but still tasty, nya.");
     chefDoes("nod");
   } else {
     customerEl.dataset.mood = "sad";
-    customerSays.textContent = "Um… this isn't what I asked for.";
-    mochiSays("Oops. Check the recipe card next time, nya.");
+    customerSays.textContent = "Hmm… not quite right.";
+    mochiSays("Look at the meter for the pink zone next time, nya.");
     chefDoes("shake");
   }
   restartAnimation(customerSays, "pop");
-  if (stars > 1) restartAnimation(customerEl, "happy-hop");
+  if (total >= 60) restartAnimation(customerEl, "happy-hop");
+  showReceipt(drink, rows, total, pay, tip);
 
   // they pay
   await wait(900);
   coins = coins + pay;
-  served = served + 1;
-  coinCount.textContent = coins;
-  servedCount.textContent = served;
+  today.served = today.served + 1;
+  today.coins = today.coins + pay;
+  today.dishes.push({ name: drink.name, pct: total });
+  drawHud();
+  saveGame();
   coinPop.textContent = "+" + pay;
   coinPop.hidden = false;
   restartAnimation(coinPop, "rise");
 
-  // they leave, and after a moment the next customer comes in
-  await wait(1600);
+  // they leave
+  await wait(2600);
   customerSays.hidden = true;
+  scoreCard.hidden = true;
   customerEl.classList.remove("walk-in", "happy-hop");
   restartAnimation(customerEl, "walk-out");
   await wait(1400);
   customerEl.hidden = true;
+
+  // was that the last customer of the day?
+  if (today.served >= customersToday()) { await wait(500); endOfDay(); return; }
   await wait(1200);
   customerArrives();
+}
+
+// the receipt: one little bar for each step, the total, and what they paid
+function showReceipt(drink, rows, total, pay, tip) {
+  scoreTitle.textContent = drink.name;
+  scoreRows.innerHTML = "";
+  rows.forEach(function (row) {
+    const li = document.createElement("li");
+    if (row.pct === 100) li.className = "perfect";
+    li.innerHTML = `<span>${row.label}</span><strong>${row.pct}%</strong><span class="bar"><span style="width:${row.pct}%"></span></span>`;
+    scoreRows.appendChild(li);
+  });
+  scoreTotal.textContent = total + "%";
+  scorePay.textContent = total >= 60
+    ? "+" + pay + " coins (" + tip + " tip)" + (total >= 90 ? " ✨" : "")
+    : "+" + pay + " coins (half price)";
+  scoreCard.hidden = false;
+  restartAnimation(scoreCard, "pop");
+}
+
+
+// ---------- 7b. The end of the day: Bloom's notebook ----------
+const DAY_NOTES = [
+  [90, "A purr-fect day! Customers are telling all their friends."],
+  [75, "Lovely work today. I only napped a little."],
+  [60, "Not bad! Watch the pink zones tomorrow, nya."],
+  [0,  "A tricky day… tomorrow will be better. Treats help."],
+];
+
+function endOfDay() {
+  const average = Math.round(today.dishes.reduce((sum, d) => sum + d.pct, 0) / today.dishes.length);
+  const best = today.dishes.reduce((a, b) => (b.pct > a.pct ? b : a));
+  const stars = average >= 90 ? 3 : average >= 70 ? 2 : 1;
+
+  document.getElementById("day-title").textContent = "Day " + day + " is done!";
+  const starsEl = document.getElementById("day-stars");
+  starsEl.innerHTML = "★".repeat(stars) + `<span class="dim">${"★".repeat(3 - stars)}</span>`;
+  starsEl.setAttribute("aria-label", stars + " out of 3 stars");
+  document.getElementById("day-served").textContent = today.served;
+  document.getElementById("day-coins").textContent = today.coins;
+  document.getElementById("day-average").textContent = average + "%";
+  document.getElementById("day-best").textContent = best.name + " (" + best.pct + "%)";
+  document.getElementById("day-note").textContent = DAY_NOTES.find(([min]) => average >= min)[1];
+
+  mochiSays("Closing time! Let's count the coins.", "happy");
+  chefDoes("hop");
+  dayCard.hidden = false;
+  nextDayBtn.focus();
+}
+
+function startNextDay() {
+  dayCard.hidden = true;
+  day = day + 1;
+  today = { served: 0, coins: 0, dishes: [] };
+  drawHud();
+  saveGame();
+  mochiSays("Good morning! Day " + day + ": " + customersToday() + " customers today, nya.");
+  setTimeout(customerArrives, 1200);
 }
 
 
@@ -252,6 +356,7 @@ function placeOpenSign() {
   openButton.style.height = spot.height + "px";
   openButton.style.fontSize = Math.max(12, spot.height * 0.3) + "px";
 }
+loadGame();
 placeOpenSign();
 window.addEventListener("resize", placeOpenSign);
 document.fonts.ready.then(placeOpenSign);
@@ -274,7 +379,10 @@ openButton.addEventListener("click", async function () {
   scene.classList.add("inside");
   titleScreen.hidden = true;
   showScreen("counter");
-  mochiSays("Welcome to work! Customers are coming, nya.");
+  drawHud();
+  mochiSays(day === 1
+    ? "Welcome to work! " + customersToday() + " customers today, nya."
+    : "Welcome back! It's day " + day + ", nya.");
   chefDoes("hop");
 
   await wait(1200);
@@ -285,6 +393,7 @@ openButton.addEventListener("click", async function () {
 // ---------- 9. All the other clicks ----------
 orderCloud.addEventListener("click", showRecipe);
 continueBtn.addEventListener("click", startMaking);
+nextDayBtn.addEventListener("click", startNextDay);
 
 // Things Mochi says when you click on Bloom, or on him.
 const CHEF_CLICK_LINES = [
