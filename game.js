@@ -30,7 +30,7 @@ const MAX_SCOOPS = 5;
 
 // ---------- 3. Small helper functions ----------
 // A function is a reusable set of instructions. We "call" it with mochiSays("hi").
-// mood can be "awake" (the default), "happy" or "belly".
+// mood can be "awake" (the default) or "happy".
 // After a few seconds of quiet, Mochi drifts back to sleep.
 let napTimer = null;
 
@@ -77,10 +77,10 @@ function restartAnimation(element, className) {
   element.classList.add(className);
 }
 
-// Make Chef Bloom do a move: "hop", "nod" or "shake".
+// Make Chef Bloom do a move: "hop", "nod", "shake" or "wave".
 // The matching CSS lives in style.css under ".chef.do-hop" etc.
 function chefDoes(move) {
-  chef.classList.remove("do-hop", "do-nod", "do-shake");
+  chef.classList.remove("do-hop", "do-nod", "do-shake", "do-wave");
   restartAnimation(chef, "do-" + move);
 }
 
@@ -109,7 +109,7 @@ const CHEF_CLICK_LINES = [
   "Psst… she sneaks me cream when nobody's looking.",
 ];
 
-// Things Mochi says when you click him (he rolls onto his back).
+// Things Mochi says when you wake him up by clicking him.
 const MOCHI_CLICK_LINES = [
   "Mrrp? I was napping…",
   "Five more minutes, nya…",
@@ -125,19 +125,25 @@ openButton.addEventListener("click", function () {
   titleScreen.hidden = true;        // hide the title screen
   kitchenScreen.hidden = false;     // show the kitchen
   mochiSays("Welcome! First, scoop the matcha. We need 2 scoops, nya!");
-  chefDoes("hop");
+  chefDoes("wave");                 // Bloom waves hello
 });
 
 mochi.addEventListener("click", function () {
   const index = Math.floor(Math.random() * MOCHI_CLICK_LINES.length);
-  mochiSays(MOCHI_CLICK_LINES[index], "belly");   // he rolls over for belly rubs
+  mochiSays(MOCHI_CLICK_LINES[index]);
 });
 
 chef.addEventListener("click", function () {
   // Pick a random line: Math.random() gives 0–0.999…, times the list length, rounded down.
   const index = Math.floor(Math.random() * CHEF_CLICK_LINES.length);
   mochiSays(CHEF_CLICK_LINES[index]);
-  chefDoes("hop");
+
+  // Half the time she hops, half the time she waves.
+  if (Math.random() < 0.5) {
+    chefDoes("hop");
+  } else {
+    chefDoes("wave");
+  }
 });
 
 scoopButton.addEventListener("click", function () {

@@ -27,6 +27,9 @@
   --dress-shade: #d9798f;
   --ribbon: #c4566b;
   --sleeve: #ffffff;
+  --cat: #ffffff;
+  --cat-line: #6e3a30;   /* Mochi's brown ink outline */
+  --cat-shade: #e6edf2;  /* soft blue-grey shadow on his white fur */
   --bowl: #f9d7e1;
   --bowl-inside: #fbeef2;
   --bowl-foot: #e8a9bc;
@@ -213,6 +216,28 @@ h1 {
   100% { opacity: 0; transform: translateY(-30px) scale(1); }
 }
 
+/* move: wave hello! Her left arm swings out from the shoulder (94px 240px)
+   and rocks back and forth. The little hand fades in while the arm is up. */
+.bloom-arm-L { transform-origin: 94px 240px; }
+.bloom-wave-hand { opacity: 0; }
+.chef.do-wave .bloom-arm-L { animation: wave 2s ease-in-out; }
+.chef.do-wave .bloom-wave-hand { animation: wave-hand 2s linear; }
+@keyframes wave {
+  0%   { transform: rotate(0deg); }
+  18%  { transform: rotate(45deg); }
+  28%  { transform: rotate(58deg); }
+  38%  { transform: rotate(35deg); }
+  48%  { transform: rotate(58deg); }
+  58%  { transform: rotate(35deg); }
+  68%  { transform: rotate(58deg); }
+  80%  { transform: rotate(45deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes wave-hand {
+  0%, 8%, 92%, 100% { opacity: 0; }
+  15%, 85%          { opacity: 1; }
+}
+
 /* move: nod ("yes, good!") */
 .chef.do-nod .bloom-head { animation: nod 0.6s ease-in-out; }
 @keyframes nod {
@@ -227,44 +252,52 @@ h1 {
   70% { transform: rotate(-2deg); }
 }
 
-.mochi { position: relative; width: 160px; height: 130px; margin-top: -50px; margin-left: 90px; cursor: pointer; }
+.mochi { width: 140px; margin-top: -60px; margin-left: 90px; cursor: pointer; overflow: visible; }
 .crew-names { margin: 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--matcha-deep); }
 
-/* ---------- Mochi's poses and animations ---------- */
+/* ---------- Mochi's animations ---------- */
 
-/* All four pictures sit on top of each other, hidden. */
-.mochi-pose {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;             /* fit the whole picture inside the box */
-  object-position: bottom center;  /* and stand it on the floor */
-  transform-origin: 50% 100%;
-  display: none;
+/* idle: his loaf body squishes gently as he breathes */
+.mochi-body {
+  transform-origin: 110px 186px;
+  animation: mochi-breathe 3s ease-in-out infinite;
 }
-
-/* Show only the picture for the current mood, each with its own animation.
-   "pose-pop" plays once when the picture appears; the second animation loops. */
-.mochi[data-mood="sleepy"] .pose-sleepy { display: block; animation: mochi-breathe 3s ease-in-out infinite; }
-.mochi[data-mood="awake"]  .pose-awake  { display: block; animation: pose-pop 0.35s ease-out, mochi-bob 2.4s ease-in-out 0.35s infinite; }
-.mochi[data-mood="happy"]  .pose-happy  { display: block; animation: pose-pop 0.35s ease-out, mochi-wiggle 0.5s ease-in-out 0.35s 3; }
-.mochi[data-mood="belly"]  .pose-belly  { display: block; animation: pose-pop 0.35s ease-out, mochi-wiggle 0.9s ease-in-out 0.35s infinite; }
-
-@keyframes pose-pop {
-  0%   { transform: scale(0.8); opacity: 0; }
-  70%  { transform: scale(1.06); opacity: 1; }
-  100% { transform: scale(1); }
-}
-@keyframes mochi-breathe {          /* sleepy loaf: slow squish */
+@keyframes mochi-breathe {
   50% { transform: scale(1.03, 0.97); }
 }
-@keyframes mochi-bob {              /* talking: little bob */
-  50% { transform: translateY(-3px); }
+
+/* idle: tail wags */
+.mochi-tail {
+  transform-origin: 150px 182px;
+  animation: wag 1.6s ease-in-out infinite;
 }
-@keyframes mochi-wiggle {           /* stretching / belly up: wiggle */
-  25% { transform: rotate(-3deg); }
-  75% { transform: rotate(3deg); }
+@keyframes wag {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-10deg); }
+}
+
+/* moods: only show the eyes that match data-mood */
+.mochi-eyes { display: none; }
+.mochi[data-mood="sleepy"] .eyes-sleepy,
+.mochi[data-mood="awake"]  .eyes-awake,
+.mochi[data-mood="happy"]  .eyes-happy { display: inline; }
+
+/* sleepy: the Zzz float up one after another */
+.mochi-zzz { opacity: 0; transition: opacity 0.4s; }
+.mochi[data-mood="sleepy"] .mochi-zzz { opacity: 1; }
+.z { animation: zzz 2.4s ease-in-out infinite; }
+.z2 { animation-delay: 0.4s; }
+.z3 { animation-delay: 0.8s; }
+@keyframes zzz {
+  0%, 100% { transform: translateY(4px); opacity: 0.2; }
+  50%      { transform: translateY(-4px); opacity: 1; }
+}
+
+/* happy: a big stretchy squish */
+.mochi[data-mood="happy"] .mochi-body { animation: mochi-stretch 0.8s ease-in-out; }
+@keyframes mochi-stretch {
+  35% { transform: scale(1.12, 0.86); }
+  70% { transform: scale(0.95, 1.06); }
 }
 
 
@@ -361,12 +394,12 @@ h1 {
   .crew { grid-template-columns: auto auto; align-items: end; }
   .bubble { grid-column: 1 / -1; }
   .chef { width: 120px; }
-  .mochi { width: 130px; height: 105px; margin: 0; }
+  .mochi { width: 110px; margin: 0; }
   .crew-names { display: none; }
 }
 
 /* People who turn off animations in their computer settings */
 @media (prefers-reduced-motion: reduce) {
-  .mochi-pose, .bounce,
+  .mochi-tail, .mochi-body, .z, .bounce,
   .bloom-body, .bloom-hair-L, .bloom-hair-R, .bloom-eye, .bloom-ribbon-L, .bloom-ribbon-R { animation: none; }
 }

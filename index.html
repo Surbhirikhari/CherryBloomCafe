@@ -46,6 +46,7 @@
                .bloom-head   nods, shakes and tilts
                .bloom-eye    blinks
                .bloom-ribbon wiggles
+               .bloom-arm-L  lifts out and waves
              Click her to make her hop! -->
         <svg id="chef" class="chef" viewBox="0 -40 296 568" role="img" aria-label="Chef Bloom: long blonde hair, a pink headband, red ribbons and a pink dress">
           <g class="bloom-body">
@@ -55,7 +56,19 @@
             <image href="assets/bloom/body.png"  width="296" height="528"/>
             <image href="assets/bloom/bow.png"   width="296" height="528"/>
             <image href="assets/bloom/hands.png" width="296" height="528"/>
-            <image href="assets/bloom/arm_L.png" width="296" height="528"/>
+            <!-- The dress's side edge was never drawn, because the left sleeve
+                 always covered it. This line draws it, so it looks finished
+                 when she lifts her arm to wave. -->
+            <path d="M97 246 L95 264 L93 282 L91 300 L88 320 Q78 323 67 325" fill="none" stroke="#3b2b2d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- left arm: its own group so it can lift and wave.
+                 The little hand only shows while she waves. -->
+            <g class="bloom-arm-L">
+              <ellipse class="bloom-wave-hand" cx="163" cy="352" rx="11" ry="14" fill="#fdefe8" stroke="#3b2b2d" stroke-width="3.5"/>
+              <image href="assets/bloom/arm_L.png" width="296" height="528"/>
+              <!-- the sleeve's cuff edge (normally hidden under her other arm) -->
+              <path d="M141 322 Q146 332 150 340 Q156 350 153 360 Q155 370 162 377" fill="none" stroke="#3b2b2d" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
             <image href="assets/bloom/arm_R.png" width="296" height="528"/>
 
             <g class="bloom-head">
@@ -75,15 +88,73 @@
           <path class="chef-heart" d="M265 14 C253 -2 235 12 265 36 C295 12 277 -2 265 14 Z" fill="var(--blossom-deep)" stroke="#3b2b2d" stroke-width="3"/>
         </svg>
 
-        <!-- Mochi the cat: four pictures, one for each mood.
-             CSS shows only the picture that matches data-mood.
-             game.js changes data-mood to "sleepy", "awake", "happy" or "belly". -->
-        <div id="mochi" class="mochi" data-mood="sleepy" role="img" aria-label="Mochi, a fluffy white cat">
-          <img class="mochi-pose pose-sleepy" src="assets/mochi-idle.png" alt="">
-          <img class="mochi-pose pose-awake" src="assets/mochi-talk.png" alt="">
-          <img class="mochi-pose pose-happy" src="assets/mochi-happy.png" alt="">
-          <img class="mochi-pose pose-belly" src="assets/mochi-belly.png" alt="">
-        </div>
+        <!-- Mochi the cat, drawn as a sleepy loaf in a rough, hand-drawn style.
+             data-mood decides which eyes show: "sleepy", "awake" or "happy".
+             game.js changes the mood. -->
+        <svg id="mochi" class="mochi" data-mood="sleepy" viewBox="0 0 220 200" role="img" aria-label="Mochi, a round white cat">
+          <defs>
+            <!-- The "rough" filter makes random noise, then uses it to nudge
+                 every line a little, so smooth shapes look drawn by hand. -->
+            <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+              <feDisplacementMap in="SourceGraphic" scale="3.5"/>
+            </filter>
+          </defs>
+
+          <g class="mochi-body" filter="url(#rough)" stroke="var(--cat-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+            <!-- tail, curling out to the side -->
+            <g class="mochi-tail">
+              <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke-width="17"/>
+              <path d="M150 182 Q198 188 200 150 Q201 132 188 126" fill="none" stroke="var(--cat)" stroke-width="8"/>
+            </g>
+
+            <!-- ears (drawn first so the body covers their base) -->
+            <path d="M48 56 L60 16 Q80 24 92 36" fill="var(--cat)"/>
+            <path d="M57 48 L64 27 Q75 31 83 38 Z" fill="var(--blossom)" stroke="none"/>
+            <path d="M138 42 Q160 26 174 32 Q174 54 166 72" fill="var(--cat)"/>
+            <path d="M146 44 Q160 35 167 39 Q166 52 161 62 Z" fill="var(--blossom)" stroke="none"/>
+
+            <!-- the big round loaf body (head and body in one) -->
+            <path d="M40 72 Q40 34 92 32 Q142 30 170 74 Q192 110 188 150 Q186 186 150 186 L62 186 Q30 186 30 150 Q30 102 40 72 Z" fill="var(--cat)"/>
+            <path d="M40 150 Q46 176 70 180 L150 180 Q178 178 182 148 Q170 166 140 168 L80 168 Q54 166 40 150 Z" fill="var(--cat-shade)" stroke="none"/>
+
+            <!-- front paws tucked together -->
+            <path d="M84 186 Q84 166 98 164 Q108 168 108 186" fill="var(--cat)"/>
+            <path d="M108 186 Q110 168 122 164 Q134 168 132 186" fill="var(--cat)"/>
+
+            <!-- little matcha-green bow by his ear -->
+            <path d="M74 44 L64 36 L64 52 Z M74 44 L84 36 L84 52 Z" fill="var(--matcha)" stroke-width="3"/>
+
+            <!-- whiskers -->
+            <path d="M40 98 L20 93 M40 107 L20 109 M164 98 L186 91 M166 107 L188 106" fill="none" stroke-width="3"/>
+
+            <!-- cheeks, nose, mouth -->
+            <ellipse cx="64" cy="108" rx="11" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".8"/>
+            <ellipse cx="136" cy="108" rx="11" ry="5.5" fill="var(--blossom)" stroke="none" opacity=".8"/>
+            <path d="M95 103 L105 103 L100 109 Z" fill="var(--blossom-deep)" stroke="none"/>
+            <path d="M92 113 Q96 118 100 112 Q104 118 108 113" fill="none" stroke-width="3"/>
+
+            <!-- three sets of eyes; CSS shows only the one for the current mood -->
+            <g class="mochi-eyes eyes-sleepy" fill="none">
+              <path d="M70 92 Q79 99 88 92"/><path d="M112 92 Q121 99 130 92"/>
+            </g>
+            <g class="mochi-eyes eyes-awake" stroke="none">
+              <ellipse cx="79" cy="92" rx="5.5" ry="7" fill="var(--cat-line)"/>
+              <ellipse cx="121" cy="92" rx="5.5" ry="7" fill="var(--cat-line)"/>
+              <circle cx="81" cy="89" r="2" fill="var(--cat)"/><circle cx="123" cy="89" r="2" fill="var(--cat)"/>
+            </g>
+            <g class="mochi-eyes eyes-happy" fill="none">
+              <path d="M70 96 Q79 84 88 96"/><path d="M112 96 Q121 84 130 96"/>
+            </g>
+          </g>
+
+          <!-- floating Zzz, only while he's sleepy -->
+          <g class="mochi-zzz" fill="none" stroke="var(--cat-line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path class="z z1" d="M178 40 L187 40 L178 49 L187 49"/>
+            <path class="z z2" d="M192 20 L204 20 L192 32 L204 32"/>
+            <path class="z z3" d="M208 -6 L223 -6 L208 9 L223 9"/>
+          </g>
+        </svg>
         <p class="crew-names">Bloom &amp; Mochi</p>
       </aside>
 
