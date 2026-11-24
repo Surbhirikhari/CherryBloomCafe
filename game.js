@@ -184,7 +184,7 @@ function showRecipe() {
   });
 
   recipeCard.hidden = false;
-  continueBtn.focus();
+  continueBtn.focus({ preventScroll: true });
 }
 
 
@@ -314,7 +314,7 @@ function endOfDay() {
   mochiSays("Closing time! Let's count the coins.", "happy");
   chefDoes("hop");
   dayCard.hidden = false;
-  nextDayBtn.focus();
+  nextDayBtn.focus({ preventScroll: true });
 }
 
 function startNextDay() {

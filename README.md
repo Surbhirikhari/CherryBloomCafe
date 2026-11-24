@@ -67,6 +67,14 @@ Everything ends with decorating. Customers love toppings! 💕
 2. Open **`index.html`** in your browser.
 3. Click the pink **Open the cafe** sign hanging from the wooden board, and walk inside.
 
+### 📱 On your iPhone (works offline!)
+
+1. Open **https://surbhirikhari.github.io/CherryBloomCafe/** in **Safari**.
+2. Tap **Share** → **Add to Home Screen**.
+3. Open it from the jam-jar icon: it plays full screen, like a real app, and **works with no internet** after the first visit.
+
+Hold your phone sideways, the cafe is wide! 🌸
+
 That's it: no installs, no build step. Works with a mouse, a touchscreen, or a keyboard (Space to pour, arrow keys to stir, Enter to flip).
 
 ---
@@ -82,6 +90,8 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `customers.js` | Draws random customers in Bloom's style, with 3 moods |
 | `matcha.js` | The matcha latte drawings: tin, kettle, whisk, bowl, jar |
 | `sparkles.js` | The little sparkle trail behind the flower mouse |
+| `sw.js` | The service worker: saves the whole game on your phone so it works offline |
+| `manifest.webmanifest` | The app's name, icon and colours, for Add to Home Screen |
 | `desserts.js` | The dessert drawings, tools and recipes (each step changes the drawing) |
 | `drinks.js` | The drink recipes: strawberry milk, sakura tea, honey coffee |
 | `bakery.js` | The kitchen station: runs every recipe. Pick up the big tool, use the oven timer, press Next step |
@@ -90,6 +100,8 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 | `street.js` | Paints the street outside, with walking people |
 | `room.js` | Paints the cafe inside: wallpaper, curtains, shelves, lamps |
 | `assets/bloom/` | Chef Bloom's 17 picture layers, so each part can move |
+| `assets/icons/` | The jam-jar app icon (`icon.svg`) in every size an iPhone needs |
+| `assets/fonts/` | The fonts, saved here so they work offline |
 
 ---
 
@@ -103,6 +115,7 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 - **Pointer events** for picking tools up, pouring, piping and drag-and-drop
 - **Data-driven design**: every recipe is just a list of steps, and one station (`bakery.js`) runs them all
 - **Saving** progress in the browser with `localStorage`
+- **Making it an app**: a web app manifest, an app icon, and a service worker for offline play
 - **Splitting code into files** so each one does one thing
 - **Debugging!** Like the time only one customer ever came, because the last one's walk-out animation was never cleared 🙈
 
@@ -116,15 +129,17 @@ That's it: no installs, no build step. Works with a mouse, a touchscreen, or a k
 - [x] Real tools, a real oven timer, and room for mistakes
 - [ ] Several customers at once, with order tickets
 - [ ] Ranks that unlock new recipes, and a shop for decorations
+- [x] Play it on an iPhone, offline, with its own app icon
 - [ ] Sounds: the whisk, the pour, the coin *ding*
 
 ---
 
 ## 💐 Credits
 
+- Game by **Surbhi Rikhari**.
 - Chef Bloom's artwork is used with the original artist's permission.
 - The street, cafe, Mochi, customers, tools and desserts were drawn for this game, inspired by reference art shared with permission.
-- Fonts: [Mochiy Pop One](https://fonts.google.com/specimen/Mochiy+Pop+One) and [Nunito](https://fonts.google.com/specimen/Nunito) from Google Fonts.
+- Fonts: [Mochiy Pop One](https://fonts.google.com/specimen/Mochiy+Pop+One), [Nunito](https://fonts.google.com/specimen/Nunito) and [Great Vibes](https://fonts.google.com/specimen/Great+Vibes) from Google Fonts (Open Font License), saved in `assets/fonts/`.
 
 <div align="center">
 

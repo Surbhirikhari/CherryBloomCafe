@@ -7,12 +7,31 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover: use the whole iPhone screen, around the notch -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Cherry Blossom Cafe</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Nunito:wght@400;600;800&display=swap">
+
+  <!-- Installing it as an app (Safari: Share → Add to Home Screen) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4f7d3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Blossom Cafe">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon-64.png">
+
+  <!-- the fonts live in assets/fonts, so they work offline too -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- On a phone held upright, we ask to turn it sideways (the cafe is wide!) -->
+  <div class="rotate-hint" aria-live="polite">
+    <img src="assets/icons/apple-touch-icon.png" alt="" width="120" height="120">
+    <p>Turn your phone sideways<br>to open the cafe 🌸</p>
+  </div>
 
   <!-- The background. Outside is the street (street.js), inside is the
        cafe room (room.js). game.js switches between them. -->
@@ -331,6 +350,9 @@
     </section>
   </main>
 
+  <!-- the maker's signature -->
+  <p class="signature">game by Surbhi Rikhari</p>
+
   <script src="paint.js"></script>
   <script src="street.js"></script>
   <script src="room.js"></script>
@@ -343,5 +365,12 @@
   <script src="drinks.js"></script>
   <script src="game.js"></script>
   <script src="sparkles.js"></script>
+  <script>
+    // Offline play: sw.js saves a copy of the whole game on the device.
+    // (It only works when the game is on a website, not opened as a file.)
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
 </html>

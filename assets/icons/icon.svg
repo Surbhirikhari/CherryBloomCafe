@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Cherry Blossom Cafe app icon: a strawberry jam jar with a gingham lid.
+       The background fills the whole square: iPhones round the corners themselves. -->
+  <style>
+    @font-face { font-family: "Mochiy Pop One"; src: url("../fonts/mochiy-pop-one-latin.woff2") format("woff2"); }
+    .name { font-family: "Mochiy Pop One", "Nunito", sans-serif; text-anchor: middle; fill: #d9486c; }
+  </style>
+  <defs>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="3" fill="#f6c3cf" opacity="0.55"/>
+      <circle cx="30" cy="30" r="3" fill="#f6c3cf" opacity="0.55"/>
+    </pattern>
+    <pattern id="gingham" width="36" height="36" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)">
+      <rect width="36" height="36" fill="#fff4f5"/>
+      <rect width="18" height="36" fill="#f39ab0" opacity="0.55"/>
+      <rect width="36" height="18" fill="#f39ab0" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="jam" x1="0" x2="1">
+      <stop offset="0" stop-color="#f27a90"/>
+      <stop offset="0.45" stop-color="#e2506b"/>
+      <stop offset="1" stop-color="#c63a55"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="#fdf3e8"/>
+  <rect width="512" height="512" fill="url(#dots)"/>
+  <ellipse cx="256" cy="488" rx="160" ry="14" fill="#ecd8cb"/>
+
+  <!-- the jar of jam -->
+  <path d="M118 184 Q100 184 100 208 L100 432 Q100 478 150 480 L362 480 Q412 478 412 432 L412 208 Q412 184 394 184 Z"
+        fill="url(#jam)" stroke="#412c2c" stroke-width="10" stroke-linejoin="round"/>
+  <g fill="#b72f49" opacity="0.45">
+    <circle cx="130" cy="250" r="4"/><circle cx="146" cy="420" r="4"/><circle cx="384" cy="232" r="4"/>
+    <circle cx="380" cy="440" r="4"/><circle cx="124" cy="350" r="3"/><circle cx="392" cy="330" r="3"/>
+  </g>
+  <path d="M128 222 L128 430" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.45"/>
+  <path d="M150 452 Q256 468 362 452" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.3"/>
+
+  <!-- the label -->
+  <path d="M378.0 338.0 Q388.0 361.3 370.6 379.7 Q372.0 405.0 349.5 416.4 Q342.1 440.6 317.0 443.7 Q301.8 463.9 277.2 458.1 Q256.0 472.0 234.8 458.1 Q210.2 463.9 195.0 443.7 Q169.9 440.6 162.5 416.4 Q140.0 405.0 141.4 379.7 Q124.0 361.3 134.0 338.0 Q124.0 314.7 141.4 296.3 Q140.0 271.0 162.5 259.6 Q169.9 235.4 195.0 232.3 Q210.2 212.1 234.8 217.9 Q256.0 204.0 277.2 217.9 Q301.8 212.1 317.0 232.3 Q342.1 235.4 349.5 259.6 Q372.0 271.0 370.6 296.3 Q388.0 314.7 378.0 338.0 Z" fill="#f6a9bc" stroke="#412c2c" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M364.0 338.0 Q371.2 358.3 357.5 374.9 Q357.3 396.5 338.7 407.4 Q331.2 427.6 310.0 431.5 Q296.0 447.9 274.8 444.4 Q256.0 455.0 237.2 444.4 Q216.0 447.9 202.0 431.5 Q180.8 427.6 173.3 407.4 Q154.7 396.5 154.5 374.9 Q140.8 358.3 148.0 338.0 Q140.8 317.7 154.5 301.1 Q154.7 279.5 173.3 268.6 Q180.8 248.4 202.0 244.5 Q216.0 228.1 237.2 231.6 Q256.0 221.0 274.8 231.6 Q296.0 228.1 310.0 244.5 Q331.2 248.4 338.7 268.6 Q357.3 279.5 357.5 301.1 Q371.2 317.7 364.0 338.0 Z" fill="#fffaf0"/>
+  <g transform="translate(224 248) rotate(200) scale(1 1)">
+      <path d="M0 0 Q26 -4 48 -2" fill="none" stroke="#6f9a48" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="14" cy="-8" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(-30 14 -8)"/>
+      <ellipse cx="28" cy="-9" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(-30 28 -9)"/>
+      <ellipse cx="22" cy="6" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(30 22 6)"/>
+      <ellipse cx="38" cy="5" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(30 38 5)"/>
+    </g>
+  <g transform="translate(288 248) rotate(-20) scale(1 1)">
+      <path d="M0 0 Q26 -4 48 -2" fill="none" stroke="#6f9a48" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="14" cy="-8" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(-30 14 -8)"/>
+      <ellipse cx="28" cy="-9" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(-30 28 -9)"/>
+      <ellipse cx="22" cy="6" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(30 22 6)"/>
+      <ellipse cx="38" cy="5" rx="8" ry="4.5" fill="#8fc77a" transform="rotate(30 38 5)"/>
+    </g>
+  <g transform="translate(256 244)"><ellipse cx="0" cy="-9" rx="6" ry="9" fill="#f59ab2" transform="rotate(0)"/><ellipse cx="0" cy="-9" rx="6" ry="9" fill="#f59ab2" transform="rotate(72)"/><ellipse cx="0" cy="-9" rx="6" ry="9" fill="#f59ab2" transform="rotate(144)"/><ellipse cx="0" cy="-9" rx="6" ry="9" fill="#f59ab2" transform="rotate(216)"/><ellipse cx="0" cy="-9" rx="6" ry="9" fill="#f59ab2" transform="rotate(288)"/><circle r="5" fill="#f6c453"/></g>
+  <g transform="translate(176 278) scale(0.9)">
+      <path d="M0 22 Q-18 10 -15 -4 Q-11 -14 0 -9 Q11 -14 15 -4 Q18 10 0 22 Z" fill="#e8475f" stroke="#412c2c" stroke-width="3"/>
+      <path d="M-9 -9 L-4 -18 L0 -10 L4 -18 L9 -9 Q0 -4 -9 -9 Z" fill="#7fb35f" stroke="#412c2c" stroke-width="2.5" stroke-linejoin="round"/>
+      <g fill="#fff3c4"><circle cx="-6" cy="0" r="1.6"/><circle cx="6" cy="0" r="1.6"/><circle cx="0" cy="9" r="1.6"/><circle cx="-5" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></g>
+    </g>
+  <g transform="translate(336 278) scale(0.9)">
+      <path d="M0 22 Q-18 10 -15 -4 Q-11 -14 0 -9 Q11 -14 15 -4 Q18 10 0 22 Z" fill="#e8475f" stroke="#412c2c" stroke-width="3"/>
+      <path d="M-9 -9 L-4 -18 L0 -10 L4 -18 L9 -9 Q0 -4 -9 -9 Z" fill="#7fb35f" stroke="#412c2c" stroke-width="2.5" stroke-linejoin="round"/>
+      <g fill="#fff3c4"><circle cx="-6" cy="0" r="1.6"/><circle cx="6" cy="0" r="1.6"/><circle cx="0" cy="9" r="1.6"/><circle cx="-5" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></g>
+    </g>
+  <text class="name" x="256" y="318" font-size="40">Cherry</text>
+  <text class="name" x="256" y="364" font-size="40">Blossom</text>
+  <text class="name" x="256" y="414" font-size="46" fill="#4f7d3a" style="fill:#4f7d3a">Cafe</text>
+  <path d="M256 448 Q240 438 241 430 Q243 423 256 429 Q269 423 271 430 Q272 438 256 448 Z" fill="#f47c9c"/>
+
+  <!-- the gingham cloth over the lid, tied with twine -->
+  <path d="M80 198 Q60 160 104 140 Q140 76 256 72 Q372 76 408 140 Q452 160 432 198 Q410 222 388 198 Q366 222 344 198 Q322 222 300 198 Q278 222 256 198 Q234 222 212 198 Q190 222 168 198 Q146 222 124 198 Q102 222 80 198 Z" fill="url(#gingham)" stroke="#412c2c" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M120 124 Q160 96 220 90" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity="0.7"/>
+  <path d="M90 160 Q256 186 422 160" fill="none" stroke="#412c2c" stroke-width="11" stroke-linecap="round"/>
+  <path d="M90 160 Q256 186 422 160" fill="none" stroke="#d3a066" stroke-width="6" stroke-linecap="round"/>
+  <!-- the bow -->
+  <g stroke="#412c2c" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M372 168 Q338 132 352 124 Q370 120 372 168 Z" fill="#e9c08c"/>
+    <path d="M372 168 Q410 136 418 150 Q420 166 372 168 Z" fill="#e9c08c"/>
+    <path d="M372 168 Q366 196 378 222"/>
+    <path d="M372 168 Q392 190 404 214"/>
+  </g>
+  <circle cx="372" cy="168" r="8" fill="#d3a066" stroke="#412c2c" stroke-width="4"/>
+  <!-- the little tag -->
+  <g transform="translate(398 270) rotate(-14)">
+    <path d="M-30 -48 L30 -48 L30 46 Q30 54 22 54 L-22 54 Q-30 54 -30 46 Z" fill="#fbeedb" stroke="#412c2c" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="0" cy="-36" r="5" fill="#fdf3e8" stroke="#412c2c" stroke-width="3"/>
+    <g transform="translate(0 4) scale(0.85)">
+      <path d="M0 22 Q-18 10 -15 -4 Q-11 -14 0 -9 Q11 -14 15 -4 Q18 10 0 22 Z" fill="#e8475f" stroke="#412c2c" stroke-width="3"/>
+      <path d="M-9 -9 L-4 -18 L0 -10 L4 -18 L9 -9 Q0 -4 -9 -9 Z" fill="#7fb35f" stroke="#412c2c" stroke-width="2.5" stroke-linejoin="round"/>
+      <g fill="#fff3c4"><circle cx="-6" cy="0" r="1.6"/><circle cx="6" cy="0" r="1.6"/><circle cx="0" cy="9" r="1.6"/><circle cx="-5" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></g>
+    </g>
+    <path d="M0 -12 Q-7 -17 -6 -21 Q-4 -24 0 -21 Q4 -24 6 -21 Q7 -17 0 -12 Z" fill="#f47c9c"/>
+    <path d="M-18 40 Q-12 34 -6 40 Q0 46 6 40 Q12 34 18 40" fill="none" stroke="#6f9a48" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <path d="M378 222 Q388 230 396 226" fill="none" stroke="#d3a066" stroke-width="4" stroke-linecap="round"/>
+</svg>
