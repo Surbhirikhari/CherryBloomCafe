@@ -4,8 +4,10 @@
 // and Honey Coffee. They work exactly like the desserts (see
 // desserts.js), so the Bakery Station runs them too.
 //
-// One new kind of step here:
-//   stir - drag side to side on the drink, like stirring with a spoon
+// New kinds of steps here:
+//   stir    - drag side to side on the drink, like stirring with a spoon
+//   drop, pour, drizzle - pick a tool up off the shelf and use it over
+//                         the glass (Sakura Tea; see bakery.js)
 // =========================================================
 
 
@@ -75,7 +77,9 @@ function strawberryMilkArt(st) {
 
 
 // ================= Sakura Tea =================
-// Add blossoms, pour hot water, steep until pink, drizzle honey.
+// Everything is carried over to the glass, one tool at a time:
+// drop in 3 flowers, pour hot water up to the heart marker,
+// stir with a spoon until it's pink, then drip honey wherever you like.
 const MUG = "M46 56 L154 56 L148 178 Q146 190 134 190 L66 190 Q54 190 52 178 Z";
 
 function teaColor(t) {
@@ -88,36 +92,110 @@ function blossom(x, y, s = 1) {
   return `<g transform="translate(${x} ${y}) scale(${s})">${petals}<circle r="3.5" fill="#f6d76b" ${DL} stroke-width="1.5"/></g>`;
 }
 
+// the heart marker on the glass: pour up to here
+const TEA_MARK = 0.79;
+const teaLevel = (amount) => 188 - 130 * amount;
+
 function sakuraTeaArt(st) {
   const v = st.v;
   const clip = uid("tea");
-  const water = Math.min(v.water || 0, 1.12);
-  const top = 188 - 130 * Math.min(water, 1);
-  const color = teaColor(v.steep ?? 0);
-  const honey = Math.min(1, (v.honey || 0) / 0.8);
+  const water = Math.min(v.water || 0, 1.15);
+  const top = teaLevel(Math.min(water, 1));
+  const stir = st.done("stir") ? 1 : (v.stir || 0);
+  const color = teaColor(0.06 + stir * 0.49);           // stirring turns it pink
+  const spin = stir * 14;                                // the flowers swirl while you stir
 
-  const flowers = [[78, 0], [104, 8], [128, -2]].slice(0, Math.min(3, v.blossoms || 0)).map(([x, dy]) =>
-    blossom(x, water > 0 ? top + 6 + dy * 0.4 : 176 - dy, 1.05)).join("");
+  const flowers = [[78, 0], [104, 8], [128, -2]].slice(0, Math.min(3, v.blossoms || 0)).map(([x, dy], k) =>
+    water > 0
+      ? blossom(x + Math.sin(spin + k * 2.1) * 12, top + 6 + dy * 0.4, 1.05)
+      : blossom(x, 176 - dy, 1.05)).join("");
 
+  // honey: a golden ribbon from where it dripped, sinking to a little pool
+  const honeyMarks = st.marks.honey || [];
+  const ribbons = water > 0 ? honeyMarks.map((m) => {
+    const x = Math.max(54, Math.min(146, m.x));
+    return `<path d="M${x} ${top} Q${x + 8} ${(top + 180) / 2} ${x - 4} 182" fill="none" stroke="#e8a83a" stroke-width="${(m.r * 0.7).toFixed(1)}" stroke-linecap="round" opacity="0.5"/>
+            <circle cx="${x}" cy="${top + 2}" r="${m.r.toFixed(1)}" fill="#f2c157" opacity="0.9"/>`;
+  }).join("") : "";
+  const pool = Math.min(1, (v.honey || 0) / 0.8);
+
+  // what's pouring right now: hot water from the kettle, or honey from the dipper
+  let stream = "";
+  if (st.flow) {
+    const fx = st.flow.x, fy = Math.min(st.flow.y, top - 4);
+    const honeyNow = st.step === "honey";
+    stream = `<path d="M${fx} ${fy} L${fx} ${top}" stroke="${INK}" stroke-width="${honeyNow ? 6 : 10}" stroke-linecap="round" opacity="0.8"/>
+              <path d="M${fx} ${fy} L${fx} ${top}" stroke="${honeyNow ? "#f2c157" : "#e6f4f8"}" stroke-width="${honeyNow ? 3.5 : 7}" stroke-linecap="round"/>
+              ${honeyNow ? "" : `<ellipse cx="${fx}" cy="${top}" rx="10" ry="3" fill="#ffffff" opacity="0.8"/>`}`;
+  }
+
+  const markY = teaLevel(TEA_MARK);
+  const showMark = !st.done("water");
   return dessertSVG(`
     <defs><clipPath id="${clip}"><path d="${MUG}"/></clipPath></defs>
     <ellipse cx="100" cy="194" rx="66" ry="7" fill="#e9d6cf" opacity="0.7"/>
+    ${water > 1.01 ? `<ellipse cx="100" cy="194" rx="${70 + (water - 1) * 200}" ry="${7 + (water - 1) * 30}" fill="#dff0f5" ${DL} stroke-width="2" opacity="0.9"/>` : ""}
     <path d="M152 80 Q186 80 184 112 Q182 144 148 144" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round"/>
     <path d="M152 80 Q186 80 184 112 Q182 144 148 144" fill="none" stroke="#eef6f7" stroke-width="7" stroke-linecap="round"/>
     <path d="${MUG}" fill="#eef6f7" opacity="0.7"/>
     <g clip-path="url(#${clip})">
       ${water > 0 ? `<rect x="0" y="${top}" width="200" height="200" fill="${color}"/>
         <path d="M44 ${top + 1} Q72 ${top + 5} 100 ${top + 1} Q128 ${top - 3} 156 ${top + 1}" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.7"/>` : ""}
-      ${(v.honey || 0) > 0 ? `<path d="${spiralPath(100, top + 50, 34, 2)}" fill="none" stroke="#f2c157" stroke-width="5" stroke-linecap="round"
-          pathLength="100" stroke-dasharray="${(honey * 100).toFixed(1)} 200" opacity="0.85"/>` : ""}
+      ${pool > 0 ? `<ellipse cx="100" cy="190" rx="${50 * pool}" ry="${6 + 6 * pool}" fill="#f2c157" opacity="0.8"/>` : ""}
+      ${ribbons}
       ${flowers}
     </g>
-    ${water > 1.02 ? `<path d="M46 58 Q38 84 44 98 Q52 88 50 60 Z" fill="${color}" ${DL} stroke-width="2"/>` : ""}
-    ${water > 0 ? `<g fill="none" stroke="#c9c6cf" stroke-width="3" stroke-linecap="round" opacity="0.7">
+    ${water > 1.01 ? `<path d="M46 58 Q36 96 44 120 Q54 104 50 60 Z M154 58 Q162 90 156 110 Q148 98 150 60 Z" fill="#dff0f5" ${DL} stroke-width="2"/>` : ""}
+    ${water > 0 && !st.flow ? `<g fill="none" stroke="#c9c6cf" stroke-width="3" stroke-linecap="round" opacity="0.7">
         <path d="M80 44 Q74 34 80 24 Q86 14 80 4"/><path d="M118 44 Q112 34 118 24 Q124 14 118 4"/></g>` : ""}
     <path d="M58 68 L66 176" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.6"/>
+    ${showMark ? `<path d="M52 ${markY} L148 ${markY}" stroke="#e1658e" stroke-width="2.5" stroke-dasharray="7 5"/>
+      <path d="M38 ${markY + 6} Q28 ${markY} 30 ${markY - 4} Q33 ${markY - 9} 38 ${markY - 4} Q43 ${markY - 9} 46 ${markY - 4} Q48 ${markY} 38 ${markY + 6} Z" fill="#f47c9c" ${DL} stroke-width="2"/>` : ""}
     <path d="${MUG}" fill="none" ${DL} stroke-width="3.5"/>
-    <ellipse cx="100" cy="56" rx="54" ry="6" fill="none" ${DL} stroke-width="2.5"/>`);
+    <ellipse cx="100" cy="56" rx="54" ry="6" fill="none" ${DL} stroke-width="2.5"/>
+    ${stream}`);
+}
+
+
+// ---------- Things you carry (their "tip" is where the pointer holds them) ----------
+const CARRY_ART = {
+  flower: { size: 0.15, tip: [0.5, 0.5], art: () => `<svg viewBox="-20 -20 40 40" class="art">${blossom(0, 0, 1.4)}</svg>` },
+  kettle: { size: 0.44, tip: [0.95, 0.29], tilt: 38, art: () => teaKettleSVG() },
+  spoon:  { size: 0.1, tip: [0.5, 0.92], art: () => `
+    <svg viewBox="0 0 24 130" class="art">
+      <path d="M12 4 L12 100" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M12 4 L12 100" stroke="#d7d5de" stroke-width="4.5" stroke-linecap="round"/>
+      <ellipse cx="12" cy="112" rx="9" ry="14" fill="#d7d5de" ${DL} stroke-width="2.5"/>
+      <path d="M8 104 Q9 100 12 99" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    </svg>` },
+  dipper: { size: 0.1, tip: [0.5, 0.97], art: () => honeyDipperSVG() },
+};
+
+// a little pink kettle; the spout tip is at the top right
+function teaKettleSVG() {
+  return `
+    <svg viewBox="0 0 120 90" class="art">
+      <path d="M30 40 Q14 40 14 56 Q14 70 30 70" fill="none" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M30 40 Q14 40 14 56 Q14 70 30 70" fill="none" stroke="#e58aa5" stroke-width="4" stroke-linecap="round"/>
+      <path d="M78 52 Q96 46 114 26 L108 24 Q94 38 76 44 Z" fill="#f6b8cb" ${DL} stroke-width="2.5"/>
+      <path d="M26 84 Q22 34 54 32 Q86 34 82 84 Z" fill="#f6b8cb" ${DL}/>
+      <ellipse cx="54" cy="32" rx="20" ry="5" fill="#e58aa5" ${DL} stroke-width="2.5"/>
+      <circle cx="54" cy="24" r="5" fill="#fffaf4" ${DL} stroke-width="2"/>
+      <path d="M36 50 Q34 64 38 76" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <path d="M54 66 Q46 60 47 55 Q49 51 54 54 Q59 51 61 55 Q62 60 54 66 Z" fill="#fffaf4" ${DL} stroke-width="1.8"/>
+    </svg>`;
+}
+
+// a honey dipper with a drop on the end
+function honeyDipperSVG() {
+  return `
+    <svg viewBox="0 0 30 124" class="art">
+      <path d="M15 4 L15 80" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M15 4 L15 80" stroke="#c9967a" stroke-width="4.5" stroke-linecap="round"/>
+      <ellipse cx="15" cy="96" rx="12" ry="17" fill="#e9b25a" ${DL} stroke-width="2.5"/>
+      <path d="M4 88 L26 88 M3 96 L27 96 M4 104 L26 104" stroke="#b97a2e" stroke-width="2"/>
+      <path d="M15 112 Q11 118 15 122 Q19 118 15 112 Z" fill="#f2c157" ${DL} stroke-width="1.5"/>
+    </svg>`;
 }
 
 
@@ -202,7 +280,17 @@ Object.assign(TOOL_ART, {
     <ellipse cx="56" cy="13" rx="8" ry="11" fill="#d7d5de" ${DL} stroke-width="2.5" transform="rotate(33 56 13)"/>
     <path d="M60 46 Q68 50 66 58 M64 36 Q74 40 74 50" fill="none" stroke="#f08caa" stroke-width="3" stroke-linecap="round"/>`),
   sakura: () => T(`${blossom(28, 46, 1.2)}${blossom(52, 30, 1)}${blossom(56, 58, 0.8)}`),
+  sakuraBowl: () => T(`
+    ${blossom(26, 40, 1.1)}${blossom(54, 38, 1.1)}${blossom(40, 30, 1.2)}
+    <path d="M6 46 L74 46 Q72 74 40 74 Q8 74 6 46 Z" fill="#fffaf4" ${DL}/>
+    <path d="M6 46 L74 46" ${DL}/>
+    <path d="M16 56 Q22 66 32 68" fill="none" stroke="#f6b8cb" stroke-width="3" stroke-linecap="round"/>`),
   kettle: () => kettleSVG(),
+  teaKettle: () => teaKettleSVG(),
+  honeyJar: () => T(`
+    <path d="M16 46 Q16 74 40 74 Q64 74 64 46 Q64 32 40 32 Q16 32 16 46 Z" fill="#f2c157" ${DL}/>
+    <rect x="24" y="22" width="32" height="12" rx="4" fill="#d99a3b" ${DL}/>
+    <g transform="translate(44 -6) rotate(20) scale(0.5)">${honeyDipperSVG().replace('<svg viewBox="0 0 30 124" class="art">', "").replace("</svg>", "")}</g>`),
   timer: () => T(`
     <rect x="18" y="8" width="44" height="8" rx="3" fill="#c9967a" ${DL}/>
     <rect x="18" y="64" width="44" height="8" rx="3" fill="#c9967a" ${DL}/>
@@ -230,6 +318,7 @@ Object.assign(TOOL_ART, {
 Object.assign(TOOL_NAMES, {
   masher: "Masher", ice: "Ice", milk: "Milk", spoon: "Spoon", sakura: "Sakura", kettle: "Hot water",
   timer: "Steep", grinder: "Grinder", brew: "Espresso", pitcher: "Milk foam",
+  sakuraBowl: "Sakura flowers", teaKettle: "Hot water", honeyJar: "Honey",
 });
 
 
@@ -255,17 +344,21 @@ Object.assign(DESSERTS, {
   sakura: {
     name: "Sakura Tea",
     draw: sakuraTeaArt,
+    oneTool: true,                       // only the tool for this step is on the shelf
     tray: ["sakura", "heart", "mint", "daisy"],
     steps: [
-      { id: "blossoms", type: "tap", tool: "sakura", times: 3, text: "Add 3 sakura flowers",
-        hint: "Click the sakura flowers 3 times to drop them in." },
-      { id: "water", type: "hold", tool: "kettle", text: "Pour hot water (hold)", target: [0.7, 0.92], max: 1.12, speed: 0.36,
-        hint: "Hold the kettle to pour. Watch the flowers float up! Let go in the pink zone." },
-      { id: "steep", type: "timing", tool: "timer", text: "Steep until pink", zone: [0.42, 0.68],
-        start: "Start steeping", stop: "Ready!",
-        hint: "Click the timer to start steeping. Press Ready! when the tea is a soft pink (green zone)." },
-      { id: "honey", type: "hold", tool: "honey", text: "Swirl in honey (hold)", target: [0.5, 0.82], max: 1.05, speed: 0.36,
-        hint: "Hold the honey jar. Let go in the pink zone." },
+      { id: "blossoms", type: "drop", tool: "sakuraBowl", carry: "flower", times: 3, text: "Drop in 3 sakura flowers",
+        area: { x: 40, y: 10, w: 120, h: 186 },
+        hint: "Drag a flower from the bowl and drop it into the glass. Do it 3 times!" },
+      { id: "water", type: "pour", tool: "teaKettle", carry: "kettle", text: "Pour hot water to the heart",
+        area: { x: 46, y: 0, w: 108, h: 120 }, target: [TEA_MARK - 0.06, TEA_MARK + 0.06], max: 1.15, speed: 0.3,
+        hint: "Pick up the kettle and hold it over the glass to pour. Stop at the heart line, or it overflows!" },
+      { id: "stir", type: "stir", tool: "spoon", carry: "spoon", times: 8, text: "Stir until pink",
+        area: { x: 50, y: 50, w: 100, h: 142 },
+        hint: "Pick up the spoon, put it in the glass, and stir side to side until the tea turns pink." },
+      { id: "honey", type: "drizzle", tool: "honeyJar", carry: "dipper", text: "Drizzle honey",
+        area: { x: 46, y: 0, w: 108, h: 140 }, target: [0.45, 0.8], max: 1.05, speed: 0.32,
+        hint: "Pick up the honey dipper and hold it over the glass. The honey drips wherever you move it! Stop in the pink zone." },
       DECORATE("Float some petals on top. Press Done when it's cute."),
     ],
   },

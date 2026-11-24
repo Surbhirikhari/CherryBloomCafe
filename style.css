@@ -816,6 +816,21 @@ h1 {
 @keyframes plate-yay { 40% { transform: scale(1.04) rotate(-1deg); } }
 #b-art, #b-art svg { width: 100%; height: 100%; }
 
+/* a tool you've picked up off the shelf (kettle, spoon, flower…) */
+.carry {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 6px rgba(65, 44, 44, 0.25));
+  transition: rotate 0.25s ease-out;
+}
+.carry svg { display: block; width: 100%; height: auto; }
+.carry.tilted { rotate: var(--tilt, 0deg); }
+.carry.in-glass { filter: none; }
+.tool.lifted { opacity: 0.2 !important; animation: none; filter: none; }
+.shelf.empty { visibility: hidden; }
+.shelf .tool[hidden] { display: none; }
+
 /* the tool that follows your mouse while you rub or swipe */
 .hand-tool {
   position: absolute;

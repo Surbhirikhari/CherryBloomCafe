@@ -44,7 +44,7 @@ then send them off happy (and earn a few coins on the way).
 |---|---|---|
 | 🍵 **Strawberry Matcha Latte** | Hands-on matcha station: scoop, whisk, pour, layer, decorate | 15 coins |
 | 🍓 **Strawberry Milk** | Mash strawberries, drop in ice, pour the milk, stir until it's all pink | 10 coins |
-| 🌸 **Sakura Tea** | Add blossoms, pour hot water, steep until pink, swirl in honey | 9 coins |
+| 🌸 **Sakura Tea** | Pick up each tool: drop in 3 flowers, pour hot water to the heart line (don't overflow!), stir it pink with a spoon, drip honey anywhere | 9 coins |
 | 🍯 **Honey Coffee** | Grind beans, brew a shot, swirl in honey, draw your own latte art | 11 coins |
 | 🍦 **Strawberry Crêpe** | Pour batter, flip it when golden, pipe cream, add strawberries, fold into a cone, add a bunny cookie | 16 coins |
 | 🍥 **Strawberry Roll Cake** | Pour batter, bake, spread pink cream, roll it up, slice to see the swirl | 18 coins |

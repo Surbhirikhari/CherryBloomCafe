@@ -512,10 +512,10 @@ function perfectDessertArt(id) {
   const recipe = DESSERTS[id];
   const v = {};
   recipe.steps.forEach(function (s) {
-    if (s.type === "hold" || s.type === "pipe") v[s.id] = (s.target[0] + s.target[1]) / 2;
+    if (s.target) v[s.id] = (s.target[0] + s.target[1]) / 2;
     else if (s.type === "timing") v[s.id] = (s.zone[0] + s.zone[1]) / 2;
-    else if (s.type === "tap") v[s.id] = s.times;
+    else if (s.type === "tap" || s.type === "drop") v[s.id] = s.times;
     else v[s.id] = 1;
   });
-  return recipe.draw({ v, marks: {}, step: "finished", done: () => true });
+  return recipe.draw({ v, marks: {}, step: "finished", done: () => true, flow: null });
 }

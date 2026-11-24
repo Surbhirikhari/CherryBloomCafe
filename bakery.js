@@ -13,6 +13,13 @@
 //   rub    - drag over the dessert; we count how much of the area you covered
 //   swipe  - drag over the dessert in one direction
 //   stir   - drag side to side over the drink, like stirring with a spoon
+//
+// Carrying (Sakura Tea): if a step has "carry", you pick its tool up
+// off the shelf and move it over the glass:
+//   drop    - drop things in (a sakura flower), "times" times
+//   pour    - the kettle tilts and pours while it's over the glass; stop at the marker
+//   drizzle - honey drips straight down wherever you hold the dipper
+//   stir    - put the spoon in the glass and move it side to side
 //   decorate - the cutting board and toppings (decor.js), then Done
 // =========================================================
 
@@ -36,6 +43,7 @@ const bArt        = document.getElementById("b-art");
 const bToppings   = document.getElementById("b-toppings");
 const bHand       = document.getElementById("b-hand");
 const bDecorZone  = document.getElementById("b-decor-zone");
+const bCarry      = document.getElementById("b-carry");
 
 
 // ---------- The station's memory ----------
@@ -80,13 +88,15 @@ function buildShelf() {
     bake.tools[s.tool] = button;
     bShelf.appendChild(button);
 
-    button.addEventListener("click", () => onToolClick(s.tool));
-    button.addEventListener("pointerdown", (event) => onToolHold(event, s.tool));
+    button.addEventListener("click", (event) => onToolClick(s.tool, event));
+    button.addEventListener("pointerdown", (event) => { onToolHold(event, s.tool); startCarry(event, s.tool); });
     button.addEventListener("keydown", function (event) {
       if ((event.key === " " || event.key === "Enter") && !event.repeat && bStep().type === "hold") onToolHold(event, s.tool);
+      keyboardFlow(event, s.tool, true);
     });
     button.addEventListener("keyup", function (event) {
       if (event.key === " " || event.key === "Enter") stopHold();
+      keyboardFlow(event, s.tool, false);
     });
     ["pointerup", "pointerleave", "pointercancel"].forEach((type) => button.addEventListener(type, stopHold));
   });
@@ -96,6 +106,7 @@ function resetBake() {
   bake.heating = false;
   bake.holding = false;
   pipe.on = false;
+  endCarry(null, true);
   bake.index = 0;
   bake.v = {};
   bake.marks = {};
@@ -134,7 +145,9 @@ function nextBakeStep(message) {
 
 // ---------- Drawing ----------
 function artState() {
-  return { v: bake.v, marks: bake.marks, step: bStep().id, done: (id) => bake.done.has(id) };
+  // flow: where the kettle or honey is pouring from right now (or null)
+  const flow = carry.on && carry.over && (carry.s.type === "pour" || carry.s.type === "drizzle") ? { x: carry.x, y: carry.y } : null;
+  return { v: bake.v, marks: bake.marks, step: bStep().id, done: (id) => bake.done.has(id), flow };
 }
 
 function drawDessert() {
@@ -142,7 +155,7 @@ function drawDessert() {
 }
 
 // steps you do by dragging on the plate
-function onPlate(s) { return s.type === "rub" || s.type === "swipe" || s.type === "pipe" || s.type === "stir"; }
+function onPlate(s) { return !s.carry && (s.type === "rub" || s.type === "swipe" || s.type === "pipe" || s.type === "stir"); }
 
 function drawBake() {
   const s = bStep();
@@ -154,9 +167,12 @@ function drawBake() {
     const mine = name === s.tool && !bake.busy;
     tool.classList.toggle("active", mine);
     tool.disabled = !mine || onPlate(s) || bake.heating;
+    // some recipes only put the tool you need right now on the shelf
+    if (bake.recipe.oneTool) tool.hidden = name !== s.tool;
     tool.querySelector(".tool-label").textContent = toolLabel(name, mine ? s : null);
   });
   bPlate.classList.toggle("active", !bake.busy && onPlate(s));
+  bShelf.classList.toggle("empty", Object.values(bake.tools).every((t) => t.hidden));
 
   // the checklist
   bSteps.innerHTML = "";
@@ -180,6 +196,7 @@ const TOOL_NAMES = {
 function toolLabel(name, step) {
   const base = TOOL_NAMES[name] || step?.label || name;
   if (!step) return base;
+  if (step.carry) return base + " (drag it)";
   if (step.type === "hold") return base + " (hold)";
   if (onPlate(step)) return base + " (use on plate)";
   if (step.type === "tap") return base + " (" + (bake.v[step.id] || 0) + "/" + step.times + ")";
@@ -191,7 +208,7 @@ function toolLabel(name, step) {
 function drawMeter() {
   const s = bStep();
   const value = bake.v[s.id] || 0;
-  const amount = s.type === "hold" || s.type === "pipe";
+  const amount = s.type === "hold" || s.type === "pipe" || s.type === "pour" || s.type === "drizzle";
 
   bMeterRow.hidden = s.type === "decorate";
   bMeter.className = "meter" + (s.type === "timing" ? " timing" : "");
@@ -211,7 +228,7 @@ function drawMeter() {
     bZone.style.width = (s.zone[1] - s.zone[0]) * 100 + "%";
     bNeedle.style.left = value * 100 + "%";
     bFill.style.width = "0";
-  } else if (s.type === "tap") {
+  } else if (s.type === "tap" || s.type === "drop") {
     bMeterLabel.textContent = (bake.v[s.id] || 0) + " of " + s.times;
     bFill.style.width = (value / s.times) * 100 + "%";
   } else {
@@ -230,7 +247,7 @@ function judgeAmount(s, value) {
 
 
 // ---------- tap, and turning things on ----------
-function onToolClick(name) {
+function onToolClick(name, event) {
   const s = bStep();
   if (bake.busy || s.tool !== name || s.type === "hold") return;
   restartAnimation(bake.tools[name], "tapped");
@@ -241,6 +258,7 @@ function onToolClick(name) {
     else { bHint.textContent = (s.times - bake.v[s.id]) + " more!"; drawBake(); }
   }
   if (s.type === "timing" && !bake.heating) startTiming(s);
+  if (s.type === "drop" && event?.detail === 0) dropOne(s);     // keyboard: Enter drops one
 }
 
 
@@ -309,6 +327,129 @@ function stopTiming() {
 }
 
 bAction.addEventListener("click", stopTiming);
+
+
+// ---------- carrying a tool over to the glass ----------
+const carry = { on: false, s: null, x: 0, y: 0, over: false, lastFrame: 0 };
+
+// Where is the pointer on the drawing? (0–200 across and down, even outside the plate)
+function startCarry(event, name) {
+  const s = bStep();
+  if (bake.busy || s.tool !== name || !s.carry || carry.on) return;
+  event.preventDefault();
+  const look = CARRY_ART[s.carry];
+  carry.on = true;
+  carry.s = s;
+  carry.over = false;
+  bCarry.innerHTML = look.art();
+  bCarry.style.width = bPlate.getBoundingClientRect().width * look.size + "px";
+  bCarry.style.transformOrigin = look.tip[0] * 100 + "% " + look.tip[1] * 100 + "%";
+  bCarry.style.setProperty("--tilt", (look.tilt || 0) + "deg");
+  bCarry.hidden = false;
+  bake.tools[name].classList.add("lifted");
+  moveCarry(event);
+  document.addEventListener("pointermove", moveCarry);
+  document.addEventListener("pointerup", onCarryUp);
+  if (s.type === "pour" || s.type === "drizzle") startFlow(s);
+}
+
+function moveCarry(event) {
+  if (!carry.on) return;
+  const look = CARRY_ART[carry.s.carry];
+  const w = bCarry.offsetWidth, h = bCarry.offsetHeight;
+  // put the tool's tip (the kettle spout, the spoon bowl…) right on the pointer
+  bCarry.style.left = event.clientX - w * look.tip[0] + "px";
+  bCarry.style.top = event.clientY - h * look.tip[1] + "px";
+  const p = plateXY(event);
+  carry.x = p.x;
+  carry.y = p.y;
+  carry.over = insideArea(carry.s.area, p.x, p.y);
+  bCarry.classList.toggle("tilted", carry.over && (carry.s.type === "pour" || carry.s.type === "drizzle"));
+  if (carry.s.type === "stir") {
+    bCarry.classList.toggle("in-glass", carry.over);
+    if (carry.over) stirTo(carry.s, p.x);
+  }
+}
+
+function onCarryUp() { endCarry(null, false); }
+
+// let go of the tool: it goes back on the shelf
+function endCarry(event, quiet) {
+  if (!carry.on) return;
+  const s = carry.s;
+  const wasOver = carry.over;
+  carry.on = false;
+  carry.over = false;
+  bCarry.hidden = true;
+  bCarry.classList.remove("tilted", "in-glass");
+  document.removeEventListener("pointermove", moveCarry);
+  document.removeEventListener("pointerup", onCarryUp);
+  if (bake.tools[s.tool]) bake.tools[s.tool].classList.remove("lifted");
+  if (quiet || bStep() !== s) return;
+
+  if (s.type === "drop") {
+    if (wasOver) dropOne(s);
+    else bHint.textContent = "Drop it into the glass!";
+  }
+  if (s.type === "pour" || s.type === "drizzle") {
+    drawDessert();
+    if ((bake.v[s.id] || 0) > 0) judgeAmount(s, bake.v[s.id]);
+  }
+}
+
+// drop: one more thing goes into the glass
+function dropOne(s) {
+  bake.v[s.id] = (bake.v[s.id] || 0) + 1;
+  restartAnimation(bPlate, "yay");
+  if (bake.v[s.id] >= s.times) { nextBakeStep("So pretty, they're floating!"); return; }
+  bHint.textContent = "Plop! " + (s.times - bake.v[s.id]) + " more.";
+  drawBake();
+}
+
+// pour and drizzle: while the tool is over the glass, it keeps flowing
+function startFlow(s) {
+  let last = performance.now();
+  function tick(now) {
+    if (!carry.on || carry.s !== s) return;
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+    if (carry.over) {
+      bake.v[s.id] = Math.min(s.max, (bake.v[s.id] || 0) + s.speed * dt);
+      if (s.type === "drizzle") {
+        // honey lands where you are: a new drip when you move, a bigger one if you stay
+        const marks = bake.marks[s.id] || (bake.marks[s.id] = []);
+        const lastMark = marks[marks.length - 1];
+        if (lastMark && Math.abs(lastMark.x - carry.x) < 5) lastMark.r = Math.min(9, lastMark.r + 6 * dt);
+        else marks.push({ x: carry.x, y: carry.y, r: 2.5 });
+      }
+      drawMeter();
+      if (bake.v[s.id] >= s.max) {               // overflowing!
+        drawDessert();
+        endCarry(null, false);
+        return;
+      }
+    }
+    drawDessert();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// keyboard: Space or Enter on a pour/drizzle tool pours into the middle of the glass
+function keyboardFlow(event, name, down) {
+  const s = bStep();
+  if (!s.carry || s.tool !== name || (s.type !== "pour" && s.type !== "drizzle")) return;
+  if (event.key !== " " && event.key !== "Enter") return;
+  event.preventDefault();
+  if (down && !carry.on && !event.repeat) {
+    const a = s.area;
+    carry.on = true; carry.s = s; carry.over = true;
+    carry.x = a.x + a.w / 2; carry.y = a.y + 20;
+    startFlow(s);
+  } else if (!down) {
+    endCarry(null, false);
+  }
+}
 
 
 // ---------- dragging on the plate: pipe, rub and swipe ----------
@@ -430,10 +571,11 @@ function stirTo(s, x) {
   stir.travel += Math.abs(dx);
 }
 function addStir(s) {
+  if (bake.busy || bStep() !== s) return;
   bake.v[s.id] = Math.min(1, bake.v[s.id] + 1 / s.times);
   drawDessert();
   drawMeter();
-  if (bake.v[s.id] >= 1) { drag2.down = false; nextBakeStep("All mixed and pink!"); }
+  if (bake.v[s.id] >= 1) { drag2.down = false; endCarry(null, true); nextBakeStep("All mixed and pink!"); }
 }
 
 // the tool follows your mouse over the plate
